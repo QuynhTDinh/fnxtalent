@@ -68,6 +68,25 @@ class PipelineRequest(BaseModel):
     job: dict
     run_id: Optional[str] = None
 
+class JDRequest(BaseModel):
+    content: str
+    role: Optional[str] = "Không rõ vị trí"
+    company: Optional[str] = None
+    industry: Optional[str] = None
+
+class CVRequest(BaseModel):
+    content: str
+    name: Optional[str] = "Ứng viên"
+    major: Optional[str] = None
+    graduation_year: Optional[int] = None
+
+# ── Standalone agents (for wizard step-by-step calls) ──
+from core.agents.jd_decoder_agent import JDDecoderAgent
+from core.agents.assessment_agent import AssessmentAgent
+
+_jd_agent = JDDecoderAgent(framework_path=framework_path, llm_provider="gemini")
+_cv_agent = AssessmentAgent(framework_path=framework_path, llm_provider="gemini")
+
 
 # ── Routes ──
 
@@ -80,6 +99,49 @@ async def health():
         "store": store.__class__.__name__,
         "vercel": bool(IS_VERCEL),
     }
+
+@app.post("/api/jd/decode")
+async def decode_jd(request: JDRequest):
+    """Wizard Step 1: Decode JD text into Building 21 competency requirements."""
+    try:
+        jd_data = {
+            "role": request.role,
+            "content": request.content,
+            "company": request.company,
+            "industry": request.industry,
+        }
+        result = _jd_agent.decode(jd_data)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/cv/assess")
+async def assess_cv(request: CVRequest):
+    """Wizard Step 2: Assess CV text into Building 21 competency matrix."""
+    try:
+        profile = {
+            "id": "wizard_candidate",
+            "fullName": request.name,
+            "yearbook_info": {
+                "major": request.major or "N/A",
+                "graduation_year": request.graduation_year or "N/A",
+            },
+            "experience": [],
+            "social_data": {},
+            "_raw_cv_text": request.content,
+        }
+        # Inject raw CV text as a single experience entry for the LLM
+        profile["experience"] = [{
+            "title": "Toàn bộ kinh nghiệm",
+            "company": "",
+            "duration": "",
+            "description": request.content,
+        }]
+        result = _cv_agent.assess(profile)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/api/pipeline/run")
@@ -117,7 +179,11 @@ if not IS_VERCEL:
     dashboard_dir = os.path.join(PROJECT_ROOT, "dashboard")
     if os.path.exists(dashboard_dir):
         @app.get("/")
-        async def serve_dashboard():
+        async def serve_wizard():
+            return FileResponse(os.path.join(dashboard_dir, "wizard.html"))
+
+        @app.get("/report")
+        async def serve_report():
             return FileResponse(os.path.join(dashboard_dir, "index.html"))
 
         # Mount static AFTER explicit routes so /api/* takes priority

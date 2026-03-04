@@ -16,8 +16,8 @@
             "dest": "/api/main.py"
         },
         {
-            "src": "/static/(.*)",
-            "dest": "/dashboard/$1"
+            "src": "/report",
+            "dest": "/dashboard/index.html"
         },
         {
             "src": "/(.*\\.css)",
@@ -29,7 +29,7 @@
         },
         {
             "src": "/",
-            "dest": "/dashboard/index.html"
+            "dest": "/dashboard/wizard.html"
         }
     ]
 }

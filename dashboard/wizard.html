@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FNX Talent Factory — Đánh giá năng lực</title>
+    <meta name="description" content="Hệ thống đánh giá năng lực ứng viên dựa trên khung Building 21, sử dụng AI.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="wizard.css">
+</head>
+
+<body>
+    <div class="ambient-bg">
+        <div class="ambient-orb orb-1"></div>
+        <div class="ambient-orb orb-2"></div>
+        <div class="ambient-orb orb-3"></div>
+    </div>
+
+    <div class="wizard-container">
+        <!-- Header -->
+        <header class="wizard-header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 32 32" fill="none">
+                        <path d="M16 2L28 8V24L16 30L4 24V8L16 2Z" stroke="currentColor" stroke-width="1.5"
+                            fill="none" />
+                        <circle cx="16" cy="16" r="3" fill="currentColor" opacity="0.8" />
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <span class="logo-name">FNX</span>
+                    <span class="logo-sub">Talent Factory</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stepper -->
+        <nav class="stepper">
+            <div class="step active" data-step="1">
+                <div class="step-number">1</div>
+                <div class="step-info">
+                    <span class="step-title">Yêu cầu tuyển dụng</span>
+                    <span class="step-desc">Nhập mô tả công việc</span>
+                </div>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step" data-step="2">
+                <div class="step-number">2</div>
+                <div class="step-info">
+                    <span class="step-title">Hồ sơ ứng viên</span>
+                    <span class="step-desc">Nhập CV ứng viên</span>
+                </div>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step" data-step="3">
+                <div class="step-number">3</div>
+                <div class="step-info">
+                    <span class="step-title">Phân tích AI</span>
+                    <span class="step-desc">So khớp năng lực</span>
+                </div>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step" data-step="4">
+                <div class="step-number">4</div>
+                <div class="step-info">
+                    <span class="step-title">Báo cáo</span>
+                    <span class="step-desc">Kết quả đánh giá</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Step Panels -->
+        <main class="step-panels">
+
+            <!-- Step 1: JD Input -->
+            <section class="panel active" id="panel-1">
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <h2>📄 Mô tả công việc (JD)</h2>
+                        <p class="panel-desc">Dán nội dung JD vào bên dưới. AI sẽ tự động phân tích và trích xuất các
+                            yêu cầu năng lực.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="jdRole">Tên vị trí <span class="required">*</span></label>
+                        <input type="text" id="jdRole" placeholder="VD: Trưởng phòng Kỹ thuật Hóa dầu" />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="jdCompany">Công ty</label>
+                            <input type="text" id="jdCompany" placeholder="VD: PVN" />
+                        </div>
+                        <div class="form-group">
+                            <label for="jdIndustry">Ngành</label>
+                            <input type="text" id="jdIndustry" placeholder="VD: Hóa dầu" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="jdContent">Nội dung JD <span class="required">*</span></label>
+                        <textarea id="jdContent" rows="12"
+                            placeholder="Dán mô tả công việc vào đây...&#10;&#10;VD:&#10;- Quản lý và điều phối đội ngũ 20 kỹ sư&#10;- Thiết kế, tối ưu hóa các quy trình chế biến&#10;- Phân tích dữ liệu vận hành hệ thống&#10;- Yêu cầu: 10+ năm kinh nghiệm..."></textarea>
+                    </div>
+
+                    <!-- JD Analysis Result (hidden initially) -->
+                    <div class="analysis-result" id="jdResult" style="display: none;">
+                        <div class="result-header">
+                            <span class="result-badge success">✓ Đã phân tích</span>
+                            <span class="result-count" id="jdCompCount"></span>
+                        </div>
+                        <div class="competency-chips" id="jdCompetencies"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 2: CV Input -->
+            <section class="panel" id="panel-2">
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <h2>👤 Hồ sơ ứng viên (CV)</h2>
+                        <p class="panel-desc">Dán nội dung CV vào bên dưới. AI sẽ đánh giá năng lực dựa trên khung
+                            Building 21.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cvName">Họ và tên <span class="required">*</span></label>
+                        <input type="text" id="cvName" placeholder="VD: Nguyễn Văn A" />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cvMajor">Chuyên ngành</label>
+                            <input type="text" id="cvMajor" placeholder="VD: Kỹ thuật Hóa học" />
+                        </div>
+                        <div class="form-group">
+                            <label for="cvYear">Năm tốt nghiệp</label>
+                            <input type="number" id="cvYear" placeholder="VD: 2015" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cvContent">Nội dung CV <span class="required">*</span></label>
+                        <textarea id="cvContent" rows="12"
+                            placeholder="Dán nội dung CV vào đây...&#10;&#10;VD:&#10;Kinh nghiệm làm việc:&#10;- 2015–2020: Kỹ sư quy trình tại ABC...&#10;- 2020–nay: Trưởng nhóm kỹ thuật tại XYZ...&#10;&#10;Kỹ năng:&#10;- Quản lý dự án, PMP certified..."></textarea>
+                    </div>
+
+                    <!-- CV Analysis Result -->
+                    <div class="analysis-result" id="cvResult" style="display: none;">
+                        <div class="result-header">
+                            <span class="result-badge success">✓ Đã đánh giá</span>
+                            <span class="result-count" id="cvCompCount"></span>
+                        </div>
+                        <div class="competency-chips" id="cvCompetencies"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 3: AI Processing -->
+            <section class="panel" id="panel-3">
+                <div class="panel-card processing-card">
+                    <div class="processing-icon">
+                        <svg class="spinner" viewBox="0 0 50 50">
+                            <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="3"
+                                stroke-dasharray="80 40" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <h2>AI đang phân tích...</h2>
+                    <p class="panel-desc">Hệ thống đang so khớp năng lực ứng viên với yêu cầu tuyển dụng</p>
+
+                    <div class="processing-steps">
+                        <div class="proc-step" id="proc-decode">
+                            <span class="proc-icon">⏳</span>
+                            <span class="proc-label">Phân tích yêu cầu JD</span>
+                        </div>
+                        <div class="proc-step" id="proc-assess">
+                            <span class="proc-icon">⏳</span>
+                            <span class="proc-label">Đánh giá năng lực CV</span>
+                        </div>
+                        <div class="proc-step" id="proc-validate">
+                            <span class="proc-icon">⏳</span>
+                            <span class="proc-label">Kiểm tra chéo</span>
+                        </div>
+                        <div class="proc-step" id="proc-match">
+                            <span class="proc-icon">⏳</span>
+                            <span class="proc-label">Tính điểm phù hợp</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 4: Report -->
+            <section class="panel" id="panel-4">
+                <div class="report-container">
+                    <!-- Score Hero -->
+                    <div class="panel-card score-hero">
+                        <div class="score-circle" id="reportScore">
+                            <span class="score-number">—</span>
+                            <span class="score-unit">%</span>
+                        </div>
+                        <div class="score-details">
+                            <h2 id="reportTitle">Kết quả đánh giá</h2>
+                            <p class="score-meta" id="reportMeta">—</p>
+                            <div class="score-tags" id="reportTags"></div>
+                        </div>
+                    </div>
+
+                    <!-- Radar Chart -->
+                    <div class="panel-card">
+                        <div class="panel-header">
+                            <h3>🕸️ Biểu đồ năng lực</h3>
+                            <div class="radar-legend">
+                                <span class="legend-item"><span class="legend-dot legend-actual"></span> Ứng viên</span>
+                                <span class="legend-item"><span class="legend-dot legend-target"></span> Yêu cầu
+                                    JD</span>
+                            </div>
+                        </div>
+                        <div class="radar-container">
+                            <canvas id="radarCanvas" width="480" height="480"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Gap Analysis -->
+                    <div class="panel-card" id="gapCard" style="display: none;">
+                        <div class="panel-header">
+                            <h3>📊 Khoảng cách năng lực</h3>
+                        </div>
+                        <div class="gap-list" id="gapList"></div>
+                    </div>
+
+                    <!-- Competency Table -->
+                    <div class="panel-card">
+                        <div class="panel-header">
+                            <h3>📋 Ma trận năng lực & Bằng chứng</h3>
+                        </div>
+                        <div class="table-wrapper">
+                            <table class="competency-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mã</th>
+                                        <th>Năng lực</th>
+                                        <th>Cấp độ</th>
+                                        <th>Bằng chứng</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="compTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Strength & Development -->
+                    <div class="panel-card">
+                        <div class="summary-grid">
+                            <div class="summary-item strength">
+                                <span class="summary-label">💪 Điểm mạnh nổi bật</span>
+                                <p id="reportStrength">—</p>
+                            </div>
+                            <div class="summary-item development">
+                                <span class="summary-label">📈 Khu vực cần phát triển</span>
+                                <p id="reportDevelopment">—</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Navigation -->
+        <footer class="wizard-nav">
+            <button class="btn btn-back" id="btnBack" onclick="goBack()" style="visibility: hidden;">
+                ← Quay lại
+            </button>
+            <div class="nav-center">
+                <span class="step-indicator" id="stepIndicator">Bước 1 / 4</span>
+            </div>
+            <button class="btn btn-next" id="btnNext" onclick="goNext()">
+                Tiếp tục →
+            </button>
+        </footer>
+
+        <!-- Footer -->
+        <div class="wizard-footer">
+            <p>FNX Talent Factory v2 · Assessment powered by Gemini AI · Framework: Building 21</p>
+        </div>
+    </div>
+
+    <script src="radar.js"></script>
+    <script src="wizard.js"></script>
+</body>
+
+</html>
