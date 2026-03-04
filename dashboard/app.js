@@ -362,7 +362,7 @@ function loadDemoData() {
     renderDashboard(DEMO_ASSESSMENT, DEMO_JD_RESULT, DEMO_MATCH, DEMO_CANDIDATE);
 }
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = '';
 
 const PIPELINE_CANDIDATE = {
     id: "cand_001",

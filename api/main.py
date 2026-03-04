@@ -22,10 +22,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional
-from dotenv import load_dotenv
 
-# Load .env
-load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
+except ImportError:
+    pass  # dotenv not required on Vercel if env vars are set in project settings
 
 from core.store.local_store import LocalStore
 from core.pipeline.nodes import build_fnx_pipeline
@@ -46,10 +48,16 @@ app.add_middleware(
 )
 
 # ── State ──
-store = LocalStore(data_dir=os.path.join(PROJECT_ROOT, "data", "store"))
+# On Vercel serverless, only /tmp is writable
+IS_VERCEL = os.environ.get("VERCEL", False)
+data_dir = "/tmp/fnx_store" if IS_VERCEL else os.path.join(PROJECT_ROOT, "data", "store")
+
+store = LocalStore(data_dir=data_dir)
+
+framework_path = os.path.join(PROJECT_ROOT, "docs", "building-21", "framework_definition.md")
 pipeline = build_fnx_pipeline(
     store=store,
-    framework_path=os.path.join(PROJECT_ROOT, "docs", "building-21", "framework_definition.md"),
+    framework_path=framework_path,
     llm_provider="gemini",
 )
 
@@ -70,6 +78,7 @@ async def health():
         "engine": "DAG Pipeline",
         "nodes": list(pipeline.nodes.keys()),
         "store": store.__class__.__name__,
+        "vercel": bool(IS_VERCEL),
     }
 
 
@@ -102,18 +111,23 @@ async def get_pipeline_run(run_id: str):
     }
 
 
-# ── Serve Dashboard (static files) ──
+# ── Serve Dashboard (local dev only — Vercel handles static via vercel.json) ──
 
-dashboard_dir = os.path.join(PROJECT_ROOT, "dashboard")
-if os.path.exists(dashboard_dir):
-    app.mount("/static", StaticFiles(directory=dashboard_dir), name="dashboard")
+if not IS_VERCEL:
+    dashboard_dir = os.path.join(PROJECT_ROOT, "dashboard")
+    if os.path.exists(dashboard_dir):
+        @app.get("/")
+        async def serve_dashboard():
+            return FileResponse(os.path.join(dashboard_dir, "index.html"))
 
-    @app.get("/")
-    async def serve_dashboard():
-        return FileResponse(os.path.join(dashboard_dir, "index.html"))
+        # Mount static AFTER explicit routes so /api/* takes priority
+        app.mount("/", StaticFiles(directory=dashboard_dir), name="dashboard")
 
 
-# ── Run ──
+# ── Vercel handler ──
+# Vercel Python runtime looks for `app` — already exported above.
+
+# ── Local dev ──
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
