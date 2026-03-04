@@ -1,0 +1,50 @@
+[
+  {
+    "id": "cand_001",
+    "fullName": "Nguyễn Văn A",
+    "yearbook_info": {
+      "major": "Kỹ thuật Hóa học",
+      "graduation_year": 2015,
+      "class": "CH10A"
+    },
+    "experience": [
+      {
+        "title": "Kỹ sư quy trình",
+        "company": "PetroVietnam",
+        "duration": "2015-2020",
+        "description": "Quản lý dây chuyền sản xuất nhựa PP, tối ưu hóa quy trình nhiệt và áp suất. Xây dựng hệ thống giám sát an toàn tự động."
+      },
+      {
+        "title": "Trưởng phòng kỹ thuật",
+        "company": "Chemical Corp X",
+        "duration": "2020-Present",
+        "description": "Điều phối đội ngũ 15 kỹ sư, thiết kế các giải pháp xử lý nước thải công nghiệp. Áp dụng tư duy hệ thống để giảm 20% chi phí vận hành."
+      }
+    ],
+    "social_data": {
+      "linkedin_url": "linkedin.com/in/nguyen-van-a",
+      "patents": ["Hệ thống lọc khí thải đa tầng (2022)"]
+    }
+  },
+  {
+    "id": "cand_002",
+    "fullName": "Trần Thị B",
+    "yearbook_info": {
+      "major": "Hóa dầu",
+      "graduation_year": 2018,
+      "class": "HD13B"
+    },
+    "experience": [
+      {
+        "title": "Chuyên viên R&D",
+        "company": "Vinachem",
+        "duration": "2018-2022",
+        "description": "Nghiên cứu công thức các loại phân bón thế hệ mới. Phân tích dữ liệu phản ứng hóa học để dự đoán hiệu suất."
+      }
+    ],
+    "social_data": {
+      "google_scholar": "scholar.google.com/citations?user=tranthib",
+      "publications": ["Nghiên cứu về polymer phân hủy sinh học (2021)"]
+    }
+  }
+]

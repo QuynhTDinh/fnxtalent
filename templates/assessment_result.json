@@ -1,0 +1,17 @@
+{
+    "candidateId": "CAND_001",
+    "evaluatedAt": "2025-01-01T00:00:00Z",
+    "competencies": [
+        {
+            "code": "HOS.1",
+            "level": 4,
+            "evidence": "Describe project experience directly justifying this level.",
+            "sourceReferences": [
+                "Resume Section 2",
+                "GitHub Project X"
+            ]
+        }
+    ],
+    "overallStrength": "Strong fit for architect roles emphasizing systems thinking.",
+    "status": "Verified"
+}

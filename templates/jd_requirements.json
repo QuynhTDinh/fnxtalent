@@ -1,0 +1,18 @@
+{
+    "job_id": "JOB_001",
+    "role": "Position Title",
+    "required_competencies": [
+        {
+            "code": "HOS.1",
+            "target_level": 4,
+            "priority": "High",
+            "description": "Why this competency is critical for this role."
+        }
+    ],
+    "metadata": {
+        "industry": "IT",
+        "seniority": "Senior",
+        "work_location": "Remote"
+    },
+    "raw_jd_summary": "Short 2-3 sentence summary of the original JD."
+}
