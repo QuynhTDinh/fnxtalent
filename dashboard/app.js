@@ -203,17 +203,14 @@ function renderFitScore(score) {
     };
     requestAnimationFrame(tick);
 
-    // Color based on score
+    // Color based on score (Apple system colors)
     if (score >= 80) {
-        el.style.background = 'linear-gradient(135deg, #34d399, #22d3ee)';
+        el.style.color = '#34c759'; // green
     } else if (score >= 60) {
-        el.style.background = 'linear-gradient(135deg, #6366f1, #22d3ee)';
+        el.style.color = '#0071e3'; // blue
     } else {
-        el.style.background = 'linear-gradient(135deg, #fb7185, #fbbf24)';
+        el.style.color = '#ff3b30'; // red
     }
-    el.style.webkitBackgroundClip = 'text';
-    el.style.webkitTextFillColor = 'transparent';
-    el.style.backgroundClip = 'text';
 }
 
 function renderDomainBars(assessment) {

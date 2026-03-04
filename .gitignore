@@ -31,3 +31,4 @@ data/store/
 
 # Agent workspace
 .agent/skills/*/scripts/__pycache__/
+.vercel

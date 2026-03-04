@@ -32,27 +32,27 @@ class RadarChart {
         this.radius = Math.min(this.logicalWidth, this.logicalHeight) / 2 - 65;
         this.levels = options.levels || 5;
 
-        // Styling
+        // Styling — Apple HIG colors
         this.colors = {
-            candidate: options.candidateColor || '#6366f1',
-            candidateFill: options.candidateFill || 'rgba(99, 102, 241, 0.12)',
-            target: options.targetColor || '#fb7185',
-            targetFill: options.targetFill || 'rgba(251, 113, 133, 0.06)',
-            grid: options.gridColor || 'rgba(99, 128, 255, 0.07)',
-            gridText: options.gridTextColor || '#505a72',
-            axisLabel: options.axisLabelColor || '#8b95b0',
-            axisLabelActive: '#f0f2f8',
+            candidate: options.candidateColor || '#0071e3',
+            candidateFill: options.candidateFill || 'rgba(0, 113, 227, 0.08)',
+            target: options.targetColor || '#ff2d55',
+            targetFill: options.targetFill || 'rgba(255, 45, 85, 0.04)',
+            grid: options.gridColor || 'rgba(0, 0, 0, 0.06)',
+            gridText: options.gridTextColor || '#86868b',
+            axisLabel: options.axisLabelColor || '#6e6e73',
+            axisLabelActive: '#1d1d1f',
         };
 
-        // Domain color mapping
+        // Domain color mapping (Apple system colors)
         this.domainColors = {
-            'HOS': '#a78bfa', // Mindset - violet
-            'PD': '#a78bfa',
-            'WF': '#22d3ee',  // Skills - cyan
-            'ELA': '#22d3ee',
-            'SCI': '#34d399', // Knowledge - emerald
-            'MATH': '#34d399',
-            'SS': '#34d399',
+            'HOS': '#af52de', // Mindset - purple
+            'PD': '#af52de',
+            'WF': '#5ac8fa',  // Skills - teal
+            'ELA': '#5ac8fa',
+            'SCI': '#34c759', // Knowledge - green
+            'MATH': '#34c759',
+            'SS': '#34c759',
         };
 
         // Data
@@ -160,7 +160,7 @@ class RadarChart {
 
             // Subtle fill on every other ring
             if (lvl % 2 === 0) {
-                ctx.fillStyle = 'rgba(99, 128, 255, 0.015)';
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.01)';
                 ctx.fill();
             }
         }
@@ -295,14 +295,14 @@ class RadarChart {
             const domainColor = this.domainColors[axis?.area] || this.colors.axisLabel;
 
             // Code label
-            ctx.font = `${isHovered ? '600' : '500'} 11px 'JetBrains Mono', monospace`;
+            ctx.font = `${isHovered ? '600' : '500'} 11px -apple-system, 'SF Mono', monospace`;
             ctx.fillStyle = isHovered ? domainColor : this.colors.axisLabel;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(axis?.code || '', x, y - 7);
 
             // Name label
-            ctx.font = `400 9px 'Inter', sans-serif`;
+            ctx.font = `400 9px -apple-system, 'SF Pro Text', sans-serif`;
             ctx.fillStyle = isHovered ? this.colors.axisLabelActive : this.colors.gridText;
 
             // Truncate long names
@@ -321,7 +321,7 @@ class RadarChart {
             const x = center.x + 4;
             const y = center.y - r - 3;
 
-            ctx.font = '500 8px "JetBrains Mono", monospace';
+            ctx.font = '500 8px -apple-system, "SF Mono", monospace';
             ctx.fillStyle = this.colors.gridText;
             ctx.textAlign = 'left';
             ctx.textBaseline = 'bottom';
