@@ -350,9 +350,11 @@ function renderReport(assessment, jdResult, matchResult) {
         ...gaps.slice(0, 3).map(g => `<span class="score-tag tag-gap">↓ ${g.code}</span>`),
     ].join('');
 
-    // Strength & Development
-    document.getElementById('reportStrength').textContent = assessment.overallStrength || '—';
-    document.getElementById('reportDevelopment').textContent = assessment.developmentAreas || '—';
+    // Candidate Profile
+    renderCandidateProfile(assessment);
+
+    // Domain Bars
+    renderDomainBars(assessment);
 
     // Radar Chart
     renderRadarChart(assessment, jdResult);
@@ -362,6 +364,90 @@ function renderReport(assessment, jdResult, matchResult) {
 
     // Competency Table
     renderCompetencyTable(assessment);
+}
+
+function renderCandidateProfile(assessment) {
+    const name = assessment.fullName || document.getElementById('cvName').value || 'Ứng viên';
+    const major = document.getElementById('cvMajor').value || '';
+    const year = document.getElementById('cvYear').value || '';
+
+    // Avatar initials
+    const initials = name.split(' ').map(w => w[0]).filter(Boolean).slice(-2).join('').toUpperCase();
+    document.getElementById('reportAvatar').textContent = initials || 'UV';
+
+    document.getElementById('reportCandidateName').textContent = name;
+    document.getElementById('reportCandidateMajor').textContent =
+        [major, year].filter(Boolean).join(' · ') || '—';
+
+    // Strength & Development
+    document.getElementById('reportStrength').textContent = assessment.overallStrength || '—';
+    document.getElementById('reportDevelopment').textContent = assessment.developmentAreas || '—';
+}
+
+function renderDomainBars(assessment) {
+    const domains = {
+        'Mindset': { areas: ['HOS', 'PD'], color: '#af52de', items: [] },
+        'Skills': { areas: ['WF', 'ELA'], color: '#5ac8fa', items: [] },
+        'Knowledge': { areas: ['SCI', 'MATH', 'SS'], color: '#34c759', items: [] },
+    };
+
+    (assessment.competencies || []).forEach(c => {
+        for (const [name, domain] of Object.entries(domains)) {
+            if (domain.areas.includes(c.area)) {
+                domain.items.push(c.level);
+                break;
+            }
+        }
+    });
+
+    const container = document.getElementById('domainBars');
+    container.innerHTML = '';
+
+    for (const [name, domain] of Object.entries(domains)) {
+        const avg = domain.items.length > 0
+            ? domain.items.reduce((a, b) => a + b, 0) / domain.items.length
+            : 0;
+        const pct = (avg / 5) * 100;
+        const areaLabels = domain.areas.join(', ');
+
+        const el = document.createElement('div');
+        el.className = 'domain-item';
+        el.innerHTML = `
+            <div class="domain-header">
+                <div class="domain-name">
+                    <span class="domain-icon" style="background: ${domain.color}"></span>
+                    <span class="domain-label">${name}</span>
+                    <span class="domain-sublabel">(${areaLabels})</span>
+                </div>
+                <span class="domain-score" style="color: ${domain.color}">${avg.toFixed(1)} / 5</span>
+            </div>
+            <div class="domain-bar-track">
+                <div class="domain-bar-fill" style="background: linear-gradient(90deg, ${domain.color}, ${domain.color}88)" data-width="${pct}"></div>
+            </div>
+        `;
+        container.appendChild(el);
+    }
+
+    // Animate bars
+    requestAnimationFrame(() => {
+        setTimeout(() => {
+            container.querySelectorAll('.domain-bar-fill').forEach(bar => {
+                bar.style.width = bar.dataset.width + '%';
+            });
+        }, 200);
+    });
+}
+
+function toggleLegend() {
+    const content = document.getElementById('legendContent');
+    const btn = document.getElementById('legendToggle');
+    if (content.style.display === 'none') {
+        content.style.display = '';
+        btn.textContent = 'Thu gọn ▲';
+    } else {
+        content.style.display = 'none';
+        btn.textContent = 'Mở rộng ▼';
+    }
 }
 
 function animateNumber(el, target) {

@@ -962,6 +962,264 @@ body {
     pointer-events: none;
 }
 
+/* ── Candidate Profile ── */
+.candidate-profile-card .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.profile-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.profile-info h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.profile-major {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+}
+
+.profile-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* ── Domain Bars ── */
+.domain-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.domain-item {}
+
+.domain-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.domain-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.domain-icon {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.domain-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.domain-sublabel {
+    font-size: 0.62rem;
+    color: var(--text-caption);
+}
+
+.domain-score {
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.domain-bar-track {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+}
+
+.domain-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    width: 0;
+    transition: width 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* ── Panel Header flex ── */
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.panel-badge {
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    background: rgba(0, 113, 227, 0.08);
+    color: var(--accent-blue);
+}
+
+/* ── Legend ── */
+.legend-toggle {
+    padding: 4px 12px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 100px;
+    background: white;
+    font-family: inherit;
+    font-size: 0.62rem;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.legend-toggle:hover {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.legend-content {}
+
+.legend-section {
+    margin-bottom: 20px;
+}
+
+.legend-section:last-child {
+    margin-bottom: 0;
+}
+
+.legend-section-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.legend-section-desc {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.legend-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.legend-area-item {
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(0, 0, 0, 0.015);
+    border-left: 3px solid currentColor;
+}
+
+.legend-area-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 0.58rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.legend-area-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-left: 8px;
+}
+
+.legend-area-codes {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-top: 6px;
+}
+
+.legend-area-codes span {
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.legend-area-codes em {
+    color: var(--text-caption);
+}
+
+/* ── Level Scale ── */
+.level-scale {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.level-scale-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+}
+
+.level-scale-item div {
+    display: flex;
+    flex-direction: column;
+}
+
+.level-scale-item strong {
+    font-size: 0.72rem;
+    color: var(--text-primary);
+}
+
+.level-scale-item span {
+    font-size: 0.62rem;
+    color: var(--text-caption);
+}
+
+/* ── Reading Guide ── */
+.reading-guide p {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.reading-guide .legend-dot {
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+/* ── Report Actions ── */
+.report-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    padding: 8px 0;
+}
+
 /* ── Footer ── */
 .wizard-footer {
     text-align: center;

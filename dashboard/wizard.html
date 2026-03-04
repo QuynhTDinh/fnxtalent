@@ -209,6 +209,36 @@
                         </div>
                     </div>
 
+                    <!-- Candidate Profile Card -->
+                    <div class="panel-card candidate-profile-card">
+                        <div class="profile-header">
+                            <div class="profile-avatar" id="reportAvatar">UV</div>
+                            <div class="profile-info">
+                                <h3 id="reportCandidateName">Ứng viên</h3>
+                                <p class="profile-major" id="reportCandidateMajor">—</p>
+                            </div>
+                        </div>
+                        <div class="profile-summary">
+                            <div class="summary-item strength">
+                                <span class="summary-label">💪 Điểm mạnh nổi bật</span>
+                                <p id="reportStrength">—</p>
+                            </div>
+                            <div class="summary-item development">
+                                <span class="summary-label">📈 Khu vực cần phát triển</span>
+                                <p id="reportDevelopment">—</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Domain Breakdown -->
+                    <div class="panel-card">
+                        <div class="panel-header">
+                            <h3>📊 Phân tích theo nhóm năng lực</h3>
+                            <span class="panel-badge">Building 21</span>
+                        </div>
+                        <div class="domain-bars" id="domainBars"></div>
+                    </div>
+
                     <!-- Radar Chart -->
                     <div class="panel-card">
                         <div class="panel-header">
@@ -227,9 +257,96 @@
                     <!-- Gap Analysis -->
                     <div class="panel-card" id="gapCard" style="display: none;">
                         <div class="panel-header">
-                            <h3>📊 Khoảng cách năng lực</h3>
+                            <h3>📉 Phân tích khoảng cách</h3>
+                            <span class="panel-badge" id="gapBadge"
+                                style="background:rgba(255,59,48,0.08); color:#ff3b30;"></span>
                         </div>
                         <div class="gap-list" id="gapList"></div>
+                    </div>
+
+                    <!-- Legend — Hướng dẫn đọc báo cáo -->
+                    <div class="panel-card legend-card">
+                        <div class="panel-header">
+                            <h3>📖 Hướng dẫn đọc báo cáo</h3>
+                            <button class="legend-toggle" id="legendToggle" onclick="toggleLegend()">Thu gọn ▲</button>
+                        </div>
+                        <div class="legend-content" id="legendContent">
+                            <div class="legend-section">
+                                <h4 class="legend-section-title">Mã vùng năng lực (Area Code)</h4>
+                                <p class="legend-section-desc">Mỗi năng lực được mã hóa theo dạng
+                                    <strong>AREA.số</strong> — trong đó AREA là vùng năng lực theo khung Building 21:
+                                </p>
+                                <div class="legend-grid">
+                                    <div class="legend-area-item" style="border-left-color: #af52de;">
+                                        <span class="legend-area-badge"
+                                            style="background:rgba(175,82,222,0.1); color:#af52de;">Mindset</span>
+                                        <span class="legend-area-label">Tư duy & Thái độ</span>
+                                        <div class="legend-area-codes">
+                                            <span><strong>HOS</strong> — Habits of Success <em>(Thói quen thành
+                                                    công)</em></span>
+                                            <span><strong>PD</strong> — Personal Development <em>(Phát triển cá
+                                                    nhân)</em></span>
+                                        </div>
+                                    </div>
+                                    <div class="legend-area-item" style="border-left-color: #5ac8fa;">
+                                        <span class="legend-area-badge"
+                                            style="background:rgba(90,200,250,0.1); color:#5ac8fa;">Skills</span>
+                                        <span class="legend-area-label">Kỹ năng thực hành</span>
+                                        <div class="legend-area-codes">
+                                            <span><strong>WF</strong> — Workforce Readiness <em>(Kỹ năng
+                                                    nghề)</em></span>
+                                            <span><strong>ELA</strong> — English Language Arts <em>(Ngôn ngữ & Giao
+                                                    tiếp)</em></span>
+                                        </div>
+                                    </div>
+                                    <div class="legend-area-item" style="border-left-color: #34c759;">
+                                        <span class="legend-area-badge"
+                                            style="background:rgba(52,199,89,0.1); color:#34c759;">Knowledge</span>
+                                        <span class="legend-area-label">Kiến thức chuyên môn</span>
+                                        <div class="legend-area-codes">
+                                            <span><strong>SCI</strong> — Science <em>(Khoa học & Kỹ thuật)</em></span>
+                                            <span><strong>MATH</strong> — Mathematics <em>(Toán & Phân tích)</em></span>
+                                            <span><strong>SS</strong> — Social Studies <em>(Khoa học xã hội)</em></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="legend-section">
+                                <h4 class="legend-section-title">Thang đánh giá năng lực (1–5)</h4>
+                                <div class="level-scale">
+                                    <div class="level-scale-item"><span class="level-badge level-1">1</span>
+                                        <div><strong>Nền tảng</strong><span>Hiểu sơ bộ, cần hướng dẫn chi tiết</span>
+                                        </div>
+                                    </div>
+                                    <div class="level-scale-item"><span class="level-badge level-2">2</span>
+                                        <div><strong>Đang phát triển</strong><span>Thực hiện cơ bản, giám sát ít
+                                                hơn</span></div>
+                                    </div>
+                                    <div class="level-scale-item"><span class="level-badge level-3">3</span>
+                                        <div><strong>Thành thạo</strong><span>Đạt chuẩn doanh nghiệp, làm việc độc
+                                                lập</span></div>
+                                    </div>
+                                    <div class="level-scale-item"><span class="level-badge level-4">4</span>
+                                        <div><strong>Nâng cao</strong><span>Giải quyết vấn đề phức tạp, tư duy hệ
+                                                thống</span></div>
+                                    </div>
+                                    <div class="level-scale-item"><span class="level-badge level-5">5</span>
+                                        <div><strong>Bậc thầy</strong><span>Chuyên gia đầu ngành, dẫn dắt & bảo
+                                                chứng</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="legend-section reading-guide">
+                                <h4 class="legend-section-title">Cách đọc biểu đồ Radar</h4>
+                                <p><span class="legend-dot legend-actual"></span> <strong>Đường xanh
+                                        (Candidate)</strong> — Năng lực thực tế của ứng viên, đánh giá dựa trên bằng
+                                    chứng từ hồ sơ</p>
+                                <p><span class="legend-dot legend-target"></span> <strong>Đường hồng (Job
+                                        Target)</strong> — Yêu cầu năng lực của vị trí, trích xuất từ JD</p>
+                                <p>📊 <strong>Vùng chồng lấp</strong> = phù hợp. <strong>Khoảng cách</strong> giữa 2
+                                    đường = gap cần bổ sung.</p>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Competency Table -->
@@ -244,7 +361,7 @@
                                         <th>Mã</th>
                                         <th>Năng lực</th>
                                         <th>Cấp độ</th>
-                                        <th>Bằng chứng</th>
+                                        <th>Bằng chứng từ hồ sơ</th>
                                     </tr>
                                 </thead>
                                 <tbody id="compTableBody"></tbody>
@@ -252,18 +369,10 @@
                         </div>
                     </div>
 
-                    <!-- Strength & Development -->
-                    <div class="panel-card">
-                        <div class="summary-grid">
-                            <div class="summary-item strength">
-                                <span class="summary-label">💪 Điểm mạnh nổi bật</span>
-                                <p id="reportStrength">—</p>
-                            </div>
-                            <div class="summary-item development">
-                                <span class="summary-label">📈 Khu vực cần phát triển</span>
-                                <p id="reportDevelopment">—</p>
-                            </div>
-                        </div>
+                    <!-- Export buttons -->
+                    <div class="report-actions">
+                        <button class="btn btn-action" onclick="exportPDF()">🖨️ Xuất PDF</button>
+                        <button class="btn btn-export" onclick="resetWizard()">🔄 Đánh giá ứng viên khác</button>
                     </div>
                 </div>
             </section>
