@@ -364,6 +364,9 @@ function renderReport(assessment, jdResult, matchResult) {
 
     // Competency Table
     renderCompetencyTable(assessment);
+
+    // Auto-save to history
+    saveToHistory(assessment, jdResult, matchResult);
 }
 
 function renderCandidateProfile(assessment) {
@@ -548,10 +551,200 @@ function renderCompetencyTable(assessment) {
 }
 
 
+// ── History ──
+
+async function saveToHistory(assessment, jdResult, matchResult) {
+    try {
+        const fitScore = matchResult.fit_score ?? matchResult.fitScore ?? 0;
+        await fetch(`${API_BASE}/api/history/save`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                candidateName: assessment.fullName || document.getElementById('cvName').value || 'Ứng viên',
+                role: jdResult.role || document.getElementById('jdRole').value || 'Vị trí',
+                fitScore,
+                assessment,
+                jdResult,
+                matchResult,
+            }),
+        });
+    } catch (err) {
+        console.warn('History save failed:', err);
+    }
+}
+
+
 // ── Export ──
 
-function exportPDF() {
-    window.print();
+async function exportPDF() {
+    const btn = document.querySelector('.report-actions .btn-action');
+    const origText = btn.textContent;
+    btn.textContent = '⏳ Đang tạo PDF...';
+    btn.disabled = true;
+
+    try {
+        const reportEl = document.querySelector('.report-container');
+
+        // Capture report as canvas
+        const canvas = await html2canvas(reportEl, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#f5f5f7',
+            logging: false,
+        });
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pageW = 210;
+        const pageH = 297;
+        const margin = 10;
+        const contentW = pageW - margin * 2;
+
+        // Header branding
+        pdf.setFillColor(0, 113, 227);
+        pdf.rect(0, 0, pageW, 12, 'F');
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(9);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('FNX Talent Factory', margin, 8);
+        pdf.setFont(undefined, 'normal');
+        pdf.setFontSize(7);
+        pdf.text(`Báo cáo đánh giá năng lực · ${new Date().toLocaleDateString('vi-VN')}`, pageW - margin, 8, { align: 'right' });
+
+        // Add report image
+        const imgData = canvas.toDataURL('image/jpeg', 0.92);
+        const imgW = contentW;
+        const imgH = (canvas.height * imgW) / canvas.width;
+        const startY = 16;
+
+        let y = startY;
+        let remainH = imgH;
+        let srcY = 0;
+
+        while (remainH > 0) {
+            const sliceH = Math.min(remainH, pageH - y - margin);
+            const sliceRatio = sliceH / imgH;
+            const srcSliceH = canvas.height * sliceRatio;
+
+            // Create slice canvas
+            const sliceCanvas = document.createElement('canvas');
+            sliceCanvas.width = canvas.width;
+            sliceCanvas.height = srcSliceH;
+            const ctx = sliceCanvas.getContext('2d');
+            ctx.drawImage(canvas, 0, srcY, canvas.width, srcSliceH, 0, 0, canvas.width, srcSliceH);
+
+            const sliceImg = sliceCanvas.toDataURL('image/jpeg', 0.92);
+            pdf.addImage(sliceImg, 'JPEG', margin, y, imgW, sliceH);
+
+            remainH -= sliceH;
+            srcY += srcSliceH;
+
+            if (remainH > 0) {
+                pdf.addPage();
+                y = margin;
+            }
+        }
+
+        // Footer on last page
+        pdf.setTextColor(150, 150, 150);
+        pdf.setFontSize(6);
+        pdf.text('FNX Talent Factory v2 · Powered by Gemini AI · Framework: Building 21', pageW / 2, pageH - 5, { align: 'center' });
+
+        // Download
+        const candName = document.getElementById('reportCandidateName')?.textContent || 'candidate';
+        const date = new Date().toISOString().slice(0, 10);
+        pdf.save(`FNX_Report_${candName.replace(/\s+/g, '_')}_${date}.pdf`);
+
+    } catch (err) {
+        console.error('PDF export error:', err);
+        alert('Lỗi xuất PDF: ' + err.message);
+    } finally {
+        btn.textContent = origText;
+        btn.disabled = false;
+    }
+}
+
+
+// ── File Upload ──
+
+function initDropZones() {
+    document.querySelectorAll('.drop-zone').forEach(zone => {
+        const input = zone.querySelector('.drop-input');
+        const targetId = zone.dataset.target;
+
+        // Click to browse
+        zone.addEventListener('click', (e) => {
+            if (e.target === input) return;
+            input.click();
+        });
+
+        // File selected via input
+        input.addEventListener('change', () => {
+            if (input.files.length > 0) handleFileUpload(input.files[0], zone, targetId);
+        });
+
+        // Drag events
+        zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('dragover'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            zone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) handleFileUpload(e.dataTransfer.files[0], zone, targetId);
+        });
+    });
+}
+
+async function handleFileUpload(file, zone, targetTextareaId) {
+    const content = zone.querySelector('.drop-zone-content');
+    const loading = zone.querySelector('.drop-loading');
+    const success = zone.querySelector('.drop-success');
+
+    // Validate
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!['pdf', 'docx', 'doc'].includes(ext)) {
+        alert('Chỉ hỗ trợ file .pdf hoặc .docx');
+        return;
+    }
+
+    // Show loading
+    content.style.display = 'none';
+    success.style.display = 'none';
+    loading.style.display = '';
+
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const resp = await fetch(`${API_BASE}/api/file/extract`, {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            throw new Error(err.detail || `Error ${resp.status}`);
+        }
+
+        const result = await resp.json();
+
+        // Populate textarea
+        document.getElementById(targetTextareaId).value = result.text;
+
+        // Show success
+        loading.style.display = 'none';
+        success.style.display = '';
+        success.querySelector('.drop-filename').textContent = `${file.name} (${result.chars} ký tự)`;
+
+        // Clear any previous analysis since content changed
+        if (targetTextareaId === 'jdContent') jdData = null;
+        if (targetTextareaId === 'cvContent') cvData = null;
+
+    } catch (err) {
+        console.error('File upload error:', err);
+        alert('Lỗi trích xuất file: ' + err.message);
+        loading.style.display = 'none';
+        content.style.display = '';
+    }
 }
 
 
@@ -559,4 +752,5 @@ function exportPDF() {
 
 window.addEventListener('DOMContentLoaded', () => {
     goToStep(1);
+    initDropZones();
 });

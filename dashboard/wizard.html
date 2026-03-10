@@ -36,6 +36,7 @@
                     <span class="logo-sub">Talent Factory</span>
                 </div>
             </div>
+            <a href="/history" class="header-link">📋 Lịch sử</a>
         </header>
 
         <!-- Stepper -->
@@ -101,6 +102,24 @@
                         </div>
                     </div>
 
+                    <div class="drop-zone" id="jdDropZone" data-target="jdContent">
+                        <input type="file" class="drop-input" id="jdFileInput" accept=".pdf,.docx,.doc" />
+                        <div class="drop-zone-content">
+                            <span class="drop-icon">📄</span>
+                            <span class="drop-text">Kéo thả file PDF/DOCX vào đây</span>
+                            <span class="drop-sub">hoặc <span class="drop-browse">chọn file</span> · hỗ trợ .pdf,
+                                .docx</span>
+                        </div>
+                        <div class="drop-loading" style="display:none;">
+                            <span class="drop-spinner"></span>
+                            <span>Đang trích xuất văn bản...</span>
+                        </div>
+                        <div class="drop-success" style="display:none;">
+                            <span>✅</span>
+                            <span class="drop-filename"></span>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label for="jdContent">Nội dung JD <span class="required">*</span></label>
                         <textarea id="jdContent" rows="12"
@@ -140,6 +159,24 @@
                         <div class="form-group">
                             <label for="cvYear">Năm tốt nghiệp</label>
                             <input type="number" id="cvYear" placeholder="VD: 2015" />
+                        </div>
+                    </div>
+
+                    <div class="drop-zone" id="cvDropZone" data-target="cvContent">
+                        <input type="file" class="drop-input" id="cvFileInput" accept=".pdf,.docx,.doc" />
+                        <div class="drop-zone-content">
+                            <span class="drop-icon">👤</span>
+                            <span class="drop-text">Kéo thả file CV (PDF/DOCX) vào đây</span>
+                            <span class="drop-sub">hoặc <span class="drop-browse">chọn file</span> · hỗ trợ .pdf,
+                                .docx</span>
+                        </div>
+                        <div class="drop-loading" style="display:none;">
+                            <span class="drop-spinner"></span>
+                            <span>Đang trích xuất văn bản...</span>
+                        </div>
+                        <div class="drop-success" style="display:none;">
+                            <span>✅</span>
+                            <span class="drop-filename"></span>
                         </div>
                     </div>
 
@@ -397,6 +434,8 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="radar.js"></script>
     <script src="wizard.js"></script>
 </body>

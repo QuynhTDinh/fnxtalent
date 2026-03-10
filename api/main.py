@@ -16,7 +16,7 @@ import sys
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, PROJECT_ROOT)
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -87,6 +87,20 @@ from core.agents.assessment_agent import AssessmentAgent
 _jd_agent = JDDecoderAgent(framework_path=framework_path, llm_provider="gemini")
 _cv_agent = AssessmentAgent(framework_path=framework_path, llm_provider="gemini")
 
+# ── History (in-memory for now; Supabase in future phase) ──
+import uuid
+from datetime import datetime
+
+_history: dict = {}  # id -> record
+
+
+class HistoryRecord(BaseModel):
+    candidateName: str
+    role: str
+    fitScore: float
+    assessment: dict
+    jdResult: dict
+    matchResult: dict
 
 # ── Routes ──
 
@@ -99,6 +113,20 @@ async def health():
         "store": store.__class__.__name__,
         "vercel": bool(IS_VERCEL),
     }
+
+
+@app.post("/api/file/extract")
+async def extract_file(file: UploadFile = File(...)):
+    """Extract text from uploaded PDF/DOCX file."""
+    from core.utils.file_parser import extract_text
+    try:
+        content = await file.read()
+        text = extract_text(content, file.filename or "unknown")
+        return {"text": text, "filename": file.filename, "chars": len(text)}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"File parsing error: {str(e)}")
 
 @app.post("/api/jd/decode")
 async def decode_jd(request: JDRequest):
@@ -173,6 +201,51 @@ async def get_pipeline_run(run_id: str):
     }
 
 
+# ── History Routes ──
+
+@app.post("/api/history/save")
+async def save_history(record: HistoryRecord):
+    """Save an assessment result to history."""
+    record_id = str(uuid.uuid4())[:8]
+    _history[record_id] = {
+        "id": record_id,
+        "candidateName": record.candidateName,
+        "role": record.role,
+        "fitScore": record.fitScore,
+        "assessment": record.assessment,
+        "jdResult": record.jdResult,
+        "matchResult": record.matchResult,
+        "createdAt": datetime.now().isoformat(),
+    }
+    return {"id": record_id, "status": "saved"}
+
+
+@app.get("/api/history")
+async def list_history():
+    """List all saved assessment records."""
+    records = sorted(_history.values(), key=lambda r: r["createdAt"], reverse=True)
+    # Return summary only (no full data)
+    return [
+        {
+            "id": r["id"],
+            "candidateName": r["candidateName"],
+            "role": r["role"],
+            "fitScore": r["fitScore"],
+            "createdAt": r["createdAt"],
+        }
+        for r in records
+    ]
+
+
+@app.get("/api/history/{record_id}")
+async def get_history(record_id: str):
+    """Get a specific history record by ID."""
+    record = _history.get(record_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="Record not found")
+    return record
+
+
 # ── Serve Dashboard (local dev only — Vercel handles static via vercel.json) ──
 
 if not IS_VERCEL:
@@ -185,6 +258,10 @@ if not IS_VERCEL:
         @app.get("/report")
         async def serve_report():
             return FileResponse(os.path.join(dashboard_dir, "index.html"))
+
+        @app.get("/history")
+        async def serve_history():
+            return FileResponse(os.path.join(dashboard_dir, "history.html"))
 
         # Mount static AFTER explicit routes so /api/* takes priority
         app.mount("/", StaticFiles(directory=dashboard_dir), name="dashboard")

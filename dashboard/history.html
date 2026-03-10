@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FNX Talent Factory — Lịch sử đánh giá</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="wizard.css">
+    <style>
+        .history-page {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 24px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .history-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .history-header h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .history-back {
+            font-size: 0.78rem;
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .history-back:hover {
+            text-decoration: underline;
+        }
+
+        .history-empty {
+            text-align: center;
+            padding: 48px;
+            color: var(--text-tertiary);
+            font-size: 0.88rem;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .history-card {
+            background: var(--bg-frosted);
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            box-shadow: var(--shadow-md);
+            border: 0.5px solid rgba(0, 0, 0, 0.04);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .history-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .history-score {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 800;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, rgba(0, 113, 227, 0.08), rgba(175, 82, 222, 0.08));
+        }
+
+        .score-high {
+            color: var(--accent-green);
+        }
+
+        .score-mid {
+            color: var(--accent-blue);
+        }
+
+        .score-low {
+            color: var(--accent-red);
+        }
+
+        .history-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .history-name {
+            font-weight: 600;
+            font-size: 0.88rem;
+            margin-bottom: 2px;
+        }
+
+        .history-role {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .history-date {
+            font-size: 0.62rem;
+            color: var(--text-caption);
+            flex-shrink: 0;
+        }
+
+        .history-arrow {
+            color: var(--text-caption);
+            font-size: 0.78rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ambient-bg">
+        <div class="ambient-orb orb-1"></div>
+        <div class="ambient-orb orb-2"></div>
+        <div class="ambient-orb orb-3"></div>
+    </div>
+
+    <div class="history-page">
+        <div class="history-header">
+            <h1>📋 Lịch sử đánh giá</h1>
+            <a href="/" class="history-back">← Quay lại Wizard</a>
+        </div>
+        <div id="historyList" class="history-list">
+            <div class="history-empty">Đang tải...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+
+        async function loadHistory() {
+            const list = document.getElementById('historyList');
+            try {
+                const resp = await fetch(`${API_BASE}/api/history`);
+                const records = await resp.json();
+
+                if (records.length === 0) {
+                    list.innerHTML = '<div class="history-empty">Chưa có đánh giá nào. <a href="/" style="color:var(--accent-blue)">Bắt đầu đánh giá →</a></div>';
+                    return;
+                }
+
+                list.innerHTML = records.map(r => {
+                    const scoreClass = r.fitScore >= 80 ? 'score-high' : r.fitScore >= 60 ? 'score-mid' : 'score-low';
+                    const date = new Date(r.createdAt).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    return `
+                        <a class="history-card" href="/?view=${r.id}">
+                            <div class="history-score ${scoreClass}">${Math.round(r.fitScore)}%</div>
+                            <div class="history-info">
+                                <div class="history-name">${r.candidateName}</div>
+                                <div class="history-role">${r.role}</div>
+                            </div>
+                            <span class="history-date">${date}</span>
+                            <span class="history-arrow">→</span>
+                        </a>`;
+                }).join('');
+            } catch (err) {
+                list.innerHTML = '<div class="history-empty">Lỗi tải lịch sử: ' + err.message + '</div>';
+            }
+        }
+
+        loadHistory();
+    </script>
+</body>
+
+</html>

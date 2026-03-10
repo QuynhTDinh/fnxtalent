@@ -28,6 +28,10 @@
             "dest": "/dashboard/$1"
         },
         {
+            "src": "/history",
+            "dest": "/dashboard/history.html"
+        },
+        {
             "src": "/",
             "dest": "/dashboard/wizard.html"
         }
