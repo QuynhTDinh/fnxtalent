@@ -1,0 +1,91 @@
+{
+    "title": "Khảo sát nhu cầu phát triển nghề nghiệp",
+    "description": "Khảo sát nhằm tìm hiểu mức độ hài lòng, định hướng phát triển, và nhu cầu đào tạo của người đi làm.",
+    "category": "working_pro",
+    "estimated_time": "5-8 phút",
+    "sections": [
+        {
+            "title": "Thông tin nghề nghiệp",
+            "description": "",
+            "questions": [
+                {
+                    "text": "Anh/Chị có bao nhiêu năm kinh nghiệm làm việc?",
+                    "type": "RADIO",
+                    "options": [
+                        "Dưới 1 năm",
+                        "1-3 năm",
+                        "3-5 năm",
+                        "5-10 năm",
+                        "Trên 10 năm"
+                    ],
+                    "required": true,
+                    "helpText": ""
+                },
+                {
+                    "text": "Vị trí hiện tại của Anh/Chị?",
+                    "type": "RADIO",
+                    "options": [
+                        "Nhân viên",
+                        "Trưởng nhóm / Team Lead",
+                        "Quản lý / Manager",
+                        "Giám đốc / Director",
+                        "Tự kinh doanh"
+                    ],
+                    "required": true,
+                    "helpText": ""
+                }
+            ]
+        },
+        {
+            "title": "Mức độ hài lòng",
+            "description": "Đánh giá về công việc hiện tại",
+            "questions": [
+                {
+                    "text": "Anh/Chị hài lòng với công việc hiện tại ở mức nào?",
+                    "type": "SCALE",
+                    "options": [
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5"
+                    ],
+                    "required": true,
+                    "helpText": "1 = Rất không hài lòng, 5 = Rất hài lòng"
+                },
+                {
+                    "text": "Anh/Chị có dự định thay đổi công việc trong 12 tháng tới?",
+                    "type": "RADIO",
+                    "options": [
+                        "Chắc chắn sẽ đổi",
+                        "Đang cân nhắc",
+                        "Chưa có ý định",
+                        "Không"
+                    ],
+                    "required": true,
+                    "helpText": ""
+                }
+            ]
+        },
+        {
+            "title": "Nhu cầu phát triển",
+            "description": "",
+            "questions": [
+                {
+                    "text": "Anh/Chị muốn phát triển kỹ năng nào nhất?",
+                    "type": "CHECKBOX",
+                    "options": [
+                        "Kỹ năng lãnh đạo",
+                        "Kỹ năng kỹ thuật / chuyên môn",
+                        "Kỹ năng giao tiếp",
+                        "Kỹ năng quản lý dự án",
+                        "Ngoại ngữ",
+                        "Khác"
+                    ],
+                    "required": true,
+                    "helpText": "Có thể chọn nhiều"
+                }
+            ]
+        }
+    ]
+}

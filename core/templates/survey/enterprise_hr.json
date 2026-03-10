@@ -1,0 +1,87 @@
+{
+    "title": "Khảo sát nhu cầu tuyển dụng nhân sự 2026",
+    "description": "Khảo sát nhằm tìm hiểu nhu cầu nhân sự, thách thức tuyển dụng, và kỳ vọng năng lực của doanh nghiệp.",
+    "category": "enterprise_hr",
+    "estimated_time": "7-10 phút",
+    "sections": [
+        {
+            "title": "Thông tin doanh nghiệp",
+            "description": "",
+            "questions": [
+                {
+                    "text": "Quy mô doanh nghiệp của Anh/Chị?",
+                    "type": "RADIO",
+                    "options": [
+                        "Dưới 50 nhân sự",
+                        "50-200 nhân sự",
+                        "200-500 nhân sự",
+                        "500-1000 nhân sự",
+                        "Trên 1000 nhân sự"
+                    ],
+                    "required": true,
+                    "helpText": ""
+                },
+                {
+                    "text": "Ngành nghề hoạt động chính?",
+                    "type": "RADIO",
+                    "options": [
+                        "Công nghệ thông tin",
+                        "Sản xuất / Chế biến",
+                        "Tài chính / Bảo hiểm",
+                        "Bán lẻ / Thương mại",
+                        "Xây dựng / Bất động sản",
+                        "Dịch vụ",
+                        "Khác"
+                    ],
+                    "required": true,
+                    "helpText": ""
+                }
+            ]
+        },
+        {
+            "title": "Nhu cầu tuyển dụng",
+            "description": "Thông tin về nhu cầu nhân sự trong 6-12 tháng tới",
+            "questions": [
+                {
+                    "text": "Doanh nghiệp có nhu cầu tuyển dụng trong 6 tháng tới không?",
+                    "type": "RADIO",
+                    "options": [
+                        "Có, đang tuyển gấp",
+                        "Có, trong kế hoạch",
+                        "Chưa xác định",
+                        "Không"
+                    ],
+                    "required": true,
+                    "helpText": ""
+                },
+                {
+                    "text": "Nhóm vị trí cần tuyển?",
+                    "type": "CHECKBOX",
+                    "options": [
+                        "Nhân viên mới (fresher)",
+                        "Nhân viên có kinh nghiệm",
+                        "Quản lý cấp trung",
+                        "Quản lý cấp cao",
+                        "Chuyên gia / Tư vấn"
+                    ],
+                    "required": true,
+                    "helpText": "Có thể chọn nhiều"
+                },
+                {
+                    "text": "Thách thức lớn nhất trong tuyển dụng hiện tại?",
+                    "type": "CHECKBOX",
+                    "options": [
+                        "Thiếu ứng viên chất lượng",
+                        "Chi phí tuyển dụng cao",
+                        "Thời gian tuyển dài",
+                        "Ứng viên không phù hợp văn hóa",
+                        "Cạnh tranh lương thưởng",
+                        "Khác"
+                    ],
+                    "required": true,
+                    "helpText": ""
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,128 @@
+{
+    "title": "Khảo sát nhu cầu việc làm sinh viên 2026",
+    "description": "Khảo sát nhằm tìm hiểu kỳ vọng nghề nghiệp, kỹ năng sẵn sàng, và nhu cầu hỗ trợ việc làm của sinh viên sắp tốt nghiệp.",
+    "category": "student_career",
+    "estimated_time": "5-7 phút",
+    "sections": [
+        {
+            "title": "Thông tin cá nhân",
+            "description": "Giúp chúng tôi hiểu rõ hơn về bạn",
+            "questions": [
+                {
+                    "text": "Bạn đang/đã theo học tại trường nào?",
+                    "type": "TEXT",
+                    "options": [],
+                    "required": true,
+                    "helpText": ""
+                },
+                {
+                    "text": "Chuyên ngành của bạn?",
+                    "type": "RADIO",
+                    "options": [
+                        "Công nghệ thông tin",
+                        "Kinh tế / Tài chính",
+                        "Kỹ thuật / Công nghệ",
+                        "Y Dược",
+                        "Luật",
+                        "Ngôn ngữ / Sư phạm",
+                        "Khác"
+                    ],
+                    "required": true,
+                    "helpText": ""
+                },
+                {
+                    "text": "Bạn dự kiến tốt nghiệp vào thời gian nào?",
+                    "type": "RADIO",
+                    "options": [
+                        "Đã tốt nghiệp",
+                        "2026",
+                        "2027",
+                        "2028+"
+                    ],
+                    "required": true,
+                    "helpText": ""
+                }
+            ]
+        },
+        {
+            "title": "Kỳ vọng nghề nghiệp",
+            "description": "Định hướng và kỳ vọng của bạn sau khi ra trường",
+            "questions": [
+                {
+                    "text": "Bạn mong muốn làm việc trong lĩnh vực nào?",
+                    "type": "CHECKBOX",
+                    "options": [
+                        "Công nghệ / IT",
+                        "Tài chính / Ngân hàng",
+                        "Marketing / Truyền thông",
+                        "Sản xuất / Kỹ thuật",
+                        "Giáo dục",
+                        "Y tế",
+                        "Khác"
+                    ],
+                    "required": true,
+                    "helpText": "Có thể chọn nhiều"
+                },
+                {
+                    "text": "Loại hình công ty bạn ưu tiên?",
+                    "type": "RADIO",
+                    "options": [
+                        "Công ty Việt Nam",
+                        "Công ty nước ngoài (FDI)",
+                        "Startup",
+                        "Cơ quan Nhà nước",
+                        "Tự kinh doanh",
+                        "Không có ưu tiên"
+                    ],
+                    "required": true,
+                    "helpText": ""
+                },
+                {
+                    "text": "Mức lương kỳ vọng cho công việc đầu tiên?",
+                    "type": "RADIO",
+                    "options": [
+                        "Dưới 8 triệu",
+                        "8-12 triệu",
+                        "12-18 triệu",
+                        "18-25 triệu",
+                        "Trên 25 triệu"
+                    ],
+                    "required": true,
+                    "helpText": ""
+                }
+            ]
+        },
+        {
+            "title": "Kỹ năng & Năng lực",
+            "description": "Tự đánh giá kỹ năng của bạn",
+            "questions": [
+                {
+                    "text": "Bạn tự đánh giá kỹ năng chuyên môn (hard skills) ở mức nào?",
+                    "type": "SCALE",
+                    "options": [
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5"
+                    ],
+                    "required": true,
+                    "helpText": "1 = Mới bắt đầu, 5 = Thành thạo"
+                },
+                {
+                    "text": "Bạn tự đánh giá kỹ năng mềm (giao tiếp, làm việc nhóm) ở mức nào?",
+                    "type": "SCALE",
+                    "options": [
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5"
+                    ],
+                    "required": true,
+                    "helpText": "1 = Cần cải thiện, 5 = Rất tốt"
+                }
+            ]
+        }
+    ]
+}

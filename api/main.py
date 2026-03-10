@@ -102,6 +102,23 @@ class HistoryRecord(BaseModel):
     jdResult: dict
     matchResult: dict
 
+
+# ── Survey Agents ──
+from core.agents.survey_designer_agent import SurveyDesignerAgent
+from core.agents.survey_evaluator_agent import SurveyEvaluatorAgent
+
+_survey_designer = SurveyDesignerAgent(llm_provider="gemini")
+_survey_evaluator = SurveyEvaluatorAgent(llm_provider="gemini")
+
+
+class SurveyRequest(BaseModel):
+    category: str = "student_career"  # student_career | enterprise_hr | working_pro
+    objective: str = "Khảo sát chung"
+    target_audience: Optional[str] = None
+    num_questions: int = 15
+    additional_context: Optional[str] = None
+
+
 # ── Routes ──
 
 @app.get("/api/health")
@@ -245,6 +262,74 @@ async def get_history(record_id: str):
         raise HTTPException(status_code=404, detail="Record not found")
     return record
 
+
+# ── Survey Routes ──
+
+@app.post("/api/survey/design")
+async def design_survey(request: SurveyRequest):
+    """Design a survey with auto-evaluation and redesign loop."""
+    try:
+        brief = {
+            "category": request.category,
+            "objective": request.objective,
+            "target_audience": request.target_audience or "",
+            "num_questions": request.num_questions,
+            "additional_context": request.additional_context or "",
+        }
+
+        # Step 1: Design
+        blueprint = _survey_designer.design(brief)
+
+        # Step 2: Evaluate
+        evaluation = _survey_evaluator.evaluate(blueprint)
+
+        # Step 3: Redesign if needed (max 2 attempts)
+        attempts = 1
+        while not evaluation.get("passed", False) and attempts < 3:
+            blueprint = _survey_designer.redesign(brief, evaluation)
+            evaluation = _survey_evaluator.evaluate(blueprint)
+            attempts += 1
+
+        return {
+            "blueprint": blueprint,
+            "evaluation": evaluation,
+            "attempts": attempts,
+            "status": "approved" if evaluation.get("passed") else "needs_review",
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/survey/evaluate")
+async def evaluate_survey(blueprint: dict):
+    """Evaluate an existing survey blueprint."""
+    try:
+        evaluation = _survey_evaluator.evaluate(blueprint)
+        return evaluation
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/survey/templates")
+async def list_survey_templates():
+    """List available survey templates."""
+    import glob
+    templates_dir = os.path.join(PROJECT_ROOT, "core", "templates", "survey")
+    templates = []
+    for path in sorted(glob.glob(os.path.join(templates_dir, "*.json"))):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                templates.append({
+                    "id": os.path.basename(path).replace(".json", ""),
+                    "title": data.get("title", ""),
+                    "category": data.get("category", ""),
+                    "estimated_time": data.get("estimated_time", ""),
+                    "total_questions": sum(len(s.get("questions", [])) for s in data.get("sections", [])),
+                })
+        except Exception:
+            continue
+    return templates
 
 # ── Serve Dashboard (local dev only — Vercel handles static via vercel.json) ──
 
