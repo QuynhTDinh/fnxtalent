@@ -1,0 +1,392 @@
+# ══════════════════════════════════════════════════════════════════
+# FNX Competency Taxonomy v2.3 (CFS 2.1)
+# Hybrid Architecture: ASK (Primary) × Katz (Career Path)
+#
+# Layer 1 (ASK):  Knowledge / Skill / Attitude  → HR, training, IDs
+# Layer 2 (Katz): Technical / Interpersonal / Conceptual → career path, radar
+#
+# v2.2 changes:
+#   - K: 2→3 (added Nghiệp vụ kỹ thuật from S1, Công cụ & Công nghệ from S2)
+#   - S: 5→5 (added Phối hợp & Giao việc, moved Tư duy hệ thống from K)
+#   - A: 3→3 (renamed Chủ động - Cải tiến, absorbed "Đổi mới" from S2)
+#   - Total: 10→11 competencies, 50→55 level descriptions
+# ══════════════════════════════════════════════════════════════════
+
+meta:
+  version: "2.3.0"
+  status: "DRAFT — Pending Team Review"
+  backbone: "ASK Framework × Katz Three-Skill Model (1955) × Bloom's Taxonomy"
+  sources:
+    - "Building 21 Framework (SCI, MATH, WF, ELA, HOS, PD)"
+    - "ABB Values in Action 2016 (VP1–VP5)"
+    - "ABB Core Values 2024 (Courage, Care, Curiosity, Collaboration)"
+  target_audience:
+    - "Kỹ sư Fresher"
+    - "Kỹ sư Junior"
+    - "Quản lý dự án"
+    - "Chuyên gia"
+  context: "Môi trường kỹ thuật (hóa dầu, sản xuất, công nghiệp)"
+
+# ── Thang đo 6 cấp độ (Bloom's Taxonomy) ──
+levels:
+  1:
+    name: "Foundational"
+    vi: "Nền tảng"
+    bloom: "Remember / Understand"
+    abb_role: "Individual Contributor (basic)"
+    experience: "0–1 năm"
+    description: "Hiểu biết sơ bộ, cần hướng dẫn chi tiết khi thực hiện."
+    assessment_method: "CV screening + Technical test cơ bản"
+  2:
+    name: "Developing"
+    vi: "Đang phát triển"
+    bloom: "Apply"
+    abb_role: "Individual Contributor (proficient)"
+    experience: "1–3 năm"
+    description: "Thực hiện nhiệm vụ cơ bản, cần giám sát ít hơn."
+    assessment_method: "CV + Portfolio review"
+  3:
+    name: "Proficient"
+    vi: "Thành thạo"
+    bloom: "Analyze"
+    abb_role: "Team Leader / Specialist"
+    experience: "3–5 năm"
+    description: "Đạt chuẩn doanh nghiệp, thực hiện độc lập tốt."
+    assessment_method: "Behavioral interview + Case study"
+  4:
+    name: "Advanced"
+    vi: "Nâng cao"
+    bloom: "Evaluate"
+    abb_role: "Management / Senior Specialist"
+    experience: "5–8 năm"
+    description: "Giải quyết vấn đề phức tạp, tư duy hệ thống mạnh."
+    assessment_method: "Case study + 360° feedback"
+  5:
+    name: "Mastery"
+    vi: "Bậc thầy"
+    bloom: "Create"
+    abb_role: "Leadership / Expert"
+    experience: "8+ năm"
+    description: "Chuyên gia đầu ngành, dẫn dắt và bảo chứng."
+    assessment_method: "Expert panel review + Track record"
+
+  6:
+    name: "Pioneer"
+    vi: "Tiên phong"
+    bloom: "Create / Innovate"
+    abb_role: "Industry Leader / Visionary"
+    experience: "12+ năm"
+    description: "Kiến tạo tiêu chuẩn mới cho toàn ngành, định hình tương lai."
+    assessment_method: "Track record chuyên gia + Industry recognition"
+
+# ══════════════════════════════════════════════════════════════════
+# LAYER 1: ASK GROUPS (Primary)
+# ══════════════════════════════════════════════════════════════════
+
+ask_groups:
+
+  # ────────────────────────────────────────────────
+  # K — KNOWLEDGE (Kiến thức) — 3 competencies
+  # "Người này BIẾT GÌ & VẬN DỤNG ĐƯỢC GÌ?"
+  # ────────────────────────────────────────────────
+  - id: "K"
+    name: "Knowledge — Kiến thức"
+    vi: "Kiến thức"
+    description: "Nền tảng lý thuyết, nghiệp vụ chuyên môn, và công nghệ cần thiết. Đào tạo bằng learning, certification, OJT."
+    training_method: "Đào tạo lý thuyết, e-learning, OJT, certification, mentoring"
+    color: "#0071e3"
+    competencies:
+
+      - id: "K1"
+        name: "Kiến thức chuyên ngành"
+        en: "Domain Knowledge"
+        katz_zone: "TECHNICAL"
+        description: "Nắm vững khái niệm, nguyên lý cốt lõi của lĩnh vực chuyên môn. Áp dụng vào công việc thực tế."
+        source: "Building 21 SCI + MATH + SS"
+        levels:
+          1: "Hiểu biết cơ bản về khái niệm, thuật ngữ nền tảng. Nhận diện và mô tả lại nguyên lý cơ bản nhưng chưa tự vận dụng. Cần hướng dẫn chi tiết."
+          2: "Vận dụng kiến thức cơ bản xử lý công việc theo hướng dẫn. Giải thích mối liên hệ giữa các khái niệm. Cần kèm cặp thường xuyên."
+          3: "Chủ động phân tích, đề xuất giải pháp dựa trên kiến thức. Phân biệt, so sánh các cách tiếp cận và lựa chọn phương án phù hợp."
+          4: "Đánh giá các đề xuất, lựa chọn giải pháp hiệu quả nhất dựa trên kiến thức chuyên sâu. Đánh giá tính đúng đắn và hiệu quả phương pháp."
+          5: "Sáng tạo phương pháp mới dựa trên kiến thức cốt lõi. Đóng góp phát triển kiến thức chuyên ngành. Đào tạo và chia sẻ cho tổ chức."
+          6: "Tiên phong nghiên cứu và thiết lập nền tảng lý thuyết mới cho chuyên ngành. Cố vấn cấp quốc gia/quốc tế. Định hình chuẩn mực tri thức cho toàn ngành."
+
+      - id: "K2"
+        name: "Kiến thức & Nghiệp vụ kỹ thuật"
+        en: "Technical Practice & Procedures"
+        katz_zone: "TECHNICAL"
+        description: "Hiểu và vận dụng quy trình, tiêu chuẩn, phương pháp kỹ thuật trong thiết kế, vận hành, và bảo trì hệ thống."
+        source: "Building 21 WF"
+        levels:
+          1: "Hiểu quy trình kỹ thuật cơ bản, biết tra cứu tài liệu hướng dẫn và SOP. Thực hiện tác vụ đơn giản dưới giám sát trực tiếp."
+          2: "Nắm vững quy trình nghiệp vụ trong phạm vi công việc. Nhận diện lỗi thường gặp và xử lý theo quy trình. Bắt đầu tích lũy kinh nghiệm thực tế."
+          3: "Am hiểu sâu quy trình kỹ thuật, áp dụng đúng tiêu chuẩn chất lượng. Thiết kế giải pháp kỹ thuật rõ ràng. Output đạt chuẩn doanh nghiệp."
+          4: "Thành thạo đa quy trình, đánh giá chất lượng đầu ra cho nhóm. Review thiết kế và output kỹ thuật của đồng nghiệp. Tối ưu hóa hiệu năng hệ thống."
+          5: "Chuyên gia nghiệp vụ kỹ thuật: xây dựng quy trình, đặt chuẩn cho tổ chức. Thiết kế giải pháp quy mô lớn. Đào tạo nghiệp vụ cho đội ngũ."
+          6: "Thiết kế các quy chuẩn, tiêu chuẩn kỹ thuật cấp quốc gia/ngành. Đổi mới hoàn toàn quy trình vận hành lõi. Là người bảo chứng cao nhất."
+
+      - id: "K3"
+        name: "Công cụ & Công nghệ"
+        en: "Tools & Technology"
+        katz_zone: "TECHNICAL"
+        description: "Hiểu và sử dụng thành thạo công cụ, phần mềm, và công nghệ phục vụ công việc chuyên môn."
+        source: "Building 21 WF + ABB VP3"
+        levels:
+          1: "Sử dụng công cụ cơ bản (email, office, chat). Cần hướng dẫn khi dùng phần mềm chuyên dụng."
+          2: "Thành thạo công cụ phổ biến trong chuyên ngành. Tự học tính năng mới. Biết sử dụng hệ thống quản lý nội bộ."
+          3: "Thành thạo nhiều công cụ chuyên sâu, tối ưu workflow cá nhân. Đề xuất công cụ mới cho team. Hiểu hệ sinh thái công nghệ trong ngành."
+          4: "Chuyên gia hệ sinh thái công cụ. Đào tạo người khác sử dụng. Đánh giá ROI công nghệ. Thiết kế automation và pipeline."
+          5: "Định hướng chiến lược công nghệ cho tổ chức. Đánh giá và pilot công nghệ mới. Hiểu xu hướng digital transformation trong ngành."
+          6: "Thiết kế nền tảng mới thay thế công nghệ cũ. Định hình xu hướng chuyển đổi số toàn cầu cho ngành công nghiệp nặng."
+
+  # ────────────────────────────────────────────────
+  # S — SKILL (Kỹ năng) — 5 competencies
+  # "Người này LÀM ĐƯỢC GÌ?"
+  # ────────────────────────────────────────────────
+  - id: "S"
+    name: "Skill — Kỹ năng"
+    vi: "Kỹ năng"
+    description: "Năng lực thực hành: giao tiếp, phân tích, quản lý, tư duy và phối hợp. Đào tạo bằng thực hành và dự án thực tế."
+    training_method: "Workshop, project-based learning, simulation, role-play, case study"
+    color: "#ff9500"
+    competencies:
+
+      - id: "S1"
+        name: "Giao tiếp kỹ thuật"
+        en: "Technical Communication"
+        katz_zone: "INTERPERSONAL"
+        description: "Truyền đạt thông tin kỹ thuật rõ ràng, thuyết phục, phù hợp đối tượng và ngữ cảnh."
+        source: "Building 21 ELA"
+        levels:
+          1: "Giao tiếp cơ bản: email, chat, báo cáo đơn giản. Trình bày ý kiến trong nhóm nhỏ. Viết tài liệu theo template."
+          2: "Giao tiếp rõ ràng có cấu trúc. Trình bày trước nhóm 5–10 người. Tóm tắt thông tin kỹ thuật phức tạp thành ngôn ngữ dễ hiểu."
+          3: "Giao tiếp thuyết phục, trình bày trước khách hàng hoặc quản lý cấp cao. Viết tài liệu kỹ thuật chuyên nghiệp (technical spec, RFC)."
+          4: "Giao tiếp chiến lược: truyền tải tầm nhìn, dẫn dắt thay đổi. Thuyết trình trước C-level. Đào tạo kỹ năng giao tiếp cho team."
+          5: "Giao tiếp tầm thought leader: public speaking, đại diện thương hiệu kỹ thuật. Định hình narrative kỹ thuật của tổ chức."
+          6: "Khởi xướng và dẫn dắt các hội thảo chuyên ngành tầm quốc tế. Nhà lãnh đạo tư tưởng (thought leader) được công nhận rộng rãi."
+
+      - id: "S2"
+        name: "Phân tích & Giải quyết vấn đề"
+        en: "Analysis & Problem Solving"
+        katz_zone: "CONCEPTUAL"
+        description: "Nhận diện, phân tích vấn đề và đưa ra giải pháp bằng tư duy logic và dữ liệu."
+        source: "Building 21 MATH + HOS"
+        levels:
+          1: "Nhận diện vấn đề khi được chỉ ra. Phân tích cơ bản theo quy trình có sẵn. Cần hỗ trợ đặt câu hỏi đúng."
+          2: "Tự phát hiện vấn đề đơn giản, thu thập dữ liệu và phân tích theo khuôn mẫu. Đề xuất 1–2 phương án giải quyết."
+          3: "Phân tích vấn đề phức tạp đa chiều, xác định nguyên nhân gốc rễ (root cause). Thực thi giải pháp độc lập và đánh giá kết quả."
+          4: "Giải quyết vấn đề hệ thống, liên bộ phận. Thiết kế quy trình phân tích cho team. Tư duy phản biện sắc bén."
+          5: "Giải quyết vấn đề chiến lược tầm tổ chức. Xây dựng framework phân tích mới. Đào tạo tư duy giải quyết vấn đề."
+          6: "Dự đoán và giải quyết các bài toán chưa từng có tiền lệ. Đưa ra các mô hình phân tích đột phá thay đổi cục diện ngành."
+
+      - id: "S3"
+        name: "Quản lý & Lên kế hoạch"
+        en: "Planning & Management"
+        katz_zone: "CONCEPTUAL"
+        description: "Lập kế hoạch, tổ chức, theo dõi và hoàn thành công việc đúng hạn và chất lượng."
+        source: "Building 21 WF"
+        levels:
+          1: "Thực hiện theo kế hoạch được giao. Quản lý thời gian cá nhân ở mức cơ bản. Báo cáo tiến độ khi được hỏi."
+          2: "Tự lập kế hoạch cá nhân, sắp xếp ưu tiên. Phối hợp với 1–2 người hoàn thành task. Theo dõi deadline chủ động."
+          3: "Quản lý dự án nhỏ–trung từ đầu đến cuối. Lập kế hoạch, phân bổ nguồn lực, theo dõi milestone. Quản lý rủi ro cơ bản."
+          4: "Quản lý nhiều dự án song song hoặc dự án phức tạp. Xây dựng quy trình quản lý cho team. Stakeholder management."
+          5: "Quản lý portfolio dự án chiến lược. Thiết kế hệ thống PMO cho tổ chức. Định hướng lộ trình sản phẩm/kỹ thuật."
+          6: "Định hình tầm nhìn và mô hình phát triển dự án vĩ mô. Kiến tạo các nền tảng/cấu trúc quản lý mới áp dụng ở cấp độ tập đoàn/quốc tế."
+
+      - id: "S4"
+        name: "Tư duy hệ thống"
+        en: "Systems Thinking"
+        katz_zone: "CONCEPTUAL"
+        description: "Nhìn nhận vấn đề trong bối cảnh tổng thể, hiểu mối liên hệ giữa các phần tử, dự đoán tác động."
+        source: "Building 21 HOS + ABB VP1"
+        levels:
+          1: "Nhận biết công việc của mình nằm trong quy trình lớn hơn. Hiểu input/output cơ bản của role mình."
+          2: "Hiểu tác động công việc mình lên upstream/downstream. Nhận ra sự phụ thuộc giữa các module/team."
+          3: "Tư duy end-to-end: hiểu toàn bộ value chain. Đề xuất cải tiến xuyên quy trình. Anticipate side effects."
+          4: "Tư duy kiến trúc: thiết kế hệ thống có tính mở rộng, bảo trì. Đánh giá trade-offs chiến lược. Kết nối kỹ thuật–kinh doanh."
+          5: "Tư duy chiến lược tầm tổ chức. Định hình roadmap kỹ thuật dài hạn. Dự đoán xu hướng và điều chỉnh chiến lược."
+          6: "Thiết kế hệ sinh thái tổng thể. Thấu hiểu quy luật thị trường, công nghệ và con người để kiến tạo luật chơi mới cho ngành."
+
+      - id: "S5"
+        name: "Phối hợp & Giao việc"
+        en: "Coordination & Delegation"
+        katz_zone: "INTERPERSONAL"
+        description: "Năng lực điều phối công việc nhóm, phân chia nhiệm vụ, theo dõi tiến độ và đảm bảo kết quả chung."
+        source: "ABB VP5 + Building 21 WF"
+        levels:
+          1: "Hoàn thành phần việc cá nhân trong nhóm đúng hạn. Tham gia họp nhóm và báo cáo tiến độ khi được yêu cầu."
+          2: "Phối hợp với 2–3 đồng nghiệp hoàn thành task chung. Chủ động chia sẻ tiến độ, phản hồi kịp thời. Biết nhờ hỗ trợ đúng lúc."
+          3: "Điều phối nhóm 3–5 người hoàn thành deliverable. Phân chia công việc rõ ràng, theo dõi milestone. Tổng hợp và review output nhóm."
+          4: "Giao việc hiệu quả theo năng lực thành viên. Quản lý cross-functional team. Điều phối nhiều nhóm làm việc song song."
+          5: "Thiết kế cơ cấu team và phân vai tầm tổ chức. Xây dựng quy trình phối hợp xuyên phòng ban. Mentor team leads."
+          6: "Xây dựng các mạng lưới liên minh đối tác tầm toàn cầu. Phát triển và đào tạo thế hệ lãnh đạo kế cận xuất chúng (C-level)."
+
+  # ────────────────────────────────────────────────
+  # A — ATTITUDE (Phẩm chất) — 3 competencies
+  # "Người này HÀNH XỬ thế nào?"
+  # ────────────────────────────────────────────────
+  - id: "A"
+    name: "Attitude — Phẩm chất"
+    vi: "Phẩm chất"
+    description: "Thái độ, giá trị và phẩm chất nghề nghiệp. Phát triển bằng coaching, mentoring, và trải nghiệm."
+    training_method: "Coaching, mentoring, 360° feedback, culture building, team retreat"
+    color: "#af52de"
+    competencies:
+
+      - id: "A1"
+        name: "Chủ động - Cải tiến"
+        en: "Proactivity & Continuous Improvement"
+        katz_zone: "CONCEPTUAL"
+        description: "Chủ động hành động, không chờ được yêu cầu. Luôn tìm cách cải tiến quy trình và nâng cao chất lượng."
+        source: "ABB VP4 (Ownership) + ABB VP3 (Innovation)"
+        levels:
+          1: "Nhận trách nhiệm task được giao, hoàn thành đúng hạn. Hỏi khi gặp khó. Không đổ lỗi cho người khác."
+          2: "Chủ động nhận thêm việc. Tự đặt mục tiêu cao hơn yêu cầu. Đề xuất cải tiến nhỏ trong phạm vi công việc cá nhân."
+          3: "Chủ động hoàn toàn, chỉ cần giám sát kết quả. Dẫn dắt delivery nhóm. Đề xuất và thực hiện cải tiến quy trình cho team."
+          4: "Chịu trách nhiệm kết quả cả team/dự án. Thiết lập văn hóa cải tiến liên tục. Đánh giá ROI các đề xuất đổi mới."
+          5: "Chịu trách nhiệm kết quả tầm tổ chức. Xây dựng hệ thống quản lý cải tiến (Kaizen, Lean). Truyền cảm hứng đổi mới cho toàn bộ."
+          6: "Thiết lập triết lý cải tiến liên tục cho toàn bộ hệ sinh thái đối tác. Trở thành biểu tượng của sự đổi mới tiên phong."
+
+      - id: "A2"
+        name: "Hợp tác - Tin tưởng"
+        en: "Collaboration & Trust"
+        katz_zone: "INTERPERSONAL"
+        description: "Sẵn sàng hợp tác, xây dựng niềm tin, tạo môi trường team đáng tin cậy."
+        source: "ABB VP5 + ABB 4C Collaboration"
+        levels:
+          1: "Lắng nghe và góp ý tích cực trong nhóm nhỏ. Chia sẻ thông tin khi được yêu cầu. Hoàn thành đúng cam kết."
+          2: "Chủ động trao đổi, thấu hiểu đồng nghiệp. Chia sẻ kiến thức. Hỗ trợ thành viên khi cần. Nhận và cho feedback đúng cách."
+          3: "Lan tỏa năng lượng tích cực, xây dựng niềm tin. Hợp tác cross-functional hiệu quả. Giải quyết mâu thuẫn nhóm."
+          4: "Xây dựng đội ngũ hiệu suất cao. Kết nối xuyên bộ phận. Tạo psychological safety. Coaching thành viên mới."
+          5: "Văn hóa cộng tác tầm tổ chức. Phá bỏ silos. Xây dựng platform chia sẻ kiến thức toàn công ty."
+          6: "Tạo lập niềm tin hệ thống phi biên giới. Viết lại văn hóa hợp tác đa quốc gia, đối tác chiến lược không thể thiếu."
+
+      - id: "A3"
+        name: "Quan tâm - Hỗ trợ"
+        en: "Care & Support"
+        katz_zone: "INTERPERSONAL"
+        description: "Quan tâm con người, cộng đồng. Đối xử công bằng, bao dung, hỗ trợ lẫn nhau."
+        source: "ABB 4C Care"
+        levels:
+          1: "Tôn trọng thời gian và công việc đồng nghiệp. Lịch sự, thân thiện. Ý thức tác động hành vi lên người khác."
+          2: "Chủ động hỗ trợ đồng nghiệp gặp khó. Quan tâm sức khỏe tinh thần nhóm. Sẵn sàng chia sẻ kiến thức."
+          3: "Tạo môi trường supportive. Lắng nghe sâu, empathize. Mentoring junior. Cân bằng wellbeing và hiệu suất."
+          4: "Thiết kế chính sách wellbeing bộ phận. D&I champion. Phát triển career path cho thành viên team."
+          5: "Văn hóa care tầm tổ chức. Tích hợp wellbeing vào chiến lược HR. Giá trị human-first xuyên suốt."
+          6: "Cống hiến vì cộng đồng và phát triển con người vĩ mô. Trở thành hình mẫu nhân chứng cho triết lý phát triển bền vững ESG."
+
+# ══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════
+# LAYER 3: T-L-D MAPPING (CFS v2.1)
+# Đóng vai trò là cầu nối tính điểm mới, ánh xạ sang Radar chart cũ
+# ══════════════════════════════════════════════════════════════════
+
+tld_zones:
+  TECHNIQUE:
+    name: "Technique (Kỹ thuật)"
+    vi: "Kỹ thuật"
+    description: "Tri thức thực chứng và khả năng thao tác (T=K+S)"
+    formula: "K + S"
+    ui_alias: "TECHNICAL"
+    color: "#0071e3"
+    competency_ids: ["K1", "K2", "K3", "S2"]
+  LANGUAGE:
+    name: "Language (Ngoại ngữ & Giao tiếp)"
+    vi: "Giao tiếp"
+    description: "Ngoại ngữ, giao tiếp, sự hợp tác (L=S+A)"
+    formula: "S + A"
+    ui_alias: "INTERPERSONAL"
+    color: "#ff9500"
+    competency_ids: ["S1", "S5", "A2", "A3"]
+  DIGITAL:
+    name: "Digital (Kỹ năng số & Thích nghi)"
+    vi: "Thích ứng số"
+    description: "Thái độ linh hoạt, kỹ năng quản lý và làm việc (D=A+S+K)"
+    formula: "A + S + K"
+    ui_alias: "CONCEPTUAL"
+    color: "#af52de"
+    competency_ids: ["S3", "S4", "A1"]
+
+# LAYER 4: KATZ MAPPING (LEGACY COMPATIBILITY)
+# ══════════════════════════════════════════════════════════════════
+
+katz_zones:
+  TECHNICAL:
+    name: "Technical"
+    vi: "Kỹ thuật"
+    description: "Xây dựng sản phẩm, vận hành hệ thống"
+    color: "#0071e3"
+    competency_ids: ["K1", "K2", "K3"]
+  INTERPERSONAL:
+    name: "Interpersonal"
+    vi: "Con người"
+    description: "Giao tiếp, phối hợp, quan tâm"
+    color: "#ff9500"
+    competency_ids: ["S1", "S5", "A2", "A3"]
+  CONCEPTUAL:
+    name: "Conceptual"
+    vi: "Tư duy"
+    description: "Phân tích, chiến lược, cải tiến"
+    color: "#af52de"
+    competency_ids: ["S2", "S3", "S4", "A1"]
+
+# ══════════════════════════════════════════════════════════════════
+# ROLE PROFILES
+# ══════════════════════════════════════════════════════════════════
+
+role_profiles:
+  fresher:
+    name: "Kỹ sư Fresher"
+    en: "Fresher Engineer"
+    description: "Mới tốt nghiệp, tập trung học kiến thức và kỹ năng nền tảng."
+    expected_level: "1–2"
+    ask_weights:
+      K: 35
+      S: 50
+      A: 15
+    katz_weights:
+      TECHNICAL: 70
+      INTERPERSONAL: 20
+      CONCEPTUAL: 10
+
+  junior:
+    name: "Kỹ sư Junior"
+    en: "Junior Engineer"
+    description: "1–3 năm kinh nghiệm, bắt đầu tự chủ và xây dựng phẩm chất nghề nghiệp."
+    expected_level: "2–3"
+    ask_weights:
+      K: 30
+      S: 40
+      A: 30
+    katz_weights:
+      TECHNICAL: 55
+      INTERPERSONAL: 25
+      CONCEPTUAL: 20
+
+  pm:
+    name: "Quản lý dự án"
+    en: "Project Manager"
+    description: "Điều phối đội nhóm, quản lý delivery, giao tiếp stakeholder."
+    expected_level: "3–4"
+    ask_weights:
+      K: 15
+      S: 40
+      A: 45
+    katz_weights:
+      TECHNICAL: 25
+      INTERPERSONAL: 35
+      CONCEPTUAL: 40
+
+  expert:
+    name: "Chuyên gia"
+    en: "Expert / Specialist"
+    description: "Chuyên sâu kỹ thuật, dẫn dắt về mặt chuyên môn, bảo chứng năng lực."
+    expected_level: "4–6"
+    ask_weights:
+      K: 30
+      S: 35
+      A: 35
+    katz_weights:
+      TECHNICAL: 40
+      INTERPERSONAL: 20
+      CONCEPTUAL: 40

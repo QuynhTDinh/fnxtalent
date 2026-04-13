@@ -18,12 +18,12 @@ Defines the actual DAG structure:
     └──────────────────┘
 """
 
-import os
 from core.agents.assessment_agent import AssessmentAgent
 from core.agents.jd_decoder_agent import JDDecoderAgent
 from core.agents.matching_agent import MatchingAgent
 from core.pipeline.dag_engine import DAGEngine
 from core.store.base_store import StateStore
+from core.taxonomy import get_taxonomy
 
 
 def build_fnx_pipeline(store: StateStore,
@@ -84,12 +84,12 @@ def build_fnx_pipeline(store: StateStore,
         if len(reqs) == 0:
             issues.append("JD decode returned 0 requirements")
 
-        # Check 2: Valid levels (1-5)
+        # Check 2: Valid levels (1-6)
         for c in comps:
-            if not (1 <= c.get("level", 0) <= 5):
+            if not (1 <= c.get("level", 0) <= 6):
                 issues.append(f"Invalid level {c.get('level')} for {c.get('code')}")
         for r in reqs:
-            if not (1 <= r.get("target_level", 0) <= 5):
+            if not (1 <= r.get("target_level", 0) <= 6):
                 issues.append(f"Invalid target_level {r.get('target_level')} for {r.get('code')}")
 
         # Check 3: At least some overlap
@@ -125,6 +125,35 @@ def build_fnx_pipeline(store: StateStore,
 
         return result
 
+    # ── Node: TLD MAP (Logic Layer) ──
+    def tld_map_node(ctx):
+        """
+        Calculate TLD scores (Technique, Language, Digital) and bridge backwards to Katz for frontend compatibility.
+        """
+        assess_result = ctx["results"]["assess"]
+        comps = assess_result.get("competencies", [])
+        
+        # Load taxonomy to get tld mapping
+        tax = get_taxonomy()
+        tld_data = getattr(tax, "tld_zones", {})
+        if not tld_data and hasattr(tax, "data") and "tld_zones" in tax.data:
+            tld_data = tax.data["tld_zones"]
+            
+        tld_scores = {}
+        for zone_key, zone_info in tld_data.items():
+            valid_codes = zone_info.get("competency_ids", [])
+            levels = [c["level"] for c in comps if c.get("code") in valid_codes]
+            avg_score = sum(levels) / len(levels) if levels else 0.0
+            
+            # Save using the ui_alias (Katz) so frontend renders Technical/Interpersonal/Conceptual unchanged
+            ui_alias = zone_info.get("ui_alias", zone_key)
+            tld_scores[ui_alias] = round(avg_score, 2)
+            
+        # Attach back
+        assess_result["tld_scores"] = tld_scores
+        
+        return assess_result
+
     # ── Node: MATCH (Computation) ──
     def match_node(ctx):
         """Calculate fit score from validated results."""
@@ -159,9 +188,15 @@ def build_fnx_pipeline(store: StateStore,
     )
 
     engine.add_node(
+        name="tld_map",
+        handler=tld_map_node,
+        depends_on=["cross_validate"],
+    )
+
+    engine.add_node(
         name="match",
         handler=match_node,
-        depends_on=["cross_validate"],  # Only runs after validation passes
+        depends_on=["tld_map"],  # Runs after TLD mapping
         max_retries=1,
     )
 

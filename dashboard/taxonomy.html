@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FNX Talent Factory — Competency Taxonomy v2.2</title>
+    <meta name="description"
+        content="FNX Competency Taxonomy v2.2 — ASK × Katz Hybrid. 11 năng lực, lộ trình nghề nghiệp minh bạch.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* ═══ TAXONOMY v2.2 PAGE STYLES ═══ */
+        .taxonomy-layout {
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap-lg);
+            flex: 1
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: var(--gap-md)
+        }
+
+        .stat-card {
+            background: var(--bg-frosted);
+            border-radius: var(--radius-md);
+            padding: var(--gap-lg) var(--gap-md);
+            text-align: center;
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            box-shadow: var(--shadow-sm);
+            border: .5px solid rgba(0, 0, 0, .04);
+            transition: all var(--transition-base)
+        }
+
+        .stat-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px)
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            letter-spacing: -.03em;
+            line-height: 1;
+            font-variant-numeric: tabular-nums
+        }
+
+        .stat-label {
+            font-size: .65rem;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            font-weight: 600;
+            margin-top: 6px
+        }
+
+        .radar-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--gap-lg)
+        }
+
+        @media(max-width:900px) {
+            .radar-section {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .legend-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px
+        }
+
+        .legend-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            transition: background var(--transition-fast);
+            font-size: .82rem
+        }
+
+        .legend-row:hover {
+            background: rgba(0, 0, 0, .025)
+        }
+
+        .legend-dot-sm {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+            flex-shrink: 0
+        }
+
+        .legend-cid {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .72rem;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            width: 26px
+        }
+
+        .legend-cname {
+            color: var(--text-secondary);
+            font-weight: 500;
+            flex: 1
+        }
+
+        .legend-katz {
+            font-size: .6rem;
+            color: var(--text-caption);
+            font-weight: 500;
+            padding: 2px 6px;
+            border-radius: 100px;
+            border: 1px solid rgba(0, 0, 0, .06)
+        }
+
+        .legend-group-label {
+            font-size: .62rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            padding: 8px 10px 4px;
+            color: var(--text-caption)
+        }
+
+        .role-selector {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap
+        }
+
+        .role-btn {
+            padding: 5px 14px;
+            border-radius: 100px;
+            font-size: .72rem;
+            font-weight: 600;
+            border: 1.5px solid rgba(0, 0, 0, .08);
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            letter-spacing: .01em
+        }
+
+        .role-btn:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue)
+        }
+
+        .role-btn.active {
+            background: var(--accent-blue);
+            color: #fff;
+            border-color: var(--accent-blue)
+        }
+
+        .level-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0
+        }
+
+        .level-table thead th {
+            font-size: .6rem;
+            font-weight: 600;
+            color: var(--text-caption);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            padding: var(--gap-sm) var(--gap-md);
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, .06)
+        }
+
+        .level-table tbody td {
+            padding: 10px var(--gap-md);
+            font-size: .82rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(0, 0, 0, .03);
+            vertical-align: middle
+        }
+
+        .level-table tbody tr {
+            transition: background var(--transition-fast)
+        }
+
+        .level-table tbody tr:hover {
+            background: rgba(0, 113, 227, .03)
+        }
+
+        .bloom-tag {
+            display: inline-block;
+            font-size: .65rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 100px;
+            letter-spacing: .02em
+        }
+
+        .bloom-1 {
+            background: rgba(255, 59, 48, .08);
+            color: var(--level-1)
+        }
+
+        .bloom-2 {
+            background: rgba(255, 149, 0, .08);
+            color: var(--level-2)
+        }
+
+        .bloom-3 {
+            background: rgba(52, 199, 89, .08);
+            color: var(--level-3)
+        }
+
+        .bloom-4 {
+            background: rgba(88, 86, 214, .08);
+            color: var(--level-4)
+        }
+
+        .bloom-5 {
+            background: rgba(175, 82, 222, .08);
+            color: var(--level-5)
+        }
+
+        .career-path-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--gap-md)
+        }
+
+        @media(max-width:768px) {
+            .career-path-grid {
+                grid-template-columns: repeat(2, 1fr)
+            }
+        }
+
+        .career-card {
+            background: var(--bg-frosted);
+            border-radius: var(--radius-md);
+            padding: var(--gap-md);
+            backdrop-filter: saturate(180%) blur(20px);
+            box-shadow: var(--shadow-sm);
+            border: .5px solid rgba(0, 0, 0, .04);
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer
+        }
+
+        .career-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px)
+        }
+
+        .career-card.active::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple), var(--accent-teal))
+        }
+
+        .career-card h4 {
+            font-size: .85rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            letter-spacing: -.01em
+        }
+
+        .career-card .career-exp {
+            font-size: .68rem;
+            color: var(--text-caption);
+            margin-bottom: var(--gap-sm)
+        }
+
+        .career-bar {
+            margin-bottom: 6px
+        }
+
+        .career-bar:last-child {
+            margin-bottom: 0
+        }
+
+        .career-bar-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2px
+        }
+
+        .career-bar-label {
+            font-size: .66rem;
+            color: var(--text-secondary);
+            font-weight: 500
+        }
+
+        .career-bar-pct {
+            font-size: .66rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-variant-numeric: tabular-nums
+        }
+
+        .career-bar-track {
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(0, 0, 0, .05);
+            overflow: hidden
+        }
+
+        .career-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width .8s cubic-bezier(.34, 1.56, .64, 1)
+        }
+
+        .ask-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: var(--gap-md)
+        }
+
+        .ask-card {
+            background: var(--bg-frosted);
+            border-radius: var(--radius-lg);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            box-shadow: var(--shadow-md);
+            border: .5px solid rgba(0, 0, 0, .04);
+            overflow: hidden;
+            transition: all var(--transition-base);
+            animation: cardAppear .6s var(--transition-base) both
+        }
+
+        .ask-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-1px)
+        }
+
+        .ask-card-header {
+            padding: var(--gap-md) var(--gap-lg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(0, 0, 0, .04)
+        }
+
+        .ask-card-header .ask-title {
+            font-size: .9rem;
+            font-weight: 700;
+            letter-spacing: -.01em
+        }
+
+        .ask-card-header .ask-train {
+            font-size: .62rem;
+            color: var(--text-caption);
+            font-weight: 500;
+            max-width: 220px;
+            text-align: right;
+            line-height: 1.4
+        }
+
+        .ask-card-header .ask-count {
+            font-size: .65rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 100px;
+            background: rgba(0, 0, 0, .04);
+            color: var(--text-tertiary)
+        }
+
+        .comp-list {
+            padding: var(--gap-sm) var(--gap-md)
+        }
+
+        .comp-row {
+            border-radius: var(--radius-sm);
+            margin-bottom: 4px;
+            overflow: hidden
+        }
+
+        .comp-row:last-child {
+            margin-bottom: 0
+        }
+
+        .comp-row-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background var(--transition-fast);
+            border-radius: var(--radius-sm)
+        }
+
+        .comp-row-header:hover {
+            background: rgba(0, 0, 0, .025)
+        }
+
+        .comp-id-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .7rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 6px;
+            color: #fff;
+            flex-shrink: 0
+        }
+
+        .comp-row-name {
+            flex: 1;
+            font-size: .85rem;
+            font-weight: 500;
+            color: var(--text-primary)
+        }
+
+        .comp-katz-tag {
+            font-size: .58rem;
+            color: var(--text-caption);
+            font-weight: 500;
+            padding: 2px 6px;
+            border-radius: 100px;
+            border: 1px solid rgba(0, 0, 0, .06);
+            flex-shrink: 0
+        }
+
+        .comp-chevron {
+            font-size: .7rem;
+            color: var(--text-caption);
+            transition: transform var(--transition-fast)
+        }
+
+        .comp-row.open .comp-chevron {
+            transform: rotate(90deg)
+        }
+
+        .comp-detail {
+            display: none;
+            padding: 4px 12px 12px;
+            animation: slideDown .25s ease
+        }
+
+        .comp-row.open .comp-detail {
+            display: block
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-6px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .comp-desc {
+            font-size: .78rem;
+            color: var(--text-secondary);
+            line-height: 1.55;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, .02);
+            border-radius: var(--radius-sm);
+            margin-bottom: 8px
+        }
+
+        .comp-desc .comp-en {
+            display: block;
+            font-size: .68rem;
+            color: var(--text-caption);
+            font-style: italic;
+            margin-top: 4px
+        }
+
+        .level-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, .025);
+            font-size: .78rem
+        }
+
+        .level-row:last-child {
+            border-bottom: none
+        }
+
+        .level-row-text {
+            color: var(--text-secondary);
+            line-height: 1.5
+        }
+
+        .nav-links {
+            display: flex;
+            gap: var(--gap-md);
+            align-items: center
+        }
+
+        .nav-link {
+            font-size: .78rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all var(--transition-fast)
+        }
+
+        .nav-link:hover {
+            color: var(--accent-blue);
+            background: var(--accent-blue-light)
+        }
+
+        .nav-link.active {
+            color: var(--accent-blue);
+            font-weight: 600
+        }
+
+        .nav-sep {
+            color: var(--text-caption);
+            font-size: .7rem
+        }
+
+        .backbone-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: .65rem;
+            font-weight: 600;
+            background: rgba(88, 86, 214, .08);
+            color: var(--accent-indigo);
+            letter-spacing: .02em
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ambient-bg">
+        <div class="ambient-orb orb-1"></div>
+        <div class="ambient-orb orb-2"></div>
+        <div class="ambient-orb orb-3"></div>
+    </div>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo">
+                    <div class="logo-icon"><svg viewBox="0 0 32 32" fill="none">
+                            <path d="M16 2L28 8V24L16 30L4 24V8L16 2Z" stroke="currentColor" stroke-width="1.5"
+                                fill="none" />
+                            <path d="M16 2L16 30" stroke="currentColor" stroke-width="1" opacity=".4" />
+                            <path d="M4 8L28 24" stroke="currentColor" stroke-width="1" opacity=".4" />
+                            <path d="M28 8L4 24" stroke="currentColor" stroke-width="1" opacity=".4" />
+                            <circle cx="16" cy="16" r="3" fill="currentColor" opacity=".8" />
+                        </svg></div>
+                    <div class="logo-text"><span class="logo-name">FNX</span><span class="logo-sub">Talent
+                            Factory</span></div>
+                </div>
+            </div>
+            <div class="header-center">
+                <h1>Competency Taxonomy</h1>
+                <p class="header-subtitle">ASK × Katz Hybrid · v2.2.0</p>
+            </div>
+            <div class="header-right">
+                <div class="header-meta">
+                    <span class="meta-badge" style="background:rgba(255,149,0,.1);color:var(--accent-orange)"><span
+                            class="pulse-dot" style="background:var(--accent-orange)"></span> DRAFT</span>
+                    <div class="nav-links">
+                        <a href="/" class="nav-link">Wizard</a><span class="nav-sep">/</span>
+                        <a href="/report" class="nav-link">Report</a><span class="nav-sep">/</span>
+                        <a href="/taxonomy" class="nav-link active">Taxonomy</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <main class="taxonomy-layout">
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">ASK Groups</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">11</div>
+                    <div class="stat-label">Năng lực</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">55</div>
+                    <div class="stat-label">Mô tả cấp độ</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">5</div>
+                    <div class="stat-label">Cấp độ (Bloom's)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">4</div>
+                    <div class="stat-label">Vai trò mục tiêu</div>
+                </div>
+            </div>
+            <div class="radar-section">
+                <section class="card">
+                    <div class="card-header">
+                        <span class="card-label">Tổng quan năng lực</span>
+                        <div class="role-selector" id="roleSelector">
+                            <button class="role-btn active" data-role="fresher"
+                                onclick="selectRole('fresher')">Fresher</button>
+                            <button class="role-btn" data-role="junior" onclick="selectRole('junior')">Junior</button>
+                            <button class="role-btn" data-role="pm" onclick="selectRole('pm')">PM</button>
+                            <button class="role-btn" data-role="expert" onclick="selectRole('expert')">Expert</button>
+                        </div>
+                    </div>
+                    <div class="radar-container"><canvas id="radarCanvas" width="440" height="440"></canvas></div>
+                    <div style="display:flex;gap:var(--gap-md);justify-content:center;margin-top:8px">
+                        <span class="legend-item"><span class="legend-dot legend-actual"></span> Baseline L3</span>
+                        <span class="legend-item"><span class="legend-dot legend-target"></span> <span id="roleLabel">Kỹ
+                                sư Fresher Target</span></span>
+                    </div>
+                </section>
+                <section class="card">
+                    <div class="card-header">
+                        <span class="card-label">11 Năng lực (ASK × Katz)</span>
+                        <span class="backbone-badge">ASK × Katz</span>
+                    </div>
+                    <div class="legend-list" id="radarLegend"></div>
+                </section>
+            </div>
+            <section>
+                <div style="margin-bottom:var(--gap-md)">
+                    <span class="card-label">Lộ trình nghề nghiệp</span>
+                    <p style="font-size:.78rem;color:var(--text-tertiary);margin-top:4px">Trọng tâm công việc dịch
+                        chuyển thế nào khi thăng tiến?</p>
+                </div>
+                <div class="career-path-grid" id="careerGrid"></div>
+            </section>
+            <section class="card">
+                <div class="card-header">
+                    <span class="card-label">Thang đo 5 cấp độ</span>
+                    <span class="card-badge">Bloom's Taxonomy</span>
+                </div>
+                <div class="table-wrapper">
+                    <table class="level-table">
+                        <thead>
+                            <tr>
+                                <th>Level</th>
+                                <th>Tên gọi</th>
+                                <th>Bloom's</th>
+                                <th>ABB Role</th>
+                                <th>Kinh nghiệm</th>
+                                <th>Mô tả</th>
+                            </tr>
+                        </thead>
+                        <tbody id="levelTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+            <section>
+                <div style="margin-bottom:var(--gap-md)">
+                    <span class="card-label">Chi tiết năng lực theo ASK</span>
+                    <p style="font-size:.78rem;color:var(--text-tertiary);margin-top:4px">Click để xem mô tả từng cấp độ
+                        · Nhãn Katz zone hiển thị bên phải</p>
+                </div>
+                <div class="ask-grid" id="askGrid"></div>
+            </section>
+        </main>
+        <footer class="app-footer">
+            <p>FNX Talent Factory v2 · Taxonomy v2.2.0 · ASK Framework × Katz (1955) × Bloom · Sources: Building 21, ABB
+                2016, ABB 4C 2024</p>
+        </footer>
+    </div>
+    <script>
+        const LEVELS = [
+            { l: 1, name: "Foundational", vi: "Nền tảng", bloom: "Remember / Understand", abb: "Individual Contributor (basic)", exp: "0–1 năm", desc: "Hiểu biết sơ bộ, cần hướng dẫn chi tiết khi thực hiện." },
+            { l: 2, name: "Developing", vi: "Đang phát triển", bloom: "Apply", abb: "Individual Contributor (proficient)", exp: "1–3 năm", desc: "Thực hiện nhiệm vụ cơ bản, cần giám sát ít hơn." },
+            { l: 3, name: "Proficient", vi: "Thành thạo", bloom: "Analyze", abb: "Team Leader / Specialist", exp: "3–5 năm", desc: "Đạt chuẩn doanh nghiệp, thực hiện độc lập tốt." },
+            { l: 4, name: "Advanced", vi: "Nâng cao", bloom: "Evaluate", abb: "Management / Senior Specialist", exp: "5–8 năm", desc: "Giải quyết vấn đề phức tạp, tư duy hệ thống mạnh." },
+            { l: 5, name: "Mastery", vi: "Bậc thầy", bloom: "Create", abb: "Leadership / Expert", exp: "8+ năm", desc: "Chuyên gia đầu ngành, dẫn dắt và bảo chứng." }
+        ];
+
+        const ASK_GROUPS = [
+            {
+                id: "K", name: "Knowledge — Kiến thức", vi: "Kiến thức", train: "Đào tạo lý thuyết, e-learning, OJT, certification", color: "#0071e3",
+                comps: [
+                    {
+                        id: "K1", name: "Kiến thức chuyên ngành", en: "Domain Knowledge", katz: "TECHNICAL", desc: "Nắm vững khái niệm, nguyên lý cốt lõi của lĩnh vực chuyên môn.",
+                        lv: { 1: "Hiểu biết cơ bản về khái niệm, thuật ngữ nền tảng. Nhận diện và mô tả lại nguyên lý cơ bản nhưng chưa tự vận dụng. Cần hướng dẫn chi tiết.", 2: "Vận dụng kiến thức cơ bản xử lý công việc theo hướng dẫn. Giải thích mối liên hệ giữa các khái niệm. Cần kèm cặp thường xuyên.", 3: "Chủ động phân tích, đề xuất giải pháp dựa trên kiến thức. Phân biệt, so sánh các cách tiếp cận và lựa chọn phương án phù hợp.", 4: "Đánh giá các đề xuất, lựa chọn giải pháp hiệu quả nhất dựa trên kiến thức chuyên sâu. Đánh giá tính đúng đắn và hiệu quả phương pháp.", 5: "Sáng tạo phương pháp mới dựa trên kiến thức cốt lõi. Đóng góp phát triển kiến thức chuyên ngành. Đào tạo và chia sẻ cho tổ chức." }
+                    },
+                    {
+                        id: "K2", name: "Kiến thức & Nghiệp vụ kỹ thuật", en: "Technical Practice & Procedures", katz: "TECHNICAL", desc: "Hiểu và vận dụng quy trình, tiêu chuẩn, phương pháp kỹ thuật trong thiết kế, vận hành, và bảo trì.",
+                        lv: { 1: "Hiểu quy trình kỹ thuật cơ bản, biết tra cứu tài liệu hướng dẫn và SOP. Thực hiện tác vụ đơn giản dưới giám sát trực tiếp.", 2: "Nắm vững quy trình nghiệp vụ trong phạm vi công việc. Nhận diện lỗi thường gặp và xử lý theo quy trình. Bắt đầu tích lũy kinh nghiệm thực tế.", 3: "Am hiểu sâu quy trình kỹ thuật, áp dụng đúng tiêu chuẩn chất lượng. Thiết kế giải pháp kỹ thuật rõ ràng. Output đạt chuẩn doanh nghiệp.", 4: "Thành thạo đa quy trình, đánh giá chất lượng đầu ra cho nhóm. Review thiết kế và output kỹ thuật của đồng nghiệp. Tối ưu hóa hiệu năng hệ thống.", 5: "Chuyên gia nghiệp vụ kỹ thuật: xây dựng quy trình, đặt chuẩn cho tổ chức. Thiết kế giải pháp quy mô lớn. Đào tạo nghiệp vụ cho đội ngũ." }
+                    },
+                    {
+                        id: "K3", name: "Công cụ & Công nghệ", en: "Tools & Technology", katz: "TECHNICAL", desc: "Hiểu và sử dụng thành thạo công cụ, phần mềm, công nghệ phục vụ công việc chuyên môn.",
+                        lv: { 1: "Sử dụng công cụ cơ bản (email, office, chat). Cần hướng dẫn khi dùng phần mềm chuyên dụng.", 2: "Thành thạo công cụ phổ biến trong chuyên ngành. Tự học tính năng mới. Biết sử dụng hệ thống quản lý nội bộ.", 3: "Thành thạo nhiều công cụ chuyên sâu, tối ưu workflow. Đề xuất công cụ mới cho team. Hiểu hệ sinh thái công nghệ trong ngành.", 4: "Chuyên gia hệ sinh thái công cụ. Đào tạo người khác. Đánh giá ROI công nghệ. Thiết kế automation và pipeline.", 5: "Định hướng chiến lược công nghệ cho tổ chức. Đánh giá và pilot công nghệ mới. Hiểu xu hướng digital transformation." }
+                    }
+                ]
+            },
+            {
+                id: "S", name: "Skill — Kỹ năng", vi: "Kỹ năng", train: "Workshop, project-based learning, simulation, case study", color: "#ff9500",
+                comps: [
+                    {
+                        id: "S1", name: "Giao tiếp kỹ thuật", en: "Technical Communication", katz: "INTERPERSONAL", desc: "Truyền đạt thông tin kỹ thuật rõ ràng, thuyết phục, phù hợp đối tượng.",
+                        lv: { 1: "Giao tiếp cơ bản: email, chat, báo cáo đơn giản. Trình bày ý kiến trong nhóm nhỏ. Viết tài liệu theo template.", 2: "Giao tiếp rõ ràng có cấu trúc. Trình bày trước nhóm 5–10 người. Tóm tắt thông tin kỹ thuật phức tạp thành ngôn ngữ dễ hiểu.", 3: "Giao tiếp thuyết phục, trình bày trước khách hàng hoặc quản lý cấp cao. Viết tài liệu kỹ thuật chuyên nghiệp (technical spec, RFC).", 4: "Giao tiếp chiến lược: truyền tải tầm nhìn, dẫn dắt thay đổi. Thuyết trình trước C-level. Đào tạo kỹ năng giao tiếp cho team.", 5: "Giao tiếp tầm thought leader: public speaking, đại diện thương hiệu kỹ thuật. Định hình narrative kỹ thuật của tổ chức." }
+                    },
+                    {
+                        id: "S2", name: "Phân tích & Giải quyết vấn đề", en: "Analysis & Problem Solving", katz: "CONCEPTUAL", desc: "Nhận diện, phân tích vấn đề và đưa ra giải pháp bằng tư duy logic và dữ liệu.",
+                        lv: { 1: "Nhận diện vấn đề khi được chỉ ra. Phân tích cơ bản theo quy trình có sẵn. Cần hỗ trợ đặt câu hỏi đúng.", 2: "Tự phát hiện vấn đề đơn giản, thu thập dữ liệu và phân tích theo khuôn mẫu. Đề xuất 1–2 phương án giải quyết.", 3: "Phân tích vấn đề phức tạp đa chiều, xác định nguyên nhân gốc rễ (root cause). Thực thi giải pháp độc lập và đánh giá kết quả.", 4: "Giải quyết vấn đề hệ thống, liên bộ phận. Thiết kế quy trình phân tích cho team. Tư duy phản biện sắc bén.", 5: "Giải quyết vấn đề chiến lược tầm tổ chức. Xây dựng framework phân tích mới. Đào tạo tư duy giải quyết vấn đề." }
+                    },
+                    {
+                        id: "S3", name: "Quản lý & Lên kế hoạch", en: "Planning & Management", katz: "CONCEPTUAL", desc: "Lập kế hoạch, tổ chức, theo dõi và hoàn thành công việc đúng hạn.",
+                        lv: { 1: "Thực hiện theo kế hoạch được giao. Quản lý thời gian cá nhân ở mức cơ bản. Báo cáo tiến độ khi được hỏi.", 2: "Tự lập kế hoạch cá nhân, sắp xếp ưu tiên. Phối hợp với 1–2 người hoàn thành task. Theo dõi deadline chủ động.", 3: "Quản lý dự án nhỏ–trung từ đầu đến cuối. Lập kế hoạch, phân bổ nguồn lực, theo dõi milestone. Quản lý rủi ro cơ bản.", 4: "Quản lý nhiều dự án song song hoặc dự án phức tạp. Xây dựng quy trình quản lý cho team. Stakeholder management.", 5: "Quản lý portfolio dự án chiến lược. Thiết kế hệ thống PMO cho tổ chức. Định hướng lộ trình sản phẩm/kỹ thuật." }
+                    },
+                    {
+                        id: "S4", name: "Tư duy hệ thống", en: "Systems Thinking", katz: "CONCEPTUAL", desc: "Nhìn nhận vấn đề trong bối cảnh tổng thể, hiểu mối liên hệ giữa các phần tử.",
+                        lv: { 1: "Nhận biết công việc của mình nằm trong quy trình lớn hơn. Hiểu input/output cơ bản của role mình.", 2: "Hiểu tác động công việc mình lên upstream/downstream. Nhận ra sự phụ thuộc giữa các module/team.", 3: "Tư duy end-to-end: hiểu toàn bộ value chain. Đề xuất cải tiến xuyên quy trình. Anticipate side effects.", 4: "Tư duy kiến trúc: thiết kế hệ thống có tính mở rộng, bảo trì. Đánh giá trade-offs chiến lược. Kết nối kỹ thuật–kinh doanh.", 5: "Tư duy chiến lược tầm tổ chức. Định hình roadmap kỹ thuật dài hạn. Dự đoán xu hướng và điều chỉnh chiến lược." }
+                    },
+                    {
+                        id: "S5", name: "Phối hợp & Giao việc", en: "Coordination & Delegation", katz: "INTERPERSONAL", desc: "Điều phối công việc nhóm, phân chia nhiệm vụ, theo dõi tiến độ và đảm bảo kết quả chung.",
+                        lv: { 1: "Hoàn thành phần việc cá nhân trong nhóm đúng hạn. Tham gia họp nhóm và báo cáo tiến độ khi được yêu cầu.", 2: "Phối hợp với 2–3 đồng nghiệp hoàn thành task chung. Chủ động chia sẻ tiến độ, phản hồi kịp thời. Biết nhờ hỗ trợ đúng lúc.", 3: "Điều phối nhóm 3–5 người hoàn thành deliverable. Phân chia công việc rõ ràng, theo dõi milestone. Tổng hợp và review output nhóm.", 4: "Giao việc hiệu quả theo năng lực thành viên. Quản lý cross-functional team. Điều phối nhiều nhóm làm việc song song.", 5: "Thiết kế cơ cấu team và phân vai tầm tổ chức. Xây dựng quy trình phối hợp xuyên phòng ban. Mentor team leads." }
+                    }
+                ]
+            },
+            {
+                id: "A", name: "Attitude — Phẩm chất", vi: "Phẩm chất", train: "Coaching, mentoring, 360° feedback", color: "#af52de",
+                comps: [
+                    {
+                        id: "A1", name: "Chủ động - Cải tiến", en: "Proactivity & Continuous Improvement", katz: "CONCEPTUAL", desc: "Chủ động hành động, luôn tìm cách cải tiến quy trình và nâng cao chất lượng.",
+                        lv: { 1: "Nhận trách nhiệm task được giao, hoàn thành đúng hạn. Hỏi khi gặp khó. Không đổ lỗi cho người khác.", 2: "Chủ động nhận thêm việc. Tự đặt mục tiêu cao hơn yêu cầu. Đề xuất cải tiến nhỏ trong phạm vi công việc cá nhân.", 3: "Chủ động hoàn toàn, chỉ cần giám sát kết quả. Dẫn dắt delivery nhóm. Đề xuất và thực hiện cải tiến quy trình cho team.", 4: "Chịu trách nhiệm kết quả cả team/dự án. Thiết lập văn hóa cải tiến liên tục. Đánh giá ROI các đề xuất đổi mới.", 5: "Chịu trách nhiệm kết quả tầm tổ chức. Xây dựng hệ thống quản lý cải tiến (Kaizen, Lean). Truyền cảm hứng đổi mới cho toàn bộ." }
+                    },
+                    {
+                        id: "A2", name: "Hợp tác - Tin tưởng", en: "Collaboration & Trust", katz: "INTERPERSONAL", desc: "Sẵn sàng hợp tác, xây dựng niềm tin, tạo môi trường team đáng tin cậy.",
+                        lv: { 1: "Lắng nghe và góp ý tích cực trong nhóm nhỏ. Chia sẻ thông tin khi được yêu cầu. Hoàn thành đúng cam kết.", 2: "Chủ động trao đổi, thấu hiểu đồng nghiệp. Chia sẻ kiến thức. Hỗ trợ thành viên khi cần. Nhận và cho feedback đúng cách.", 3: "Lan tỏa năng lượng tích cực, xây dựng niềm tin. Hợp tác cross-functional hiệu quả. Giải quyết mâu thuẫn nhóm.", 4: "Xây dựng đội ngũ hiệu suất cao. Kết nối xuyên bộ phận. Tạo psychological safety. Coaching thành viên mới.", 5: "Văn hóa cộng tác tầm tổ chức. Phá bỏ silos. Xây dựng platform chia sẻ kiến thức toàn công ty." }
+                    },
+                    {
+                        id: "A3", name: "Quan tâm - Hỗ trợ", en: "Care & Support", katz: "INTERPERSONAL", desc: "Quan tâm con người, đối xử công bằng, bao dung, hỗ trợ lẫn nhau.",
+                        lv: { 1: "Tôn trọng thời gian và công việc đồng nghiệp. Lịch sự, thân thiện. Ý thức tác động hành vi lên người khác.", 2: "Chủ động hỗ trợ đồng nghiệp gặp khó. Quan tâm sức khỏe tinh thần nhóm. Sẵn sàng chia sẻ kiến thức.", 3: "Tạo môi trường supportive. Lắng nghe sâu, empathize. Mentoring junior. Cân bằng wellbeing và hiệu suất.", 4: "Thiết kế chính sách wellbeing bộ phận. D&I champion. Phát triển career path cho thành viên team.", 5: "Văn hóa care tầm tổ chức. Tích hợp wellbeing vào chiến lược HR. Giá trị human-first xuyên suốt." }
+                    }
+                ]
+            }
+        ];
+
+        const KATZ_ZONES = {
+            TECHNICAL: { name: "Technical", vi: "Kỹ thuật", color: "#0071e3", ids: ["K1", "K2", "K3"] },
+            INTERPERSONAL: { name: "Interpersonal", vi: "Con người", color: "#ff9500", ids: ["S1", "S5", "A2", "A3"] },
+            CONCEPTUAL: { name: "Conceptual", vi: "Tư duy", color: "#af52de", ids: ["S2", "S3", "S4", "A1"] }
+        };
+
+        const ROLES = {
+            fresher: { name: "Kỹ sư Fresher", exp: "0–1 năm", katz: { Technical: 70, Interpersonal: 20, Conceptual: 10 }, target: [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+            junior: { name: "Kỹ sư Junior", exp: "1–3 năm", katz: { Technical: 55, Interpersonal: 25, Conceptual: 20 }, target: [3, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2] },
+            pm: { name: "Quản lý dự án", exp: "3–5 năm", katz: { Technical: 25, Interpersonal: 35, Conceptual: 40 }, target: [3, 2, 3, 4, 4, 4, 3, 4, 4, 3, 3] },
+            expert: { name: "Chuyên gia", exp: "5–8+ năm", katz: { Technical: 40, Interpersonal: 20, Conceptual: 40 }, target: [5, 5, 4, 3, 4, 3, 5, 3, 4, 3, 3] }
+        };
+
+        function getKatzColor(compId) { for (const [, z] of Object.entries(KATZ_ZONES)) { if (z.ids.includes(compId)) return z.color } return '#666' }
+        function getKatzName(compId) { for (const [, z] of Object.entries(KATZ_ZONES)) { if (z.ids.includes(compId)) return z.vi } return '' }
+
+        let currentRole = 'fresher';
+
+        function renderLevels() {
+            const tb = document.getElementById('levelTableBody');
+            LEVELS.forEach(l => { tb.innerHTML += `<tr><td><span class="level-badge level-${l.l}">${l.l}</span></td><td><strong>${l.vi}</strong><br><span style="font-size:.7rem;color:var(--text-caption)">${l.name}</span></td><td><span class="bloom-tag bloom-${l.l}">${l.bloom}</span></td><td style="font-size:.78rem">${l.abb}</td><td>${l.exp}</td><td>${l.desc}</td></tr>` });
+        }
+
+        function renderCareer() {
+            const grid = document.getElementById('careerGrid'); grid.innerHTML = '';
+            const katzLabels = { Technical: 'Kỹ thuật', Interpersonal: 'Con người', Conceptual: 'Tư duy' };
+            const katzColors = { Technical: '#0071e3', Interpersonal: '#ff9500', Conceptual: '#af52de' };
+            const summaries = { fresher: 'Tập trung xây nền kỹ thuật', junior: 'Bắt đầu phối hợp đội nhóm', pm: 'Dẫn dắt con người & chiến lược', expert: 'Cân bằng kỹ thuật sâu & tầm nhìn' };
+            Object.entries(ROLES).forEach(([rid, r]) => {
+                let bars = '';
+                Object.entries(r.katz).forEach(([k, pct]) => { bars += `<div class="career-bar"><div class="career-bar-top"><span class="career-bar-label">${katzLabels[k]}</span><span class="career-bar-pct">${pct}%</span></div><div class="career-bar-track"><div class="career-bar-fill" style="width:${pct}%;background:${katzColors[k]}"></div></div></div>` });
+                grid.innerHTML += `<div class="career-card ${rid === currentRole ? 'active' : ''}" onclick="selectRole('${rid}')"><h4>${r.name}</h4><div class="career-exp">${r.exp}</div><div style="font-size:.72rem;color:var(--text-secondary);margin-bottom:8px;font-style:italic">${summaries[rid]}</div>${bars}</div>`;
+            });
+        }
+
+        function renderLegend() {
+            const el = document.getElementById('radarLegend'); el.innerHTML = '';
+            ASK_GROUPS.forEach(g => {
+                el.innerHTML += `<div class="legend-group-label" style="color:${g.color}">${g.vi} (${g.id})</div>`;
+                g.comps.forEach(c => { el.innerHTML += `<div class="legend-row"><div class="legend-dot-sm" style="background:${getKatzColor(c.id)}"></div><span class="legend-cid">${c.id}</span><span class="legend-cname">${c.name}</span><span class="legend-katz">${getKatzName(c.id)}</span></div>` });
+            });
+        }
+
+        function renderAskCards() {
+            const grid = document.getElementById('askGrid'); grid.innerHTML = '';
+            ASK_GROUPS.forEach(g => {
+                let cl = '';
+                g.comps.forEach(c => {
+                    let lvH = ''; for (let i = 1; i <= 5; i++)lvH += `<div class="level-row"><span class="level-badge level-${i}" style="flex-shrink:0">${i}</span><span class="level-row-text">${c.lv[i]}</span></div>`;
+                    cl += `<div class="comp-row" onclick="this.classList.toggle('open')"><div class="comp-row-header"><span class="comp-id-tag" style="background:${getKatzColor(c.id)}">${c.id}</span><span class="comp-row-name">${c.name}</span><span class="comp-katz-tag">${getKatzName(c.id)}</span><span class="comp-chevron">&#9654;</span></div><div class="comp-detail"><div class="comp-desc">${c.desc}<span class="comp-en">${c.en}</span></div>${lvH}</div></div>`;
+                });
+                grid.innerHTML += `<div class="ask-card"><div class="ask-card-header"><div><div class="ask-title" style="color:${g.color}">${g.name}</div><div class="ask-train" style="margin-top:2px">${g.train}</div></div><span class="ask-count">${g.comps.length}</span></div><div class="comp-list">${cl}</div></div>`;
+            });
+        }
+
+        function drawRadar() {
+            const canvas = document.getElementById('radarCanvas'), ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1; canvas.width = 440 * dpr; canvas.height = 440 * dpr; canvas.style.width = '440px'; canvas.style.height = '440px'; ctx.scale(dpr, dpr);
+            const W = 440, H = 440, cx = W / 2, cy = H / 2, R = 165;
+            const allComps = []; ASK_GROUPS.forEach(g => g.comps.forEach(c => allComps.push({ ...c, katzColor: getKatzColor(c.id) })));
+            const n = allComps.length, step = (Math.PI * 2) / n;
+            ctx.clearRect(0, 0, W, H);
+            for (let ring = 1; ring <= 5; ring++) { const r = R * (ring / 5); ctx.beginPath(); for (let i = 0; i <= n; i++) { const a = i * step - Math.PI / 2; const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r; i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y) } ctx.closePath(); ctx.strokeStyle = 'rgba(0,0,0,.06)'; ctx.lineWidth = 1; ctx.stroke(); ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.font = '500 10px Inter,sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(ring, cx - 6, cy - r) }
+            allComps.forEach((_, i) => { const a = i * step - Math.PI / 2; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R); ctx.strokeStyle = 'rgba(0,0,0,.04)'; ctx.stroke() });
+            ctx.beginPath(); allComps.forEach((_, i) => { const a = i * step - Math.PI / 2, r = R * (3 / 5); const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r; i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y) }); ctx.closePath(); ctx.fillStyle = 'rgba(0,113,227,.06)'; ctx.fill(); ctx.strokeStyle = 'rgba(0,113,227,.35)'; ctx.lineWidth = 1.5; ctx.stroke();
+            const targets = ROLES[currentRole].target;
+            ctx.beginPath(); targets.forEach((lv, i) => { const a = i * step - Math.PI / 2, r = R * (lv / 5); const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r; i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y) }); ctx.closePath(); ctx.fillStyle = 'rgba(255,45,85,.06)'; ctx.fill(); ctx.strokeStyle = 'rgba(255,45,85,.5)'; ctx.lineWidth = 2; ctx.stroke();
+            targets.forEach((lv, i) => { const a = i * step - Math.PI / 2, r = R * (lv / 5); const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r; ctx.fillStyle = allComps[i].katzColor; ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2); ctx.fill(); const lx = cx + Math.cos(a) * (R + 16), ly = cy + Math.sin(a) * (R + 16); ctx.fillStyle = allComps[i].katzColor; ctx.font = "600 10px 'JetBrains Mono',monospace"; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(allComps[i].id, lx, ly) });
+        }
+
+        function selectRole(role) {
+            currentRole = role;
+            document.querySelectorAll('.role-btn').forEach(b => b.classList.toggle('active', b.dataset.role === role));
+            document.getElementById('roleLabel').textContent = ROLES[role].name + ' Target';
+            drawRadar(); renderCareer();
+        }
+
+        renderLevels(); renderLegend(); renderAskCards(); renderCareer(); drawRadar();
+    </script>
+</body>
+
+</html>

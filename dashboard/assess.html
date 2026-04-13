@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FNX Talent Factory — Đánh giá ứng viên</title>
+    <meta name="description" content="FNX Assessment — Đánh giá năng lực ứng viên dựa trên khung ASK × Katz v2.2">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* ═══ ASSESS PAGE STYLES ═══ */
+        .assess-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: var(--gap-lg);
+            flex: 1
+        }
+
+        @media(max-width:960px) {
+            .assess-grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        /* Nav */
+        .nav-links {
+            display: flex;
+            gap: var(--gap-md);
+            align-items: center
+        }
+
+        .nav-link {
+            font-size: .78rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all var(--transition-fast)
+        }
+
+        .nav-link:hover {
+            color: var(--accent-blue);
+            background: rgba(0, 113, 227, .08)
+        }
+
+        .nav-link.active {
+            color: var(--accent-blue);
+            font-weight: 600
+        }
+
+        .nav-sep {
+            color: var(--text-caption);
+            font-size: .7rem
+        }
+
+        /* Process bar */
+        .process-bar {
+            display: flex;
+            gap: 0;
+            margin-bottom: var(--gap-md);
+            background: var(--bg-frosted);
+            border-radius: var(--radius-lg);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            box-shadow: var(--shadow-sm);
+            border: .5px solid rgba(0, 0, 0, .04);
+            overflow: hidden
+        }
+
+        .process-step {
+            flex: 1;
+            padding: 14px var(--gap-md);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            transition: all var(--transition-base);
+            cursor: default
+        }
+
+        .process-step::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 20%;
+            bottom: 20%;
+            width: 1px;
+            background: rgba(0, 0, 0, .06)
+        }
+
+        .process-step:last-child::after {
+            display: none
+        }
+
+        .process-step.active {
+            background: rgba(0, 113, 227, .06)
+        }
+
+        .process-step.completed {
+            background: rgba(52, 199, 89, .04)
+        }
+
+        .process-step .step-num {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .7rem;
+            font-weight: 700;
+            border: 2px solid rgba(0, 0, 0, .1);
+            color: var(--text-caption);
+            flex-shrink: 0;
+            transition: all var(--transition-fast)
+        }
+
+        .process-step.active .step-num {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+            background: rgba(0, 113, 227, .08)
+        }
+
+        .process-step.completed .step-num {
+            border-color: var(--accent-green);
+            color: #fff;
+            background: var(--accent-green)
+        }
+
+        .process-step .step-text {
+            font-size: .72rem;
+            font-weight: 600;
+            color: var(--text-caption);
+            line-height: 1.3
+        }
+
+        .process-step.active .step-text {
+            color: var(--accent-blue)
+        }
+
+        .process-step.completed .step-text {
+            color: var(--accent-green)
+        }
+
+        /* Form */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--gap-md)
+        }
+
+        .form-label {
+            font-size: .65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            color: var(--text-caption)
+        }
+
+        .form-input,
+        .form-select {
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid rgba(0, 0, 0, .08);
+            background: var(--bg-tertiary);
+            font-size: .85rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            transition: all var(--transition-fast);
+            outline: none
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, .1)
+        }
+
+        .form-input::placeholder {
+            color: var(--text-caption)
+        }
+
+        textarea.form-input {
+            min-height: 180px;
+            resize: vertical;
+            line-height: 1.55
+        }
+
+        .form-select {
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center
+        }
+
+        /* Buttons */
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, #ff9500, #ff3b30);
+            color: #fff;
+            font-size: .85rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            box-shadow: 0 4px 14px rgba(255, 149, 0, .25)
+        }
+
+        .btn-action:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(255, 149, 0, .35)
+        }
+
+        .btn-action:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+            transform: none
+        }
+
+        .btn-action .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, .3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin .6s linear infinite;
+            display: none
+        }
+
+        .btn-action.loading .spinner {
+            display: block
+        }
+
+        .btn-action.loading .btn-icon {
+            display: none
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .btn-confirm {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border-radius: var(--radius-sm);
+            background: var(--accent-green);
+            color: #fff;
+            font-size: .85rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            box-shadow: 0 4px 14px rgba(52, 199, 89, .25)
+        }
+
+        .btn-confirm:hover {
+            transform: translateY(-1px)
+        }
+
+        .btn-demo {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-indigo));
+            color: #fff;
+            font-size: .85rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            box-shadow: 0 4px 14px rgba(0, 113, 227, .25)
+        }
+
+        .btn-demo:hover {
+            transform: translateY(-1px)
+        }
+
+        /* Demand context card */
+        .demand-context {
+            padding: 0
+        }
+
+        .demand-context-header {
+            padding: var(--gap-md) var(--gap-lg);
+            border-bottom: 1px solid rgba(0, 0, 0, .04)
+        }
+
+        .demand-context-body {
+            padding: var(--gap-md) var(--gap-lg)
+        }
+
+        .context-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0
+        }
+
+        .context-label {
+            font-size: .7rem;
+            color: var(--text-caption);
+            font-weight: 500
+        }
+
+        .context-value {
+            font-size: .8rem;
+            font-weight: 600;
+            color: var(--text-primary)
+        }
+
+        .context-comp-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: var(--gap-sm)
+        }
+
+        .context-comp {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 3px 0
+        }
+
+        .context-comp-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .65rem;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #fff;
+            width: 30px;
+            text-align: center
+        }
+
+        .context-comp-name {
+            font-size: .72rem;
+            color: var(--text-secondary);
+            flex: 1
+        }
+
+        .context-comp-level {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .72rem;
+            font-weight: 700;
+            width: 20px;
+            text-align: center
+        }
+
+        .no-demand-msg {
+            text-align: center;
+            padding: var(--gap-xl)
+        }
+
+        .no-demand-msg h3 {
+            font-size: 1rem;
+            color: var(--text-primary);
+            margin-bottom: 8px
+        }
+
+        .no-demand-msg p {
+            font-size: .82rem;
+            color: var(--text-secondary);
+            margin-bottom: var(--gap-md)
+        }
+
+        .no-demand-msg a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            background: var(--accent-blue);
+            color: #fff;
+            font-weight: 600;
+            font-size: .82rem;
+            text-decoration: none;
+            transition: all var(--transition-fast)
+        }
+
+        .no-demand-msg a:hover {
+            transform: translateY(-1px)
+        }
+
+        /* Result section */
+        .result-section {
+            display: none
+        }
+
+        .result-section.visible {
+            display: block;
+            animation: cardAppear .5s ease both
+        }
+
+        .comp-matrix {
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .comp-matrix-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            transition: background var(--transition-fast)
+        }
+
+        .comp-matrix-row:hover {
+            background: rgba(0, 0, 0, .025)
+        }
+
+        .comp-matrix-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .68rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 6px;
+            color: #fff;
+            flex-shrink: 0;
+            width: 36px;
+            text-align: center
+        }
+
+        .comp-matrix-name {
+            flex: 1;
+            font-size: .82rem;
+            font-weight: 500;
+            color: var(--text-primary)
+        }
+
+        .comp-matrix-evidence {
+            font-size: .68rem;
+            color: var(--text-tertiary);
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-style: italic
+        }
+
+        .level-select {
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1.5px solid rgba(0, 0, 0, .08);
+            font-size: .78rem;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            cursor: pointer;
+            width: 50px;
+            text-align: center
+        }
+
+        /* Gap indicator */
+        .gap-indicator {
+            font-size: .6rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace
+        }
+
+        .gap-ok {
+            background: rgba(52, 199, 89, .1);
+            color: var(--accent-green)
+        }
+
+        .gap-warn {
+            background: rgba(255, 149, 0, .1);
+            color: var(--accent-orange)
+        }
+
+        .gap-critical {
+            background: rgba(255, 59, 48, .1);
+            color: var(--accent-red)
+        }
+
+        /* Score display */
+        .score-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: var(--gap-md) auto;
+            position: relative
+        }
+
+        .score-circle::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            background: conic-gradient(var(--accent-blue) var(--score-pct, 0%), rgba(0, 0, 0, .06) var(--score-pct, 0%));
+            z-index: 0
+        }
+
+        .score-circle::after {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            border-radius: 50%;
+            background: var(--bg-frosted);
+            z-index: 1
+        }
+
+        .score-num {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            z-index: 2;
+            line-height: 1;
+            font-variant-numeric: tabular-nums
+        }
+
+        .score-unit {
+            font-size: .6rem;
+            font-weight: 600;
+            color: var(--text-caption);
+            z-index: 2;
+            text-transform: uppercase;
+            letter-spacing: .06em
+        }
+
+        /* Radar */
+        .radar-mini {
+            display: flex;
+            flex-direction: column;
+            align-items: center
+        }
+
+        .radar-mini canvas {
+            max-width: 100%;
+            height: auto
+        }
+
+        /* Summary */
+        .assess-summary {
+            display: none;
+            padding: var(--gap-md);
+            background: rgba(52, 199, 89, .04);
+            border-radius: var(--radius-sm);
+            border-left: 3px solid var(--accent-green)
+        }
+
+        .assess-summary.visible {
+            display: block;
+            animation: cardAppear .4s ease both
+        }
+
+        .assess-summary h3 {
+            font-size: .85rem;
+            font-weight: 700;
+            color: var(--accent-green);
+            margin-bottom: 8px
+        }
+
+        .assess-summary p {
+            font-size: .8rem;
+            color: var(--text-secondary);
+            line-height: 1.55
+        }
+
+        /* Drop zone */
+        .drop-zone {
+            border: 2px dashed rgba(0, 0, 0, .1);
+            border-radius: var(--radius-sm);
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .2s ease;
+            position: relative;
+            background: rgba(0, 0, 0, .01)
+        }
+
+        .drop-zone:hover,
+        .drop-zone.dragover {
+            border-color: var(--accent-blue);
+            background: rgba(0, 113, 227, .03)
+        }
+
+        .drop-zone.dragover {
+            transform: scale(1.01);
+            box-shadow: 0 0 0 4px rgba(0, 113, 227, .08)
+        }
+
+        .drop-zone-input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer
+        }
+
+        .drop-zone-content {
+            pointer-events: none
+        }
+
+        .drop-zone-icon {
+            font-size: 1.5rem;
+            margin-bottom: 6px
+        }
+
+        .drop-zone-text {
+            font-size: .82rem;
+            font-weight: 600;
+            color: var(--text-secondary)
+        }
+
+        .drop-zone-sub {
+            font-size: .68rem;
+            color: var(--text-caption);
+            margin-top: 4px
+        }
+
+        .drop-zone-browse {
+            color: var(--accent-blue);
+            font-weight: 600
+        }
+
+        .drop-zone-loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px;
+            color: var(--accent-blue);
+            font-size: .82rem;
+            font-weight: 500
+        }
+
+        .drop-zone-loading .drop-spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(0, 113, 227, .2);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin .6s linear infinite
+        }
+
+        .drop-zone-success {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(52, 199, 89, .06);
+            border-radius: 6px;
+            font-size: .78rem;
+            color: var(--accent-green);
+            font-weight: 500
+        }
+
+        .drop-zone.loaded .drop-zone-content {
+            display: none
+        }
+
+        .drop-zone.loaded .drop-zone-success {
+            display: flex
+        }
+
+        .drop-zone.extracting .drop-zone-content {
+            display: none
+        }
+
+        .drop-zone.extracting .drop-zone-loading {
+            display: flex
+        }
+
+        .drop-zone-or {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 8px 0;
+            color: var(--text-caption);
+            font-size: .68rem;
+            font-weight: 500
+        }
+
+        .drop-zone-or::before,
+        .drop-zone-or::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(0, 0, 0, .06)
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ambient-bg">
+        <div class="ambient-orb orb-1"></div>
+        <div class="ambient-orb orb-2"></div>
+        <div class="ambient-orb orb-3"></div>
+    </div>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo">
+                    <div class="logo-icon"><svg viewBox="0 0 32 32" fill="none">
+                            <path d="M16 2L28 8V24L16 30L4 24V8L16 2Z" stroke="currentColor" stroke-width="1.5"
+                                fill="none" />
+                            <path d="M16 2L16 30" stroke="currentColor" stroke-width="1" opacity=".4" />
+                            <path d="M4 8L28 24" stroke="currentColor" stroke-width="1" opacity=".4" />
+                            <path d="M28 8L4 24" stroke="currentColor" stroke-width="1" opacity=".4" />
+                            <circle cx="16" cy="16" r="3" fill="currentColor" opacity=".8" />
+                        </svg></div>
+                    <div class="logo-text"><span class="logo-name">FNX</span><span class="logo-sub">Talent
+                            Factory</span></div>
+                </div>
+            </div>
+            <div class="header-center">
+                <h1>Đánh giá ứng viên</h1>
+                <p class="header-subtitle">Step 3 · Competency Assessment · v2.2</p>
+            </div>
+            <div class="header-right">
+                <div class="header-meta">
+                    <div class="nav-links">
+                        <a href="/demand" class="nav-link">Demand</a><span class="nav-sep">/</span>
+                        <a href="/assess" class="nav-link active">Assess</a><span class="nav-sep">/</span>
+                        <a href="/report" class="nav-link">Report</a><span class="nav-sep">/</span>
+                        <a href="/taxonomy" class="nav-link">Taxonomy</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Process Bar -->
+        <div class="process-bar">
+            <div class="process-step completed"><span class="step-num">✓</span><span class="step-text">Giải mã yêu
+                    cầu</span></div>
+            <div class="process-step"><span class="step-num">2</span><span class="step-text">Tạo nguồn & Sàng lọc</span>
+            </div>
+            <div class="process-step active"><span class="step-num">3</span><span class="step-text">Đánh giá năng
+                    lực</span></div>
+            <div class="process-step"><span class="step-num">4</span><span class="step-text">Đào tạo & Close gap</span>
+            </div>
+            <div class="process-step"><span class="step-num">5</span><span class="step-text">Bàn giao & Bảo chứng</span>
+            </div>
+        </div>
+
+        <main style="display:flex;flex-direction:column;gap:var(--gap-lg);flex:1">
+            <div class="assess-grid">
+                <!-- LEFT: CV Input + Results -->
+                <div style="display:flex;flex-direction:column;gap:var(--gap-lg)">
+                    <!-- CV Input Card -->
+                    <section class="card" id="cvInputCard">
+                        <div class="card-header">
+                            <span class="card-label">Hồ sơ ứng viên</span>
+                            <span class="card-badge">Step 3</span>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:var(--gap-md)">
+                            <div class="form-group">
+                                <label class="form-label">Demand đang dùng</label>
+                                <select class="form-select" id="demandSelect" onchange="onDemandChange()"></select>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Họ và tên *</label>
+                                    <input type="text" class="form-input" id="cvName" placeholder="VD: Nguyễn Văn A">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Chuyên ngành</label>
+                                    <input type="text" class="form-input" id="cvMajor"
+                                        placeholder="VD: Kỹ thuật Hóa học">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Năm tốt nghiệp</label>
+                                <input type="number" class="form-input" id="cvYear" placeholder="VD: 2020"
+                                    style="width:140px">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Nội dung CV *</label>
+                                <div class="drop-zone" id="cvDropZone">
+                                    <input type="file" class="drop-zone-input" id="cvFileInput"
+                                        accept=".pdf,.docx,.doc,.txt">
+                                    <div class="drop-zone-content">
+                                        <div class="drop-zone-icon">👤</div>
+                                        <div class="drop-zone-text">Kéo thả file CV vào đây</div>
+                                        <div class="drop-zone-sub">hoặc <span class="drop-zone-browse">chọn file</span>
+                                            · hỗ trợ .pdf, .docx, .txt</div>
+                                    </div>
+                                    <div class="drop-zone-loading"><span class="drop-spinner"></span> Đang trích xuất
+                                        văn bản...</div>
+                                    <div class="drop-zone-success">✅ <span class="drop-filename"></span> · <span
+                                            class="drop-wordcount"></span></div>
+                                </div>
+                                <div class="drop-zone-or">hoặc paste trực tiếp</div>
+                                <textarea class="form-input" id="cvContent"
+                                    placeholder="Paste nội dung CV vào đây. AI sẽ đánh giá năng lực dựa trên kinh nghiệm và bằng chứng..."></textarea>
+                            </div>
+                            <div style="display:flex;gap:var(--gap-md);align-items:center">
+                                <button class="btn-action" id="assessBtn" onclick="runAssessment()">
+                                    <span class="btn-icon">🔍</span>
+                                    <span class="spinner"></span>
+                                    Đánh giá bằng AI
+                                </button>
+                                <button class="btn-demo" onclick="loadDemoCV()">👤 Demo CV</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Assessment Result Matrix -->
+                    <section class="card result-section" id="resultCard">
+                        <div class="card-header">
+                            <span class="card-label">Ma trận năng lực ứng viên</span>
+                            <span class="card-badge" id="assessCompCount">0 / 11</span>
+                        </div>
+                        <div class="comp-matrix" id="assessMatrix"></div>
+                        <div style="margin-top:var(--gap-lg);display:flex;gap:var(--gap-md);align-items:center">
+                            <button class="btn-confirm" onclick="confirmAssessment()">✓ Xác nhận & Xem Report</button>
+                            <span style="font-size:.72rem;color:var(--text-caption)">Chỉnh level nếu cần trước khi xác
+                                nhận</span>
+                        </div>
+                    </section>
+
+                    <!-- Assessment Summary -->
+                    <div class="assess-summary" id="assessSummary">
+                        <h3>✓ Đánh giá đã hoàn tất</h3>
+                        <p id="assessSummaryText"></p>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Demand Context + Radar -->
+                <div style="display:flex;flex-direction:column;gap:var(--gap-lg)">
+                    <!-- Demand Context -->
+                    <section class="card demand-context" id="demandContextCard">
+                        <div class="demand-context-header">
+                            <div class="card-header" style="margin-bottom:0">
+                                <span class="card-label">Yêu cầu tuyển dụng</span>
+                                <span class="card-badge">Target</span>
+                            </div>
+                        </div>
+                        <div class="demand-context-body" id="demandContextBody">
+                            <div class="no-demand-msg" id="noDemandMsg">
+                                <h3>Chưa có yêu cầu</h3>
+                                <p>Tạo demand profile trước khi đánh giá ứng viên</p>
+                                <a href="/demand">→ Tạo yêu cầu mới</a>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Radar Chart -->
+                    <section class="card result-section" id="radarCard">
+                        <div class="card-header">
+                            <span class="card-label">Radar: Ứng viên vs Yêu cầu</span>
+                            <div style="display:flex;gap:var(--gap-md)">
+                                <span
+                                    style="display:flex;align-items:center;gap:4px;font-size:.68rem;color:var(--text-secondary)"><span
+                                        style="width:10px;height:10px;border-radius:3px;background:rgba(0,113,227,.7)"></span>
+                                    Ứng viên</span>
+                                <span
+                                    style="display:flex;align-items:center;gap:4px;font-size:.68rem;color:var(--text-secondary)"><span
+                                        style="width:10px;height:10px;border-radius:3px;background:rgba(255,45,85,.5)"></span>
+                                    Yêu cầu</span>
+                            </div>
+                        </div>
+                        <div class="radar-mini">
+                            <canvas id="radarCanvas" width="400" height="400"></canvas>
+                        </div>
+                        <div class="score-circle" id="scoreCircle" style="display:none;--score-pct:0%">
+                            <span class="score-num" id="fitScore">—</span>
+                            <span class="score-unit">Fit Score</span>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <p>FNX Talent Factory v2 · Assessment powered by AI · Taxonomy v2.2.0</p>
+        </footer>
+    </div>
+
+    <script>
+        // ── Shared definitions ──
+        const COMPS = [
+            { id: 'K1', name: 'Kiến thức chuyên ngành', katz: 'TECHNICAL', color: '#0071e3' },
+            { id: 'K2', name: 'Kiến thức & Nghiệp vụ kỹ thuật', katz: 'TECHNICAL', color: '#0071e3' },
+            { id: 'K3', name: 'Công cụ & Công nghệ', katz: 'TECHNICAL', color: '#0071e3' },
+            { id: 'S1', name: 'Giao tiếp kỹ thuật', katz: 'INTERPERSONAL', color: '#ff9500' },
+            { id: 'S2', name: 'Phân tích & Giải quyết vấn đề', katz: 'CONCEPTUAL', color: '#af52de' },
+            { id: 'S3', name: 'Quản lý & Lên kế hoạch', katz: 'CONCEPTUAL', color: '#af52de' },
+            { id: 'S4', name: 'Tư duy hệ thống', katz: 'CONCEPTUAL', color: '#af52de' },
+            { id: 'S5', name: 'Phối hợp & Giao việc', katz: 'INTERPERSONAL', color: '#ff9500' },
+            { id: 'A1', name: 'Chủ động - Cải tiến', katz: 'CONCEPTUAL', color: '#af52de' },
+            { id: 'A2', name: 'Hợp tác - Tin tưởng', katz: 'INTERPERSONAL', color: '#ff9500' },
+            { id: 'A3', name: 'Quan tâm - Hỗ trợ', katz: 'INTERPERSONAL', color: '#ff9500' }
+        ];
+
+        let currentDemand = null;
+        let assessData = null;
+
+        // ── Init ──
+        document.addEventListener('DOMContentLoaded', () => {
+            populateDemandSelect();
+            initDropZone('cvDropZone', 'cvFileInput', 'cvContent');
+            const urlParams = new URLSearchParams(window.location.search);
+            const demandId = urlParams.get('demand');
+            if (demandId) {
+                document.getElementById('demandSelect').value = demandId;
+                onDemandChange();
+            }
+        });
+
+        // ── PDF Upload ──
+        function initDropZone(zoneId, inputId, textareaId) {
+            const zone = document.getElementById(zoneId);
+            const input = document.getElementById(inputId);
+            const textarea = document.getElementById(textareaId);
+            ['dragenter', 'dragover'].forEach(e => zone.addEventListener(e, ev => { ev.preventDefault(); zone.classList.add('dragover'); }));
+            ['dragleave', 'drop'].forEach(e => zone.addEventListener(e, ev => { ev.preventDefault(); zone.classList.remove('dragover'); }));
+            zone.addEventListener('drop', ev => { const file = ev.dataTransfer.files[0]; if (file) handleFile(file, zone, textarea); });
+            input.addEventListener('change', ev => { const file = ev.target.files[0]; if (file) handleFile(file, zone, textarea); });
+        }
+
+        async function handleFile(file, zone, textarea) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            zone.classList.remove('loaded'); zone.classList.add('extracting');
+            try {
+                let text = '';
+                if (ext === 'pdf') text = await extractPDF(file);
+                else if (ext === 'txt') text = await file.text();
+                else if (ext === 'docx' || ext === 'doc') text = await extractDOCX(file);
+                else throw new Error('Unsupported: ' + ext);
+                textarea.value = text;
+                zone.classList.remove('extracting'); zone.classList.add('loaded');
+                zone.querySelector('.drop-filename').textContent = file.name;
+                zone.querySelector('.drop-wordcount').textContent = text.split(/\s+/).length + ' từ';
+            } catch (err) { zone.classList.remove('extracting'); alert('Lỗi: ' + err.message); }
+        }
+
+        async function extractPDF(file) {
+            if (!window.pdfjsLib) {
+                await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            }
+            const ab = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
+            let text = '';
+            for (let i = 1; i <= pdf.numPages; i++) { const p = await pdf.getPage(i); const c = await p.getTextContent(); text += c.items.map(it => it.str).join(' ') + '\n\n'; }
+            return text.trim();
+        }
+
+        async function extractDOCX(file) {
+            if (!window.mammoth) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js');
+            const ab = await file.arrayBuffer();
+            return (await mammoth.extractRawText({ arrayBuffer: ab })).value;
+        }
+
+        function loadScript(src) {
+            return new Promise((resolve, reject) => { const s = document.createElement('script'); s.src = src; s.onload = resolve; s.onerror = reject; document.head.appendChild(s); });
+        }
+
+        function populateDemandSelect() {
+            const demands = JSON.parse(localStorage.getItem('fnx_demands') || '[]');
+            const sel = document.getElementById('demandSelect');
+            if (demands.length === 0) {
+                sel.innerHTML = '<option value="">— Chưa có demand —</option>';
+                return;
+            }
+            sel.innerHTML = demands.map(d =>
+                `<option value="${d.id}">${d.jobTitle || '(chưa đặt tên)'} — ${d.client || ''}</option>`
+            ).join('');
+            // Auto-select first
+            onDemandChange();
+        }
+
+        function onDemandChange() {
+            const demands = JSON.parse(localStorage.getItem('fnx_demands') || '[]');
+            const id = document.getElementById('demandSelect').value;
+            currentDemand = demands.find(d => d.id === id) || null;
+            renderDemandContext();
+        }
+
+        function renderDemandContext() {
+            const body = document.getElementById('demandContextBody');
+            const msg = document.getElementById('noDemandMsg');
+            if (!currentDemand) { msg.style.display = 'block'; body.innerHTML = ''; body.appendChild(msg); return; }
+            const active = currentDemand.competencies.filter(c => c.level > 0);
+            body.innerHTML = `
+    <div class="context-row"><span class="context-label">Vị trí</span><span class="context-value">${currentDemand.jobTitle}</span></div>
+    <div class="context-row"><span class="context-label">Khách hàng</span><span class="context-value">${currentDemand.client}</span></div>
+    <div class="context-row"><span class="context-label">Ngành</span><span class="context-value">${currentDemand.industry}</span></div>
+    <div class="context-row"><span class="context-label">Cấp bậc</span><span class="context-value">${currentDemand.seniority}</span></div>
+    <div class="context-row"><span class="context-label">Năng lực yêu cầu</span><span class="context-value">${active.length} / 11</span></div>
+    <div class="context-comp-list">
+      ${active.map(c => {
+                const comp = COMPS.find(cc => cc.id === c.id);
+                return `<div class="context-comp">
+          <span class="context-comp-id" style="background:${comp?.color || '#888'}">${c.id}</span>
+          <span class="context-comp-name">${comp?.name || c.id}</span>
+          <span class="context-comp-level">${c.level}</span>
+        </div>`;
+            }).join('')}
+    </div>`;
+        }
+
+        // ── Demo CV ──
+        function loadDemoCV() {
+            document.getElementById('cvName').value = 'Trần Minh Khoa';
+            document.getElementById('cvMajor').value = 'Kỹ thuật Hóa học';
+            document.getElementById('cvYear').value = '2022';
+            document.getElementById('cvContent').value = `TRẦN MINH KHOA
+Kỹ sư Hóa học · TP.HCM
+
+HỌC VẤN
+- Đại học Bách Khoa TP.HCM, Kỹ thuật Hóa học, 2022 (GPA: 3.2/4.0)
+- Đồ án tốt nghiệp: Mô phỏng quá trình chưng cất dầu thô bằng Aspen HYSYS
+
+KINH NGHIỆM
+2022–2024: Kỹ sư vận hành — Nhà máy Lọc dầu Dung Quất (BSR)
+- Vận hành panel DCS Honeywell tại phân xưởng CDU/VDU
+- Giám sát thông số vận hành: nhiệt độ, áp suất, lưu lượng các cột chưng cất
+- Lập báo cáo vận hành hàng ca
+- Phối hợp đội bảo trì trong các đợt shutdown lớn (TA 2023)
+- Tuân thủ quy trình an toàn, tham gia 2 đợt diễn tập PCCC
+
+KỸ NĂNG
+- DCS: Honeywell Experion PKS (thành thạo)
+- Phần mềm: Aspen HYSYS, AutoCAD P&ID
+- Đọc hiểu P&ID, PFD, HAZOP worksheet
+- Tiếng Anh: TOEIC 650
+
+CHỨNG CHỈ
+- An toàn lao động nhóm 3 (2022)
+- Huấn luyện PCCC cơ sở (2023)`;
+        }
+
+        // ── AI Assessment (keyword-based MVP) ──
+        function runAssessment() {
+            if (!currentDemand) { alert('Vui lòng chọn demand trước'); return; }
+            const cv = document.getElementById('cvContent').value.trim();
+            if (!cv) { alert('Vui lòng nhập CV'); return; }
+            const name = document.getElementById('cvName').value.trim();
+            if (!name) { alert('Vui lòng nhập tên ứng viên'); return; }
+
+            const btn = document.getElementById('assessBtn');
+            btn.classList.add('loading'); btn.disabled = true;
+
+            setTimeout(() => {
+                assessData = {
+                    candidateName: name,
+                    major: document.getElementById('cvMajor').value,
+                    gradYear: document.getElementById('cvYear').value,
+                    competencies: assessCV(cv),
+                    demand_id: currentDemand.id
+                };
+
+                btn.classList.remove('loading'); btn.disabled = false;
+                renderAssessMatrix();
+                drawRadar();
+                document.getElementById('resultCard').classList.add('visible');
+                document.getElementById('radarCard').classList.add('visible');
+            }, 1800);
+        }
+
+        function assessCV(cv) {
+            const cvLower = cv.toLowerCase();
+            const results = [];
+            const rules = [
+                { id: 'K1', keywords: ['đại học', 'bách khoa', 'kỹ thuật hóa', 'hóa học', 'chuyên ngành', 'gpa', 'tốt nghiệp'], evidence: 'Tốt nghiệp ĐH chuyên ngành' },
+                { id: 'K2', keywords: ['vận hành', 'sop', 'quy trình', 'bảo trì', 'shutdown', 'p&id', 'hazop', 'cột chưng cất', 'cdu', 'vdu'], evidence: 'Kinh nghiệm vận hành CDU/VDU' },
+                { id: 'K3', keywords: ['dcs', 'honeywell', 'yokogawa', 'hysys', 'autocad', 'phần mềm', 'aspen', 'experion'], evidence: 'DCS Honeywell + HYSYS' },
+                { id: 'S1', keywords: ['báo cáo', 'giao tiếp', 'trình bày', 'tiếng anh', 'toeic', 'communication'], evidence: 'Báo cáo hàng ca + TOEIC' },
+                { id: 'S2', keywords: ['phân tích', 'giải quyết', 'sự cố', 'troubleshoot', 'root cause', 'mô phỏng'], evidence: 'Mô phỏng / xử lý sự cố' },
+                { id: 'S3', keywords: ['quản lý', 'kế hoạch', 'giám sát', 'lịch trình', 'project', 'schedule'], evidence: 'Giám sát thông số' },
+                { id: 'S4', keywords: ['hệ thống', 'tổng thể', 'quy trình', 'end-to-end', 'mô hình'], evidence: 'Hiểu quy trình chưng cất' },
+                { id: 'S5', keywords: ['phối hợp', 'nhóm', 'team', 'đội', 'ca', 'shift', 'coordinate', 'bảo trì'], evidence: 'Phối hợp đội bảo trì' },
+                { id: 'A1', keywords: ['chủ động', 'cải tiến', 'sáng kiến', 'ownership', 'đề xuất', 'initiative'], evidence: '(chưa rõ bằng chứng)' },
+                { id: 'A2', keywords: ['hợp tác', 'tin tưởng', 'teamwork', 'chia sẻ', 'đội ngũ'], evidence: 'Phối hợp đa nhóm' },
+                { id: 'A3', keywords: ['an toàn', 'safety', 'osha', 'pccc', 'hse', 'khẩn cấp', 'chứng chỉ an toàn'], evidence: 'An toàn LĐ + PCCC' }
+            ];
+
+            rules.forEach(rule => {
+                const hits = rule.keywords.filter(kw => cvLower.includes(kw)).length;
+                let level = 0;
+                if (hits >= 4) level = 3;
+                else if (hits >= 2) level = 2;
+                else if (hits >= 1) level = 1;
+                const ev = hits > 0 ? rule.evidence : '(không tìm thấy)';
+                results.push({ id: rule.id, level, evidence: ev });
+            });
+            return results;
+        }
+
+        // ── Render Assessment Matrix ──
+        function renderAssessMatrix() {
+            const el = document.getElementById('assessMatrix'); el.innerHTML = '';
+            const targetComps = currentDemand?.competencies || [];
+            assessData.competencies.forEach((ac, i) => {
+                const comp = COMPS.find(c => c.id === ac.id);
+                const target = targetComps.find(c => c.id === ac.id);
+                const tLv = target?.level || 0;
+                const gap = tLv - ac.level;
+                let gapClass = 'gap-ok', gapText = '✓';
+                if (gap >= 2) { gapClass = 'gap-critical'; gapText = '-' + gap; }
+                else if (gap === 1) { gapClass = 'gap-warn'; gapText = '-1'; }
+                else if (gap < 0) { gapClass = 'gap-ok'; gapText = '+' + Math.abs(gap); }
+
+                el.innerHTML += `<div class="comp-matrix-row">
+      <span class="comp-matrix-tag" style="background:${comp?.color || '#888'}">${ac.id}</span>
+      <span class="comp-matrix-name">${comp?.name || ac.id}</span>
+      <span class="comp-matrix-evidence" title="${ac.evidence}">${ac.evidence}</span>
+      <select class="level-select" onchange="updateAssessLevel(${i},this.value)">
+        <option value="0" ${ac.level === 0 ? 'selected' : ''}>—</option>
+        <option value="1" ${ac.level === 1 ? 'selected' : ''}>1</option>
+        <option value="2" ${ac.level === 2 ? 'selected' : ''}>2</option>
+        <option value="3" ${ac.level === 3 ? 'selected' : ''}>3</option>
+        <option value="4" ${ac.level === 4 ? 'selected' : ''}>4</option>
+        <option value="5" ${ac.level === 5 ? 'selected' : ''}>5</option>
+      </select>
+      <span class="gap-indicator ${gapClass}" title="Target: ${tLv}">${gapText}</span>
+    </div>`;
+            });
+            document.getElementById('assessCompCount').textContent = assessData.competencies.filter(c => c.level > 0).length + ' / 11';
+        }
+
+        function updateAssessLevel(idx, val) {
+            assessData.competencies[idx].level = parseInt(val);
+            renderAssessMatrix();
+            drawRadar();
+        }
+
+        // ── Radar (dual: demand target + candidate actual) ──
+        function drawRadar() {
+            if (!assessData || !currentDemand) return;
+            const canvas = document.getElementById('radarCanvas'), ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1; canvas.width = 400 * dpr; canvas.height = 400 * dpr; canvas.style.width = '400px'; canvas.style.height = '400px'; ctx.scale(dpr, dpr);
+            const W = 400, H = 400, cx = W / 2, cy = H / 2, R = 150;
+            const n = COMPS.length, step = (Math.PI * 2) / n;
+            ctx.clearRect(0, 0, W, H);
+
+            // Grid
+            for (let ring = 1; ring <= 5; ring++) { const r = R * (ring / 5); ctx.beginPath(); for (let i = 0; i <= n; i++) { const a = i * step - Math.PI / 2; const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r; i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y) } ctx.closePath(); ctx.strokeStyle = 'rgba(0,0,0,.06)'; ctx.lineWidth = 1; ctx.stroke() }
+            COMPS.forEach((_, i) => { const a = i * step - Math.PI / 2; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R); ctx.strokeStyle = 'rgba(0,0,0,.04)'; ctx.stroke() });
+
+            // Target area (demand)
+            const targetLevels = currentDemand.competencies.map(c => c.level);
+            ctx.beginPath();
+            targetLevels.forEach((lv, i) => { const a = i * step - Math.PI / 2, r = R * (lv / 5); const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r; i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y) });
+            ctx.closePath(); ctx.fillStyle = 'rgba(255,45,85,.06)'; ctx.fill(); ctx.strokeStyle = 'rgba(255,45,85,.4)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]); ctx.stroke(); ctx.setLineDash([]);
+
+            // Candidate area
+            const candLevels = assessData.competencies.map(c => c.level);
+            ctx.beginPath();
+            candLevels.forEach((lv, i) => { const a = i * step - Math.PI / 2, r = R * (lv / 5); const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r; i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y) });
+            ctx.closePath(); ctx.fillStyle = 'rgba(0,113,227,.1)'; ctx.fill(); ctx.strokeStyle = 'rgba(0,113,227,.6)'; ctx.lineWidth = 2; ctx.stroke();
+
+            // Points + labels
+            candLevels.forEach((lv, i) => {
+                const a = i * step - Math.PI / 2, r = R * (Math.max(lv, 0.2) / 5);
+                if (lv > 0) { const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r; ctx.fillStyle = COMPS[i].color; ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill(); }
+                const lx = cx + Math.cos(a) * (R + 14), ly = cy + Math.sin(a) * (R + 14);
+                ctx.fillStyle = COMPS[i].color; ctx.font = "600 9px 'JetBrains Mono',monospace"; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(COMPS[i].id, lx, ly);
+            });
+
+            // Calculate fit score
+            let totalTarget = 0, totalActual = 0;
+            currentDemand.competencies.forEach((dc, i) => {
+                if (dc.level > 0) { totalTarget += dc.level; totalActual += Math.min(assessData.competencies[i].level, dc.level); }
+            });
+            const fitScore = totalTarget > 0 ? Math.round(totalActual / totalTarget * 100) : 0;
+            assessData.fitScore = fitScore;
+
+            const circle = document.getElementById('scoreCircle');
+            circle.style.display = 'flex';
+            circle.style.setProperty('--score-pct', fitScore + '%');
+            document.getElementById('fitScore').textContent = fitScore;
+        }
+
+        // ── Confirm Assessment ──
+        function confirmAssessment() {
+            if (!assessData || !currentDemand) return;
+            const active = assessData.competencies.filter(c => c.level > 0);
+
+            // Calculate gaps
+            const gaps = [];
+            currentDemand.competencies.forEach((dc, i) => {
+                const ac = assessData.competencies[i];
+                if (dc.level > 0 && ac.level < dc.level) {
+                    gaps.push({ id: dc.id, target: dc.level, actual: ac.level, gap: dc.level - ac.level });
+                }
+            });
+
+            const saved = {
+                ...assessData,
+                gaps,
+                id: 'ASSESS_' + Date.now(),
+                timestamp: new Date().toISOString()
+            };
+
+            const assessments = JSON.parse(localStorage.getItem('fnx_assessments') || '[]');
+            assessments.unshift(saved);
+            localStorage.setItem('fnx_assessments', JSON.stringify(assessments));
+
+            // Show summary
+            document.getElementById('assessSummaryText').textContent =
+                `${assessData.candidateName} · Fit Score: ${assessData.fitScore}% · ${gaps.length} gaps · Đã lưu`;
+            document.getElementById('assessSummary').classList.add('visible');
+
+            // Redirect to report
+            setTimeout(() => {
+                window.location.href = '/report?id=' + saved.id;
+            }, 1500);
+        }
+    </script>
+</body>
+
+</html>

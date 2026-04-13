@@ -16,6 +16,14 @@
             "dest": "/api/main.py"
         },
         {
+            "src": "/demand",
+            "dest": "/dashboard/demand.html"
+        },
+        {
+            "src": "/assess",
+            "dest": "/dashboard/assess.html"
+        },
+        {
             "src": "/report",
             "dest": "/dashboard/index.html"
         },
@@ -28,12 +36,20 @@
             "dest": "/dashboard/$1"
         },
         {
+            "src": "/taxonomy",
+            "dest": "/dashboard/taxonomy.html"
+        },
+        {
             "src": "/history",
             "dest": "/dashboard/history.html"
         },
         {
+            "src": "/audit",
+            "dest": "/dashboard/audit.html"
+        },
+        {
             "src": "/",
-            "dest": "/dashboard/wizard.html"
+            "dest": "/dashboard/demand.html"
         }
     ]
 }

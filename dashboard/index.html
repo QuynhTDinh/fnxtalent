@@ -4,304 +4,717 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FNX Talent Factory — Competency Assessment Report</title>
-    <meta name="description"
-        content="FNX Talent Factory Assessment Dashboard — Radar Chart visualization inspired by SHL and Korn Ferry assessment standards.">
+    <title>FNX Talent Factory — Báo cáo đánh giá</title>
+    <meta name="description" content="FNX Report — Báo cáo đánh giá năng lực ứng viên vs yêu cầu tuyển dụng">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* ═══ REPORT PAGE STYLES ═══ */
+        .nav-links {
+            display: flex;
+            gap: var(--gap-md);
+            align-items: center
+        }
+
+        .nav-link {
+            font-size: .78rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all var(--transition-fast)
+        }
+
+        .nav-link:hover {
+            color: var(--accent-blue);
+            background: rgba(0, 113, 227, .08)
+        }
+
+        .nav-link.active {
+            color: var(--accent-blue);
+            font-weight: 600
+        }
+
+        .nav-sep {
+            color: var(--text-caption);
+            font-size: .7rem
+        }
+
+        /* Process bar */
+        .process-bar {
+            display: flex;
+            gap: 0;
+            margin-bottom: var(--gap-md);
+            background: var(--bg-frosted);
+            border-radius: var(--radius-lg);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            box-shadow: var(--shadow-sm);
+            border: .5px solid rgba(0, 0, 0, .04);
+            overflow: hidden
+        }
+
+        .process-step {
+            flex: 1;
+            padding: 14px var(--gap-md);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            transition: all var(--transition-base);
+            cursor: default
+        }
+
+        .process-step::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 20%;
+            bottom: 20%;
+            width: 1px;
+            background: rgba(0, 0, 0, .06)
+        }
+
+        .process-step:last-child::after {
+            display: none
+        }
+
+        .process-step.active {
+            background: rgba(0, 113, 227, .06)
+        }
+
+        .process-step.completed {
+            background: rgba(52, 199, 89, .04)
+        }
+
+        .process-step .step-num {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .7rem;
+            font-weight: 700;
+            border: 2px solid rgba(0, 0, 0, .1);
+            color: var(--text-caption);
+            flex-shrink: 0
+        }
+
+        .process-step.active .step-num {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+            background: rgba(0, 113, 227, .08)
+        }
+
+        .process-step.completed .step-num {
+            border-color: var(--accent-green);
+            color: #fff;
+            background: var(--accent-green)
+        }
+
+        .process-step .step-text {
+            font-size: .72rem;
+            font-weight: 600;
+            color: var(--text-caption);
+            line-height: 1.3
+        }
+
+        .process-step.active .step-text {
+            color: var(--accent-blue)
+        }
+
+        .process-step.completed .step-text {
+            color: var(--accent-green)
+        }
+
+        /* Report list */
+        .report-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .report-list-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            background: rgba(0, 0, 0, .02);
+            cursor: pointer;
+            transition: all var(--transition-fast)
+        }
+
+        .report-list-item:hover {
+            background: rgba(0, 113, 227, .04)
+        }
+
+        .report-list-item.selected {
+            background: rgba(0, 113, 227, .06);
+            border-left: 3px solid var(--accent-blue)
+        }
+
+        .report-list-info {
+            flex: 1;
+            min-width: 0
+        }
+
+        .report-list-name {
+            font-size: .82rem;
+            font-weight: 600;
+            color: var(--text-primary)
+        }
+
+        .report-list-meta {
+            font-size: .65rem;
+            color: var(--text-caption);
+            margin-top: 2px
+        }
+
+        .report-list-score {
+            font-size: 1.1rem;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums
+        }
+
+        /* Score hero */
+        .score-hero {
+            text-align: center;
+            padding: var(--gap-xl) var(--gap-lg);
+            position: relative;
+            overflow: hidden
+        }
+
+        .score-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0
+        }
+
+        .score-hero-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto var(--gap-md);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative
+        }
+
+        .score-hero-circle::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: conic-gradient(var(--score-color, var(--accent-blue)) var(--score-pct, 0%), rgba(0, 0, 0, .06) var(--score-pct, 0%))
+        }
+
+        .score-hero-circle::after {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            border-radius: 50%;
+            background: var(--bg-frosted)
+        }
+
+        .score-hero-num {
+            font-size: 2.2rem;
+            font-weight: 800;
+            z-index: 1;
+            line-height: 1;
+            font-variant-numeric: tabular-nums
+        }
+
+        .score-hero-unit {
+            font-size: .6rem;
+            font-weight: 600;
+            color: var(--text-caption);
+            z-index: 1;
+            text-transform: uppercase;
+            letter-spacing: .08em
+        }
+
+        .score-hero-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary)
+        }
+
+        .score-hero-detail {
+            font-size: .78rem;
+            color: var(--text-secondary);
+            margin-top: 4px
+        }
+
+        /* Radar */
+        .radar-mini {
+            display: flex;
+            flex-direction: column;
+            align-items: center
+        }
+
+        .radar-mini canvas {
+            max-width: 100%;
+            height: auto
+        }
+
+        /* Gap list */
+        .gap-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            transition: background var(--transition-fast)
+        }
+
+        .gap-row:hover {
+            background: rgba(0, 0, 0, .025)
+        }
+
+        .gap-row-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .7rem;
+            font-weight: 600;
+            color: var(--accent-red);
+            width: 30px
+        }
+
+        .gap-row-name {
+            flex: 1;
+            font-size: .78rem;
+            color: var(--text-primary)
+        }
+
+        .gap-row-levels {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .72rem;
+            display: flex;
+            gap: 6px;
+            align-items: center
+        }
+
+        .gap-row-target {
+            color: var(--text-caption)
+        }
+
+        .gap-row-arrow {
+            color: var(--text-caption)
+        }
+
+        .gap-row-actual {
+            font-weight: 700
+        }
+
+        .gap-row-diff {
+            background: rgba(255, 59, 48, .1);
+            color: var(--accent-red);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: .65rem
+        }
+
+        /* Comp table */
+        .comp-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0
+        }
+
+        .comp-table th {
+            font-size: .6rem;
+            font-weight: 600;
+            color: var(--text-caption);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, .06)
+        }
+
+        .comp-table td {
+            padding: 8px 12px;
+            font-size: .8rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(0, 0, 0, .03);
+            vertical-align: top
+        }
+
+        .comp-table tr:hover {
+            background: rgba(0, 113, 227, .03)
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: var(--gap-2xl)
+        }
+
+        .empty-state h2 {
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            margin-bottom: 8px
+        }
+
+        .empty-state p {
+            font-size: .85rem;
+            color: var(--text-secondary);
+            margin-bottom: var(--gap-lg)
+        }
+
+        .empty-state a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            background: var(--accent-blue);
+            color: #fff;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all var(--transition-fast)
+        }
+
+        .empty-state a:hover {
+            transform: translateY(-1px)
+        }
+    </style>
 </head>
 
 <body>
-    <!-- Ambient background -->
     <div class="ambient-bg">
         <div class="ambient-orb orb-1"></div>
         <div class="ambient-orb orb-2"></div>
         <div class="ambient-orb orb-3"></div>
     </div>
-
     <div class="app-container">
-        <!-- Header -->
         <header class="app-header">
             <div class="header-left">
                 <div class="logo">
-                    <div class="logo-icon">
-                        <svg viewBox="0 0 32 32" fill="none">
+                    <div class="logo-icon"><svg viewBox="0 0 32 32" fill="none">
                             <path d="M16 2L28 8V24L16 30L4 24V8L16 2Z" stroke="currentColor" stroke-width="1.5"
                                 fill="none" />
-                            <path d="M16 2L16 30" stroke="currentColor" stroke-width="1" opacity="0.4" />
-                            <path d="M4 8L28 24" stroke="currentColor" stroke-width="1" opacity="0.4" />
-                            <path d="M28 8L4 24" stroke="currentColor" stroke-width="1" opacity="0.4" />
-                            <circle cx="16" cy="16" r="3" fill="currentColor" opacity="0.8" />
-                        </svg>
-                    </div>
-                    <div class="logo-text">
-                        <span class="logo-name">FNX</span>
-                        <span class="logo-sub">Talent Factory</span>
-                    </div>
+                            <path d="M16 2L16 30" stroke="currentColor" stroke-width="1" opacity=".4" />
+                            <path d="M4 8L28 24" stroke="currentColor" stroke-width="1" opacity=".4" />
+                            <path d="M28 8L4 24" stroke="currentColor" stroke-width="1" opacity=".4" />
+                            <circle cx="16" cy="16" r="3" fill="currentColor" opacity=".8" />
+                        </svg></div>
+                    <div class="logo-text"><span class="logo-name">FNX</span><span class="logo-sub">Talent
+                            Factory</span></div>
                 </div>
             </div>
             <div class="header-center">
-                <h1>Competency Assessment Report</h1>
-                <p class="header-subtitle">Building 21 Framework · Powered by AI</p>
+                <h1>Báo cáo đánh giá</h1>
+                <p class="header-subtitle">Step 4-5 · Report & Warranty · v2.2</p>
             </div>
             <div class="header-right">
                 <div class="header-meta">
-                    <span class="meta-badge live-badge">
-                        <span class="pulse-dot"></span>
-                        LLM Verified
-                    </span>
-                    <span class="meta-date" id="reportDate"></span>
+                    <div class="nav-links">
+                        <a href="/demand" class="nav-link">Demand</a><span class="nav-sep">/</span>
+                        <a href="/assess" class="nav-link">Assess</a><span class="nav-sep">/</span>
+                        <a href="/report" class="nav-link active">Report</a><span class="nav-sep">/</span>
+                        <a href="/taxonomy" class="nav-link">Taxonomy</a>
+                    </div>
                 </div>
             </div>
         </header>
 
-        <!-- Main Content -->
+        <!-- Process Bar -->
+        <div class="process-bar">
+            <div class="process-step completed"><span class="step-num">✓</span><span class="step-text">Giải mã yêu
+                    cầu</span></div>
+            <div class="process-step"><span class="step-num">2</span><span class="step-text">Tạo nguồn & Sàng lọc</span>
+            </div>
+            <div class="process-step completed"><span class="step-num">✓</span><span class="step-text">Đánh giá năng
+                    lực</span></div>
+            <div class="process-step active"><span class="step-num">4</span><span class="step-text">Đào tạo & Close
+                    gap</span></div>
+            <div class="process-step"><span class="step-num">5</span><span class="step-text">Bàn giao & Bảo chứng</span>
+            </div>
+        </div>
+
         <main class="main-content">
-            <!-- Left Column: Candidate Info + Details -->
+            <!-- LEFT: Assessment List + Details -->
             <div class="col-left">
-                <!-- Candidate Card -->
-                <section class="card candidate-card" id="candidateCard">
+                <!-- Assessment List -->
+                <section class="card" id="listCard">
                     <div class="card-header">
-                        <span class="card-label">Hồ sơ ứng viên</span>
-                        <span class="candidate-id" id="candidateId">CAND_001</span>
+                        <span class="card-label">Danh sách đánh giá</span>
+                        <span class="card-badge" id="assessListCount">0</span>
                     </div>
-                    <div class="candidate-info">
-                        <div class="candidate-avatar" id="candidateAvatar">
-                            <span>NVA</span>
-                        </div>
-                        <div class="candidate-details">
-                            <h2 class="candidate-name" id="candidateName">Nguyễn Văn A</h2>
-                            <p class="candidate-major" id="candidateMajor">Kỹ thuật Hóa học · 2015</p>
-                        </div>
-                    </div>
-                    <div class="candidate-summary">
-                        <div class="summary-item">
-                            <span class="summary-label">Điểm mạnh nổi bật</span>
-                            <p class="summary-text" id="overallStrength">—</p>
-                        </div>
-                        <div class="summary-item">
-                            <span class="summary-label">Khu vực cần phát triển</span>
-                            <p class="summary-text" id="developmentAreas">—</p>
-                        </div>
-                    </div>
+                    <div class="report-list" id="reportList"></div>
                 </section>
 
-                <!-- Domain Breakdown -->
-                <section class="card domain-card">
+                <!-- Gap Analysis -->
+                <section class="card" id="gapCard" style="display:none">
                     <div class="card-header">
-                        <span class="card-label">Phân tích theo nhóm năng lực</span>
-                        <span class="card-badge">Building 21</span>
+                        <span class="card-label">Phân tích khoảng cách</span>
+                        <span class="card-badge" style="background:rgba(255,59,48,.08);color:var(--accent-red)"
+                            id="gapCount">0 gaps</span>
                     </div>
-                    <div class="domain-bars" id="domainBars">
-                        <!-- Generated by JS -->
-                    </div>
+                    <div id="gapList"></div>
                 </section>
 
-                <!-- Framework Legend — Hướng dẫn đọc báo cáo -->
-                <section class="card legend-card" id="legendCard">
-                    <div class="card-header">
-                        <span class="card-label">📖 Hướng dẫn đọc báo cáo</span>
-                        <button class="card-toggle" id="legendToggle" onclick="toggleLegend()">Thu gọn ▲</button>
-                    </div>
-                    <div class="legend-content" id="legendContent">
-                        <!-- Area Codes -->
-                        <div class="legend-section">
-                            <h3 class="legend-section-title">Mã vùng năng lực (Area Code)</h3>
-                            <p class="legend-section-desc">Mỗi năng lực được mã hóa theo dạng <strong>AREA.số</strong> —
-                                trong đó AREA là vùng năng lực theo khung Building 21:</p>
-                            <div class="legend-grid">
-                                <div class="legend-area-item" style="--area-color: var(--domain-mindset)">
-                                    <div class="legend-area-header">
-                                        <span class="legend-area-badge">Mindset</span>
-                                        <span class="legend-area-label">Tư duy & Thái độ</span>
-                                    </div>
-                                    <div class="legend-area-codes">
-                                        <span class="legend-code"><strong>HOS</strong> — Habits of Success <em>(Thói
-                                                quen thành công: tư duy hệ thống, tự quản lý, thích ứng)</em></span>
-                                        <span class="legend-code"><strong>PD</strong> — Personal Development <em>(Phát
-                                                triển cá nhân: thiết lập mục tiêu, học tập liên tục)</em></span>
-                                    </div>
-                                </div>
-                                <div class="legend-area-item" style="--area-color: var(--domain-skills)">
-                                    <div class="legend-area-header">
-                                        <span class="legend-area-badge">Skills</span>
-                                        <span class="legend-area-label">Kỹ năng thực hành</span>
-                                    </div>
-                                    <div class="legend-area-codes">
-                                        <span class="legend-code"><strong>WF</strong> — Workforce Readiness <em>(Kỹ năng
-                                                nghề: quản lý dự án, lãnh đạo, làm việc nhóm)</em></span>
-                                        <span class="legend-code"><strong>ELA</strong> — English Language Arts <em>(Ngôn
-                                                ngữ & Giao tiếp: viết báo cáo, thuyết trình, đàm phán)</em></span>
-                                    </div>
-                                </div>
-                                <div class="legend-area-item" style="--area-color: var(--domain-knowledge)">
-                                    <div class="legend-area-header">
-                                        <span class="legend-area-badge">Knowledge</span>
-                                        <span class="legend-area-label">Kiến thức chuyên môn</span>
-                                    </div>
-                                    <div class="legend-area-codes">
-                                        <span class="legend-code"><strong>SCI</strong> — Science <em>(Khoa học & Kỹ
-                                                thuật: kiến thức chuyên ngành, R&D, sáng chế)</em></span>
-                                        <span class="legend-code"><strong>MATH</strong> — Mathematics <em>(Toán & Phân
-                                                tích: phân tích dữ liệu, mô hình hóa)</em></span>
-                                        <span class="legend-code"><strong>SS</strong> — Social Studies <em>(Khoa học xã
-                                                hội: am hiểu ngành, quy định pháp luật)</em></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Level Scale -->
-                        <div class="legend-section">
-                            <h3 class="legend-section-title">Thang đánh giá năng lực (1–5)</h3>
-                            <div class="level-scale">
-                                <div class="level-scale-item">
-                                    <span class="level-badge level-1">1</span>
-                                    <div class="level-scale-text">
-                                        <strong>Nền tảng</strong>
-                                        <span>Hiểu sơ bộ, cần hướng dẫn chi tiết</span>
-                                    </div>
-                                </div>
-                                <div class="level-scale-item">
-                                    <span class="level-badge level-2">2</span>
-                                    <div class="level-scale-text">
-                                        <strong>Đang phát triển</strong>
-                                        <span>Thực hiện cơ bản, giám sát ít hơn</span>
-                                    </div>
-                                </div>
-                                <div class="level-scale-item">
-                                    <span class="level-badge level-3">3</span>
-                                    <div class="level-scale-text">
-                                        <strong>Thành thạo</strong>
-                                        <span>Đạt chuẩn doanh nghiệp, làm việc độc lập</span>
-                                    </div>
-                                </div>
-                                <div class="level-scale-item">
-                                    <span class="level-badge level-4">4</span>
-                                    <div class="level-scale-text">
-                                        <strong>Nâng cao</strong>
-                                        <span>Giải quyết vấn đề phức tạp, tư duy hệ thống</span>
-                                    </div>
-                                </div>
-                                <div class="level-scale-item">
-                                    <span class="level-badge level-5">5</span>
-                                    <div class="level-scale-text">
-                                        <strong>Bậc thầy</strong>
-                                        <span>Chuyên gia đầu ngành, dẫn dắt & bảo chứng</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Reading guide -->
-                        <div class="legend-section reading-guide">
-                            <h3 class="legend-section-title">Cách đọc biểu đồ Radar</h3>
-                            <div class="reading-guide-items">
-                                <p><span class="legend-dot legend-actual"></span> <strong>Đường xanh
-                                        (Candidate)</strong> — Năng lực thực tế của ứng viên, đánh giá dựa trên bằng
-                                    chứng từ hồ sơ</p>
-                                <p><span class="legend-dot legend-target"></span> <strong>Đường hồng (Job
-                                        Target)</strong> — Yêu cầu năng lực của vị trí, trích xuất từ JD</p>
-                                <p>📊 <strong>Vùng chồng lấp</strong> = phù hợp. <strong>Khoảng cách</strong> giữa 2
-                                    đường = gap cần bổ sung.</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Competency Detail Table -->
-                <section class="card competency-table-card">
+                <!-- Competency Table -->
+                <section class="card" id="tableCard" style="display:none">
                     <div class="card-header">
                         <span class="card-label">Ma trận năng lực & Bằng chứng</span>
                     </div>
-                    <div class="table-wrapper">
-                        <table class="competency-table" id="competencyTable">
+                    <div class="table-wrapper"
+                        style="overflow-x:auto;margin:0 calc(var(--gap-lg)*-1);padding:0 var(--gap-lg)">
+                        <table class="comp-table">
                             <thead>
                                 <tr>
-                                    <th>Vùng</th>
+                                    <th>Mã</th>
                                     <th>Năng lực</th>
-                                    <th>Cấp độ</th>
-                                    <th>Bằng chứng từ hồ sơ</th>
+                                    <th>Yêu cầu</th>
+                                    <th>Ứng viên</th>
+                                    <th>Gap</th>
+                                    <th>Bằng chứng</th>
                                 </tr>
                             </thead>
-                            <tbody id="competencyTableBody">
-                                <!-- Generated by JS -->
-                            </tbody>
+                            <tbody id="compTableBody"></tbody>
                         </table>
                     </div>
                 </section>
             </div>
 
-            <!-- Right Column: Radar Chart + Score -->
+            <!-- RIGHT: Score + Radar -->
             <div class="col-right">
-                <!-- Radar Chart Card -->
-                <section class="card radar-card">
+                <!-- Score Hero -->
+                <section class="card score-hero" id="scoreCard" style="display:none">
+                    <div class="score-hero-circle" id="scoreCircle">
+                        <span class="score-hero-num" id="scoreNum">—</span>
+                        <span class="score-hero-unit">Fit Score</span>
+                    </div>
+                    <div class="score-hero-name" id="scoreName">—</div>
+                    <div class="score-hero-detail" id="scoreDetail">—</div>
+                </section>
+
+                <!-- Radar -->
+                <section class="card" id="radarCard" style="display:none">
                     <div class="card-header">
                         <span class="card-label">Biểu đồ năng lực</span>
-                        <div class="radar-legend">
-                            <span class="legend-item">
-                                <span class="legend-dot legend-actual"></span>
-                                Ứng viên
-                            </span>
-                            <span class="legend-item">
-                                <span class="legend-dot legend-target"></span>
-                                Yêu cầu JD
-                            </span>
+                        <div style="display:flex;gap:var(--gap-md)">
+                            <span
+                                style="display:flex;align-items:center;gap:4px;font-size:.68rem;color:var(--text-secondary)"><span
+                                    style="width:10px;height:10px;border-radius:3px;background:rgba(0,113,227,.7)"></span>
+                                Ứng viên</span>
+                            <span
+                                style="display:flex;align-items:center;gap:4px;font-size:.68rem;color:var(--text-secondary)"><span
+                                    style="width:10px;height:10px;border-radius:3px;background:rgba(255,45,85,.5)"></span>
+                                Yêu cầu</span>
                         </div>
                     </div>
-                    <div class="radar-container">
-                        <canvas id="radarCanvas" width="520" height="520"></canvas>
-                        <div class="radar-center-score" id="radarCenterScore">
-                            <span class="score-value" id="fitScoreValue">—</span>
-                            <span class="score-label">Độ phù hợp</span>
-                        </div>
+                    <div class="radar-mini">
+                        <canvas id="radarCanvas" width="480" height="480"></canvas>
                     </div>
                 </section>
 
-                <!-- Gap Analysis Card (SHL style) -->
-                <section class="card gap-card">
-                    <div class="card-header">
-                        <span class="card-label">Phân tích khoảng cách</span>
-                        <span class="card-badge gap-badge" id="gapCount">0 gaps</span>
-                    </div>
-                    <div class="gap-list" id="gapList">
-                        <!-- Generated by JS -->
-                    </div>
-                </section>
-
-                <!-- Action Button -->
-                <div class="action-bar">
-                    <button class="btn btn-primary" id="runAssessmentBtn" onclick="runFullPipeline()">
-                        <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
-                            <path
-                                d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                        </svg>
-                        Run Full Pipeline
-                    </button>
-                    <button class="btn btn-secondary" onclick="loadDemoData()">
-                        <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
-                            <path fill-rule="evenodd"
-                                d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h2.433a.75.75 0 000-1.5H4.598a.75.75 0 00-.75.75v3.634a.75.75 0 001.5 0v-2.033l.312.311a7 7 0 0011.712-3.138.75.75 0 00-1.449-.39zm-6.624-8.848a7 7 0 00-11.712 3.138.75.75 0 001.45.388 5.5 5.5 0 019.201-2.466l.312.311H5.506a.75.75 0 000 1.5H9.14a.75.75 0 00.75-.75V1.063a.75.75 0 00-1.5 0v2.033l-.312-.311z"
-                                clip-rule="evenodd" transform="translate(2.5,1)" />
-                        </svg>
-                        Load Demo Data
-                    </button>
+                <!-- Actions -->
+                <div style="display:flex;gap:var(--gap-md);flex-wrap:wrap" id="actionBar" style="display:none">
+                    <a href="/assess"
+                        style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:var(--radius-sm);background:var(--accent-blue);color:#fff;font-weight:600;text-decoration:none;font-size:.82rem;transition:all var(--transition-fast)">+
+                        Đánh giá ứng viên khác</a>
+                    <a href="/demand"
+                        style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:var(--radius-sm);background:rgba(0,0,0,.04);color:var(--text-secondary);font-weight:600;text-decoration:none;font-size:.82rem;transition:all var(--transition-fast)">←
+                        Tạo demand mới</a>
                 </div>
             </div>
         </main>
 
-        <!-- Footer -->
         <footer class="app-footer">
-            <p>FNX Talent Factory v2 · Assessment powered by Gemini AI · Framework: Building 21</p>
+            <p>FNX Talent Factory v2 · Report powered by AI · Taxonomy v2.2.0</p>
         </footer>
     </div>
 
-    <script src="radar.js"></script>
-    <script src="app.js"></script>
+    <script>
+const COMPS=[
+  {id:'K1',name:'Kiến thức chuyên ngành',katz:'TECHNICAL',color:'#0071e3'},
+  {id:'K2',name:'Kiến thức & Nghiệp vụ kỹ thuật',katz:'TECHNICAL',color:'#0071e3'},
+  {id:'K3',name:'Công cụ & Công nghệ',katz:'TECHNICAL',color:'#0071e3'},
+  {id:'S1',name:'Giao tiếp kỹ thuật',katz:'INTERPERSONAL',color:'#ff9500'},
+  {id:'S2',name:'Phân tích & Giải quyết vấn đề',katz:'CONCEPTUAL',color:'#af52de'},
+  {id:'S3',name:'Quản lý & Lên kế hoạch',katz:'CONCEPTUAL',color:'#af52de'},
+  {id:'S4',name:'Tư duy hệ thống',katz:'CONCEPTUAL',color:'#af52de'},
+  {id:'S5',name:'Phối hợp & Giao việc',katz:'INTERPERSONAL',color:'#ff9500'},
+  {id:'A1',name:'Chủ động - Cải tiến',katz:'CONCEPTUAL',color:'#af52de'},
+  {id:'A2',name:'Hợp tác - Tin tưởng',katz:'INTERPERSONAL',color:'#ff9500'},
+  {id:'A3',name:'Quan tâm - Hỗ trợ',katz:'INTERPERSONAL',color:'#ff9500'}
+];
+
+let selectedAssess = null;
+let selectedDemand = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderAssessList();
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get('id');
+  if (id) selectAssessment(id);
+});
+
+function renderAssessList() {
+  const assessments = JSON.parse(localStorage.getItem('fnx_assessments') || '[]');
+  const el = document.getElementById('reportList');
+  document.getElementById('assessListCount').textContent = assessments.length;
+
+  if (assessments.length === 0) {
+    el.innerHTML = `<div class="empty-state">
+      <h2>Chưa có đánh giá nào</h2>
+      <p>Tạo demand profile và đánh giá ứng viên để xem báo cáo</p>
+      <a href="/demand">→ Bắt đầu từ Demand</a>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = assessments.map(a => {
+    const scoreColor = a.fitScore >= 80 ? 'var(--accent-green)' : a.fitScore >= 60 ? 'var(--accent-orange)' : 'var(--accent-red)';
+    const date = new Date(a.timestamp).toLocaleDateString('vi-VN', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    return `<div class="report-list-item" onclick="selectAssessment('${a.id}')">
+      <div class="report-list-info">
+        <div class="report-list-name">${a.candidateName}</div>
+        <div class="report-list-meta">${a.major || ''} · ${date} · ${a.gaps?.length || 0} gaps</div>
+      </div>
+      <span class="report-list-score" style="color:${scoreColor}">${a.fitScore || 0}%</span>
+    </div>`;
+  }).join('');
+}
+
+function selectAssessment(id) {
+  const assessments = JSON.parse(localStorage.getItem('fnx_assessments') || '[]');
+  selectedAssess = assessments.find(a => a.id === id);
+  if (!selectedAssess) return;
+
+  const demands = JSON.parse(localStorage.getItem('fnx_demands') || '[]');
+  selectedDemand = demands.find(d => d.id === selectedAssess.demand_id) || null;
+
+  // Highlight in list
+  document.querySelectorAll('.report-list-item').forEach(el => el.classList.remove('selected'));
+  const items = document.querySelectorAll('.report-list-item');
+  const idx = assessments.findIndex(a => a.id === id);
+  if (items[idx]) items[idx].classList.add('selected');
+
+  renderScore();
+  renderGaps();
+  renderTable();
+  drawRadar();
+
+  document.getElementById('scoreCard').style.display = '';
+  document.getElementById('radarCard').style.display = '';
+  document.getElementById('gapCard').style.display = '';
+  document.getElementById('tableCard').style.display = '';
+}
+
+function renderScore() {
+  const score = selectedAssess.fitScore || 0;
+  const color = score >= 80 ? 'var(--accent-green)' : score >= 60 ? 'var(--accent-orange)' : 'var(--accent-red)';
+  const circle = document.getElementById('scoreCircle');
+  circle.style.setProperty('--score-pct', score + '%');
+  circle.style.setProperty('--score-color', color);
+  document.getElementById('scoreNum').textContent = score;
+  document.getElementById('scoreNum').style.color = color;
+  document.getElementById('scoreName').textContent = selectedAssess.candidateName;
+
+  const demandInfo = selectedDemand ? `${selectedDemand.jobTitle} · ${selectedDemand.client}` : '';
+  document.getElementById('scoreDetail').textContent = `${selectedAssess.major || ''} · ${demandInfo}`;
+}
+
+function renderGaps() {
+  const gaps = selectedAssess.gaps || [];
+  document.getElementById('gapCount').textContent = gaps.length + ' gaps';
+  const el = document.getElementById('gapList');
+  if (gaps.length === 0) {
+    el.innerHTML = '<p style="font-size:.82rem;color:var(--accent-green);padding:8px;text-align:center">✓ Không có gap nào — ứng viên đạt tất cả yêu cầu!</p>';
+    return;
+  }
+  el.innerHTML = gaps.sort((a,b) => b.gap - a.gap).map(g => {
+    const comp = COMPS.find(c => c.id === g.id);
+    return `<div class="gap-row">
+      <span class="gap-row-id">${g.id}</span>
+      <span class="gap-row-name">${comp?.name || g.id}</span>
+      <div class="gap-row-levels">
+        <span class="gap-row-actual">${g.actual}</span>
+        <span class="gap-row-arrow">→</span>
+        <span class="gap-row-target">${g.target}</span>
+        <span class="gap-row-diff">-${g.gap}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderTable() {
+  const targetComps = selectedDemand?.competencies || [];
+  const el = document.getElementById('compTableBody');
+  el.innerHTML = selectedAssess.competencies.map(ac => {
+    const comp = COMPS.find(c => c.id === ac.id);
+    const tc = targetComps.find(c => c.id === ac.id);
+    const tLv = tc?.level || 0;
+    const gap = tLv > 0 ? tLv - ac.level : 0;
+    let gapHtml = '<span style="color:var(--text-caption)">—</span>';
+    if (gap > 0) gapHtml = `<span style="color:var(--accent-red);font-weight:700">-${gap}</span>`;
+    else if (gap < 0) gapHtml = `<span style="color:var(--accent-green);font-weight:700">+${Math.abs(gap)}</span>`;
+    else if (tLv > 0) gapHtml = `<span style="color:var(--accent-green)">✓</span>`;
+
+    return `<tr>
+      <td><span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:${comp?.color || '#888'}">${ac.id}</span></td>
+      <td style="font-weight:500;color:var(--text-primary)">${comp?.name || ac.id}</td>
+      <td><span class="level-badge level-${tLv}" style="width:24px;height:24px;font-size:.7rem;display:inline-flex;align-items:center;justify-content:center;border-radius:6px">${tLv || '—'}</span></td>
+      <td><span class="level-badge level-${ac.level}" style="width:24px;height:24px;font-size:.7rem;display:inline-flex;align-items:center;justify-content:center;border-radius:6px">${ac.level || '—'}</span></td>
+      <td>${gapHtml}</td>
+      <td style="font-size:.72rem;max-width:160px">${ac.evidence || '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function drawRadar() {
+  if (!selectedAssess) return;
+  const canvas = document.getElementById('radarCanvas'), ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio||1;canvas.width=480*dpr;canvas.height=480*dpr;canvas.style.width='480px';canvas.style.height='480px';ctx.scale(dpr,dpr);
+  const W=480,H=480,cx=W/2,cy=H/2,R=180;
+  const n=COMPS.length,step=(Math.PI*2)/n;
+  ctx.clearRect(0,0,W,H);
+
+  // Grid
+  for(let ring=1;ring<=5;ring++){const r=R*(ring/5);ctx.beginPath();for(let i=0;i<=n;i++){const a=i*step-Math.PI/2;const x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)}ctx.closePath();ctx.strokeStyle='rgba(0,0,0,.06)';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='rgba(0,0,0,.08)';ctx.font='500 9px Inter';ctx.textAlign='right';ctx.fillText(ring,cx-5,cy-r)}
+  COMPS.forEach((_,i)=>{const a=i*step-Math.PI/2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);ctx.strokeStyle='rgba(0,0,0,.04)';ctx.stroke()});
+
+  // Target (demand)
+  if (selectedDemand) {
+    const tLevels = selectedDemand.competencies.map(c => c.level);
+    ctx.beginPath();
+    tLevels.forEach((lv,i)=>{const a=i*step-Math.PI/2,r=R*(lv/5);const x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
+    ctx.closePath();ctx.fillStyle='rgba(255,45,85,.06)';ctx.fill();ctx.strokeStyle='rgba(255,45,85,.4)';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);
+  }
+
+  // Candidate
+  const cLevels = selectedAssess.competencies.map(c => c.level);
+  ctx.beginPath();
+  cLevels.forEach((lv,i)=>{const a=i*step-Math.PI/2,r=R*(lv/5);const x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
+  ctx.closePath();ctx.fillStyle='rgba(0,113,227,.1)';ctx.fill();ctx.strokeStyle='rgba(0,113,227,.6)';ctx.lineWidth=2;ctx.stroke();
+
+  // Points + labels
+  cLevels.forEach((lv,i)=>{
+    const a=i*step-Math.PI/2;
+    if(lv>0){const r=R*(lv/5);const x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;ctx.fillStyle=COMPS[i].color;ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill()}
+    const lx=cx+Math.cos(a)*(R+16),ly=cy+Math.sin(a)*(R+16);
+    ctx.fillStyle=COMPS[i].color;ctx.font="600 10px 'JetBrains Mono',monospace";ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(COMPS[i].id,lx,ly);
+  });
+}
+    </script>
 </body>
 
 </html>

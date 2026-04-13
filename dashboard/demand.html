@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FNX Talent Factory — Giải mã yêu cầu tuyển dụng</title>
+    <meta name="description" content="FNX Demand Analysis — Giải mã JD khách hàng thành ma trận năng lực v2.2">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* ═══ DEMAND PAGE STYLES ═══ */
+        .demand-layout {
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap-lg);
+            flex: 1
+        }
+
+        .demand-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--gap-lg)
+        }
+
+        @media(max-width:960px) {
+            .demand-grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        /* Process steps */
+        .process-bar {
+            display: flex;
+            gap: 0;
+            margin-bottom: var(--gap-md);
+            background: var(--bg-frosted);
+            border-radius: var(--radius-lg);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            box-shadow: var(--shadow-sm);
+            border: .5px solid rgba(0, 0, 0, .04);
+            overflow: hidden
+        }
+
+        .process-step {
+            flex: 1;
+            padding: 14px var(--gap-md);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            transition: all var(--transition-base);
+            cursor: default
+        }
+
+        .process-step::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 20%;
+            bottom: 20%;
+            width: 1px;
+            background: rgba(0, 0, 0, .06)
+        }
+
+        .process-step:last-child::after {
+            display: none
+        }
+
+        .process-step.active {
+            background: rgba(0, 113, 227, .06)
+        }
+
+        .process-step.completed {
+            background: rgba(52, 199, 89, .04)
+        }
+
+        .process-step .step-num {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .7rem;
+            font-weight: 700;
+            border: 2px solid rgba(0, 0, 0, .1);
+            color: var(--text-caption);
+            flex-shrink: 0;
+            transition: all var(--transition-fast)
+        }
+
+        .process-step.active .step-num {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+            background: rgba(0, 113, 227, .08)
+        }
+
+        .process-step.completed .step-num {
+            border-color: var(--accent-green);
+            color: #fff;
+            background: var(--accent-green)
+        }
+
+        .process-step .step-text {
+            font-size: .72rem;
+            font-weight: 600;
+            color: var(--text-caption);
+            line-height: 1.3;
+            transition: color var(--transition-fast)
+        }
+
+        .process-step.active .step-text {
+            color: var(--accent-blue)
+        }
+
+        .process-step.completed .step-text {
+            color: var(--accent-green)
+        }
+
+        /* Input form */
+        .input-form {
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap-md)
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--gap-md)
+        }
+
+        @media(max-width:600px) {
+            .form-row {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px
+        }
+
+        .form-label {
+            font-size: .65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            color: var(--text-caption)
+        }
+
+        .form-input,
+        .form-select {
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid rgba(0, 0, 0, .08);
+            background: var(--bg-tertiary);
+            font-size: .85rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            transition: all var(--transition-fast);
+            outline: none
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, .1)
+        }
+
+        .form-input::placeholder {
+            color: var(--text-caption)
+        }
+
+        textarea.form-input {
+            min-height: 180px;
+            resize: vertical;
+            line-height: 1.55
+        }
+
+        .form-select {
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center
+        }
+
+        /* Buttons */
+        .btn-decode {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-indigo));
+            color: #fff;
+            font-size: .85rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            box-shadow: 0 4px 14px rgba(0, 113, 227, .25)
+        }
+
+        .btn-decode:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 113, 227, .35)
+        }
+
+        .btn-decode:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+            transform: none
+        }
+
+        .btn-decode .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, .3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin .6s linear infinite;
+            display: none
+        }
+
+        .btn-decode.loading .spinner {
+            display: block
+        }
+
+        .btn-decode.loading .btn-icon {
+            display: none
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .btn-confirm {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border-radius: var(--radius-sm);
+            background: var(--accent-green);
+            color: #fff;
+            font-size: .85rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            box-shadow: 0 4px 14px rgba(52, 199, 89, .25)
+        }
+
+        .btn-confirm:hover {
+            transform: translateY(-1px)
+        }
+
+        /* Competency matrix */
+        .matrix-section {
+            display: none
+        }
+
+        .matrix-section.visible {
+            display: block;
+            animation: cardAppear .5s ease both
+        }
+
+        .comp-matrix {
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .comp-matrix-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            transition: background var(--transition-fast)
+        }
+
+        .comp-matrix-row:hover {
+            background: rgba(0, 0, 0, .025)
+        }
+
+        .comp-matrix-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .68rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 6px;
+            color: #fff;
+            flex-shrink: 0;
+            width: 36px;
+            text-align: center
+        }
+
+        .comp-matrix-name {
+            flex: 1;
+            font-size: .82rem;
+            font-weight: 500;
+            color: var(--text-primary)
+        }
+
+        .comp-matrix-evidence {
+            font-size: .68rem;
+            color: var(--text-tertiary);
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-style: italic
+        }
+
+        .comp-matrix-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .level-select {
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1.5px solid rgba(0, 0, 0, .08);
+            font-size: .78rem;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            cursor: pointer;
+            width: 50px;
+            text-align: center
+        }
+
+        .priority-tag {
+            font-size: .6rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 100px;
+            cursor: pointer;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+            transition: all var(--transition-fast);
+            min-width: 62px;
+            text-align: center
+        }
+
+        .priority-high {
+            background: rgba(255, 59, 48, .1);
+            color: var(--accent-red)
+        }
+
+        .priority-medium {
+            background: rgba(255, 149, 0, .1);
+            color: var(--accent-orange)
+        }
+
+        .priority-low {
+            background: rgba(88, 86, 214, .1);
+            color: var(--accent-indigo)
+        }
+
+        /* Katz distribution bars */
+        .katz-distrib {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: var(--gap-md)
+        }
+
+        .katz-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .katz-bar-label {
+            font-size: .72rem;
+            font-weight: 600;
+            width: 70px;
+            color: var(--text-secondary)
+        }
+
+        .katz-bar-track {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(0, 0, 0, .05);
+            overflow: hidden
+        }
+
+        .katz-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width .8s cubic-bezier(.34, 1.56, .64, 1)
+        }
+
+        .katz-bar-pct {
+            font-size: .68rem;
+            font-weight: 700;
+            width: 36px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            color: var(--text-secondary)
+        }
+
+        /* Summary card */
+        .demand-summary {
+            display: none;
+            padding: var(--gap-md);
+            background: rgba(52, 199, 89, .04);
+            border-radius: var(--radius-sm);
+            border-left: 3px solid var(--accent-green)
+        }
+
+        .demand-summary.visible {
+            display: block;
+            animation: cardAppear .4s ease both
+        }
+
+        .demand-summary h3 {
+            font-size: .85rem;
+            font-weight: 700;
+            color: var(--accent-green);
+            margin-bottom: 8px
+        }
+
+        .demand-summary p {
+            font-size: .8rem;
+            color: var(--text-secondary);
+            line-height: 1.55
+        }
+
+        /* Nav */
+        .nav-links {
+            display: flex;
+            gap: var(--gap-md);
+            align-items: center
+        }
+
+        .nav-link {
+            font-size: .78rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all var(--transition-fast)
+        }
+
+        .nav-link:hover {
+            color: var(--accent-blue);
+            background: var(--accent-blue-light)
+        }
+
+        .nav-link.active {
+            color: var(--accent-blue);
+            font-weight: 600
+        }
+
+        .nav-sep {
+            color: var(--text-caption);
+            font-size: .7rem
+        }
+
+        /* Radar mini */
+        .radar-mini {
+            display: flex;
+            flex-direction: column;
+            align-items: center
+        }
+
+        .radar-mini canvas {
+            max-width: 100%
+        }
+
+        /* Demand list */
+        .demand-list-section {
+            margin-top: var(--gap-md)
+        }
+
+        .demand-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .demand-list-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            background: rgba(0, 0, 0, .02);
+            transition: all var(--transition-fast);
+            cursor: pointer
+        }
+
+        .demand-list-item:hover {
+            background: rgba(0, 113, 227, .04)
+        }
+
+        .demand-list-item.current {
+            background: rgba(52, 199, 89, .06);
+            border-left: 3px solid var(--accent-green)
+        }
+
+        .demand-list-info {
+            flex: 1;
+            min-width: 0
+        }
+
+        .demand-list-title {
+            font-size: .8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        .demand-list-meta {
+            font-size: .65rem;
+            color: var(--text-caption);
+            margin-top: 2px
+        }
+
+        .demand-list-count {
+            font-size: .68rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            font-variant-numeric: tabular-nums;
+            font-family: 'JetBrains Mono', monospace
+        }
+
+        .btn-assess {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 6px;
+            background: var(--accent-blue);
+            color: #fff;
+            font-size: .7rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+            white-space: nowrap
+        }
+
+        .btn-assess:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 113, 227, .3)
+        }
+
+        /* Drop zone */
+        .drop-zone {
+            border: 2px dashed rgba(0, 0, 0, .1);
+            border-radius: var(--radius-sm);
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .2s ease;
+            position: relative;
+            background: rgba(0, 0, 0, .01)
+        }
+
+        .drop-zone:hover,
+        .drop-zone.dragover {
+            border-color: var(--accent-blue);
+            background: rgba(0, 113, 227, .03)
+        }
+
+        .drop-zone.dragover {
+            transform: scale(1.01);
+            box-shadow: 0 0 0 4px rgba(0, 113, 227, .08)
+        }
+
+        .drop-zone-input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer
+        }
+
+        .drop-zone-content {
+            pointer-events: none
+        }
+
+        .drop-zone-icon {
+            font-size: 1.5rem;
+            margin-bottom: 6px
+        }
+
+        .drop-zone-text {
+            font-size: .82rem;
+            font-weight: 600;
+            color: var(--text-secondary)
+        }
+
+        .drop-zone-sub {
+            font-size: .68rem;
+            color: var(--text-caption);
+            margin-top: 4px
+        }
+
+        .drop-zone-browse {
+            color: var(--accent-blue);
+            font-weight: 600;
+            cursor: pointer
+        }
+
+        .drop-zone-loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px;
+            color: var(--accent-blue);
+            font-size: .82rem;
+            font-weight: 500
+        }
+
+        .drop-zone-loading .drop-spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(0, 113, 227, .2);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin .6s linear infinite
+        }
+
+        .drop-zone-success {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(52, 199, 89, .06);
+            border-radius: 6px;
+            font-size: .78rem;
+            color: var(--accent-green);
+            font-weight: 500
+        }
+
+        .drop-zone.loaded .drop-zone-content {
+            display: none
+        }
+
+        .drop-zone.loaded .drop-zone-success {
+            display: flex
+        }
+
+        .drop-zone.extracting .drop-zone-content {
+            display: none
+        }
+
+        .drop-zone.extracting .drop-zone-loading {
+            display: flex
+        }
+
+        .drop-zone-or {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 8px 0;
+            color: var(--text-caption);
+            font-size: .68rem;
+            font-weight: 500
+        }
+
+        .drop-zone-or::before,
+        .drop-zone-or::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(0, 0, 0, .06)
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ambient-bg">
+        <div class="ambient-orb orb-1"></div>
+        <div class="ambient-orb orb-2"></div>
+        <div class="ambient-orb orb-3"></div>
+    </div>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo">
+                    <div class="logo-icon"><svg viewBox="0 0 32 32" fill="none">
+                            <path d="M16 2L28 8V24L16 30L4 24V8L16 2Z" stroke="currentColor" stroke-width="1.5"
+                                fill="none" />
+                            <path d="M16 2L16 30" stroke="currentColor" stroke-width="1" opacity=".4" />
+                            <path d="M4 8L28 24" stroke="currentColor" stroke-width="1" opacity=".4" />
+                            <path d="M28 8L4 24" stroke="currentColor" stroke-width="1" opacity=".4" />
+                            <circle cx="16" cy="16" r="3" fill="currentColor" opacity=".8" />
+                        </svg></div>
+                    <div class="logo-text"><span class="logo-name">FNX</span><span class="logo-sub">Talent
+                            Factory</span></div>
+                </div>
+            </div>
+            <div class="header-center">
+                <h1>Giải mã yêu cầu tuyển dụng</h1>
+                <p class="header-subtitle">Step 1 · Demand Analysis · v2.2</p>
+            </div>
+            <div class="header-right">
+                <div class="header-meta">
+                    <div class="nav-links">
+                        <a href="/demand" class="nav-link active">Demand</a><span class="nav-sep">/</span>
+                        <a href="/assess" class="nav-link">Assess</a><span class="nav-sep">/</span>
+                        <a href="/report" class="nav-link">Report</a><span class="nav-sep">/</span>
+                        <a href="/taxonomy" class="nav-link">Taxonomy</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Process Bar -->
+        <div class="process-bar">
+            <div class="process-step active">
+                <span class="step-num">1</span>
+                <span class="step-text">Giải mã yêu cầu</span>
+            </div>
+            <div class="process-step">
+                <span class="step-num">2</span>
+                <span class="step-text">Tạo nguồn & Sàng lọc</span>
+            </div>
+            <div class="process-step">
+                <span class="step-num">3</span>
+                <span class="step-text">Đánh giá năng lực</span>
+            </div>
+            <div class="process-step">
+                <span class="step-num">4</span>
+                <span class="step-text">Đào tạo & Close gap</span>
+            </div>
+            <div class="process-step">
+                <span class="step-num">5</span>
+                <span class="step-text">Bàn giao & Bảo chứng</span>
+            </div>
+        </div>
+
+        <main class="demand-layout">
+            <div class="demand-grid">
+                <!-- LEFT: Input + Matrix -->
+                <div style="display:flex;flex-direction:column;gap:var(--gap-lg)">
+                    <!-- Input Card -->
+                    <section class="card" id="inputCard">
+                        <div class="card-header">
+                            <span class="card-label">Thông tin yêu cầu</span>
+                            <span class="card-badge">Step 1</span>
+                        </div>
+                        <div class="input-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Khách hàng</label>
+                                    <input type="text" class="form-input" id="clientName"
+                                        placeholder="VD: NSRP, PVN, BSR...">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Chức danh</label>
+                                    <input type="text" class="form-input" id="jobTitle"
+                                        placeholder="VD: Kỹ sư vận hành DCS">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Ngành</label>
+                                    <select class="form-select" id="industry">
+                                        <option value="petrochemical">Hóa dầu</option>
+                                        <option value="manufacturing">Sản xuất</option>
+                                        <option value="energy">Năng lượng</option>
+                                        <option value="construction">Xây dựng</option>
+                                        <option value="it">CNTT</option>
+                                        <option value="other">Khác</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Cấp bậc</label>
+                                    <select class="form-select" id="seniority">
+                                        <option value="fresher">Fresher (0-1 năm)</option>
+                                        <option value="junior">Junior (1-3 năm)</option>
+                                        <option value="mid">Middle (3-5 năm)</option>
+                                        <option value="senior">Senior (5-8 năm)</option>
+                                        <option value="expert">Expert (8+ năm)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Mô tả công việc (JD)</label>
+                                <div class="drop-zone" id="jdDropZone">
+                                    <input type="file" class="drop-zone-input" id="jdFileInput"
+                                        accept=".pdf,.docx,.doc,.txt">
+                                    <div class="drop-zone-content">
+                                        <div class="drop-zone-icon">📄</div>
+                                        <div class="drop-zone-text">Kéo thả file JD vào đây</div>
+                                        <div class="drop-zone-sub">hoặc <span class="drop-zone-browse">chọn file</span>
+                                            · hỗ trợ .pdf, .docx, .txt</div>
+                                    </div>
+                                    <div class="drop-zone-loading"><span class="drop-spinner"></span> Đang trích xuất
+                                        văn bản...</div>
+                                    <div class="drop-zone-success">✅ <span class="drop-filename"></span> · <span
+                                            class="drop-wordcount"></span></div>
+                                </div>
+                                <div class="drop-zone-or">hoặc paste trực tiếp</div>
+                                <textarea class="form-input" id="jdText"
+                                    placeholder="Paste nội dung JD vào đây. AI sẽ phân tích và trích xuất yêu cầu năng lực tự động..."></textarea>
+                            </div>
+                            <div style="display:flex;gap:var(--gap-md);align-items:center">
+                                <button class="btn-decode" id="decodeBtn" onclick="decodeJD()">
+                                    <span class="btn-icon">🔍</span>
+                                    <span class="spinner"></span>
+                                    Giải mã bằng AI
+                                </button>
+                                <button class="btn-decode"
+                                    style="background:linear-gradient(135deg,var(--accent-orange),var(--accent-red));box-shadow:0 4px 14px rgba(255,149,0,.25)"
+                                    onclick="loadDemoJD()">
+                                    📄 Demo JD
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Competency Matrix (hidden until AI decodes) -->
+                    <section class="card matrix-section" id="matrixCard">
+                        <div class="card-header">
+                            <span class="card-label">Ma trận yêu cầu năng lực</span>
+                            <span class="card-badge" id="compCount">0 / 11</span>
+                        </div>
+                        <div class="comp-matrix" id="compMatrix"></div>
+                        <div style="margin-top:var(--gap-lg);display:flex;gap:var(--gap-md);align-items:center">
+                            <button class="btn-confirm" onclick="confirmDemand()">✓ Xác nhận ma trận</button>
+                            <span style="font-size:.72rem;color:var(--text-caption)">Chỉnh level & priority trước khi
+                                xác nhận</span>
+                        </div>
+                    </section>
+
+                    <!-- Confirmed Summary -->
+                    <div class="demand-summary" id="demandSummary">
+                        <h3>✓ Ma trận yêu cầu đã xác nhận</h3>
+                        <p id="summaryText"></p>
+                        <a href="#" class="btn-assess" id="goAssessBtn" style="margin-top:12px;display:none">→ Đánh giá
+                            ứng viên cho vị trí này</a>
+                    </div>
+
+                    <!-- Demand History List -->
+                    <section class="card demand-list-section" id="demandListSection">
+                        <div class="card-header">
+                            <span class="card-label">Yêu cầu đã tạo</span>
+                            <span class="card-badge" id="demandListCount">0</span>
+                        </div>
+                        <div class="demand-list" id="demandList"></div>
+                    </section>
+                </div>
+
+                <!-- RIGHT: Radar + Katz + JD Summary -->
+                <div style="display:flex;flex-direction:column;gap:var(--gap-lg)">
+                    <!-- Radar Preview -->
+                    <section class="card matrix-section" id="radarCard">
+                        <div class="card-header">
+                            <span class="card-label">Radar Preview</span>
+                            <span class="card-badge">11 năng lực</span>
+                        </div>
+                        <div class="radar-mini">
+                            <canvas id="radarCanvas" width="400" height="400"></canvas>
+                        </div>
+                        <div class="katz-distrib" id="katzDistrib"></div>
+                    </section>
+
+                    <!-- JD AI Summary -->
+                    <section class="card matrix-section" id="aiSummaryCard">
+                        <div class="card-header">
+                            <span class="card-label">AI nhận định</span>
+                            <span class="card-badge">JD Decoder</span>
+                        </div>
+                        <p id="aiSummary" style="font-size:.82rem;color:var(--text-secondary);line-height:1.6"></p>
+                    </section>
+                </div>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <p>FNX Talent Factory v2 · Demand Analysis powered by AI · Taxonomy v2.2.0</p>
+        </footer>
+    </div>
+
+    <script>
+        // ── Competency definitions (v2.2) ──
+        const COMPS = [
+            { id: 'K1', name: 'Kiến thức chuyên ngành', katz: 'TECHNICAL', color: '#0071e3' },
+            { id: 'K2', name: 'Kiến thức & Nghiệp vụ kỹ thuật', katz: 'TECHNICAL', color: '#0071e3' },
+            { id: 'K3', name: 'Công cụ & Công nghệ', katz: 'TECHNICAL', color: '#0071e3' },
+            { id: 'S1', name: 'Giao tiếp kỹ thuật', katz: 'INTERPERSONAL', color: '#ff9500' },
+            { id: 'S2', name: 'Phân tích & Giải quyết vấn đề', katz: 'CONCEPTUAL', color: '#af52de' },
+            { id: 'S3', name: 'Quản lý & Lên kế hoạch', katz: 'CONCEPTUAL', color: '#af52de' },
+            { id: 'S4', name: 'Tư duy hệ thống', katz: 'CONCEPTUAL', color: '#af52de' },
+            { id: 'S5', name: 'Phối hợp & Giao việc', katz: 'INTERPERSONAL', color: '#ff9500' },
+            { id: 'A1', name: 'Chủ động - Cải tiến', katz: 'CONCEPTUAL', color: '#af52de' },
+            { id: 'A2', name: 'Hợp tác - Tin tưởng', katz: 'INTERPERSONAL', color: '#ff9500' },
+            { id: 'A3', name: 'Quan tâm - Hỗ trợ', katz: 'INTERPERSONAL', color: '#ff9500' }
+        ];
+        const KATZ_COLORS = { TECHNICAL: '#0071e3', INTERPERSONAL: '#ff9500', CONCEPTUAL: '#af52de' };
+        const KATZ_LABELS = { TECHNICAL: 'Kỹ thuật', INTERPERSONAL: 'Con người', CONCEPTUAL: 'Tư duy' };
+        const PRIORITIES = ['High', 'Medium', 'Low'];
+        const PRIORITY_CLASSES = { High: 'priority-high', Medium: 'priority-medium', Low: 'priority-low' };
+
+        let demandData = null;
+
+        // ── Demo JD ──
+        function loadDemoJD() {
+            document.getElementById('clientName').value = 'NSRP (Nhà máy Lọc hóa dầu Nghi Sơn)';
+            document.getElementById('jobTitle').value = 'Kỹ sư vận hành DCS';
+            document.getElementById('industry').value = 'petrochemical';
+            document.getElementById('seniority').value = 'junior';
+            document.getElementById('jdText').value = `Vị trí: Kỹ sư vận hành DCS
+Phòng ban: Vận hành sản xuất
+Báo cáo cho: Trưởng ca vận hành
+
+Mô tả công việc:
+- Vận hành hệ thống DCS (Distributed Control System) đảm bảo các thông số sản xuất trong giới hạn cho phép
+- Giám sát, điều chỉnh các thông số vận hành thiết bị trong phân xưởng
+- Phối hợp với đội bảo trì để thực hiện các hoạt động bảo trì định kỳ và đột xuất
+- Lập báo cáo vận hành hàng ca, báo cáo sự cố
+- Tuân thủ nghiêm ngặt quy trình an toàn và SOP của nhà máy
+- Tham gia diễn tập xử lý tình huống khẩn cấp
+
+Yêu cầu:
+- Tốt nghiệp Đại học chuyên ngành Hóa học, Hóa dầu, Kỹ thuật Hóa học hoặc tương đương
+- Có 1-3 năm kinh nghiệm vận hành nhà máy lọc dầu, hóa chất hoặc hóa dầu
+- Thành thạo vận hành hệ thống DCS (ưu tiên Honeywell hoặc Yokogawa)
+- Đọc hiểu P&ID, PFD và các bản vẽ kỹ thuật
+- Có khả năng làm việc theo ca xoay (shift work)
+- Giao tiếp tốt, khả năng phối hợp nhóm trong môi trường đa quốc gia
+- Ưu tiên có chứng chỉ an toàn công nghiệp (OSHA, Process Safety)`;
+        }
+
+        // ── AI Decode (simulated for MVP — will connect to API later) ──
+        function decodeJD() {
+            const jd = document.getElementById('jdText').value.trim();
+            if (!jd) { alert('Vui lòng nhập JD trước khi giải mã'); return }
+
+            const btn = document.getElementById('decodeBtn');
+            btn.classList.add('loading'); btn.disabled = true;
+
+            // Simulate AI processing
+            setTimeout(() => {
+                const seniority = document.getElementById('seniority').value;
+                const industry = document.getElementById('industry').value;
+
+                // Smart extraction based on JD content and context
+                demandData = {
+                    competencies: extractCompetencies(jd, seniority, industry),
+                    summary: generateSummary(jd),
+                    client: document.getElementById('clientName').value || '(chưa nhập)',
+                    jobTitle: document.getElementById('jobTitle').value || '(chưa nhập)',
+                    industry: document.getElementById('industry').selectedOptions[0].text,
+                    seniority: document.getElementById('seniority').selectedOptions[0].text
+                };
+
+                btn.classList.remove('loading'); btn.disabled = false;
+                renderMatrix();
+                drawRadar();
+                renderKatz();
+
+                document.getElementById('matrixCard').classList.add('visible');
+                document.getElementById('radarCard').classList.add('visible');
+                document.getElementById('aiSummaryCard').classList.add('visible');
+                document.getElementById('aiSummary').textContent = demandData.summary;
+                document.getElementById('compCount').textContent = demandData.competencies.filter(c => c.level > 0).length + ' / 11';
+            }, 1500);
+        }
+
+        function extractCompetencies(jd, seniority, industry) {
+            const jdLower = jd.toLowerCase();
+            const levelMap = { fresher: 1, junior: 2, mid: 3, senior: 4, expert: 5 };
+            const baseLevel = levelMap[seniority] || 2;
+            const results = [];
+
+            const rules = [
+                { id: 'K1', keywords: ['chuyên ngành', 'hóa học', 'hóa dầu', 'kỹ thuật hóa', 'tốt nghiệp đại học', 'kiến thức'], base: baseLevel, priority: 'High' },
+                { id: 'K2', keywords: ['vận hành', 'sop', 'quy trình', 'tiêu chuẩn', 'bảo trì', 'thiết bị', 'p&id', 'pfd', 'bản vẽ'], base: baseLevel, priority: 'High' },
+                { id: 'K3', keywords: ['dcs', 'scada', 'honeywell', 'yokogawa', 'phần mềm', 'công cụ', 'hệ thống'], base: baseLevel, priority: 'Medium' },
+                { id: 'S1', keywords: ['giao tiếp', 'báo cáo', 'trình bày', 'đa quốc gia', 'communication', 'tiếng anh'], base: Math.max(1, baseLevel - 1), priority: 'Medium' },
+                { id: 'S2', keywords: ['phân tích', 'giải quyết', 'sự cố', 'xử lý', 'troubleshoot', 'root cause', 'vấn đề'], base: baseLevel, priority: 'Medium' },
+                { id: 'S3', keywords: ['quản lý', 'kế hoạch', 'lập kế hoạch', 'planning', 'giám sát', 'định kỳ', 'lịch trình'], base: Math.max(1, baseLevel - 1), priority: 'Low' },
+                { id: 'S4', keywords: ['hệ thống', 'tổng thể', 'quy trình', 'end-to-end', 'tư duy', 'architecture'], base: Math.max(1, baseLevel - 1), priority: 'Low' },
+                { id: 'S5', keywords: ['phối hợp', 'nhóm', 'team', 'đội', 'ca xoay', 'shift', 'coordinate', 'làm việc nhóm'], base: baseLevel, priority: 'Medium' },
+                { id: 'A1', keywords: ['chủ động', 'cải tiến', 'sáng kiến', 'ownership', 'initiative', 'đề xuất'], base: Math.max(1, baseLevel - 1), priority: 'Low' },
+                { id: 'A2', keywords: ['hợp tác', 'tin tưởng', 'collaborate', 'teamwork', 'chia sẻ'], base: Math.max(1, baseLevel - 1), priority: 'Medium' },
+                { id: 'A3', keywords: ['an toàn', 'safety', 'osha', 'hse', 'khẩn cấp', 'emergency', 'quan tâm', 'care'], base: baseLevel, priority: 'High' }
+            ];
+
+            // Petrochemical industry overlay: A3 (Safety) always High
+            if (industry === 'petrochemical') {
+                rules.find(r => r.id === 'A3').priority = 'High';
+                rules.find(r => r.id === 'A3').base = Math.max(baseLevel, 3);
+                rules.find(r => r.id === 'K2').priority = 'High';
+            }
+
+            rules.forEach(rule => {
+                const hits = rule.keywords.filter(kw => jdLower.includes(kw)).length;
+                const evidence = rule.keywords.filter(kw => jdLower.includes(kw)).slice(0, 3).join(', ');
+                let level = 0, priority = 'Low';
+
+                if (hits >= 3) { level = rule.base + 1; priority = rule.priority }
+                else if (hits >= 1) { level = rule.base; priority = rule.priority }
+                else if (industry === 'petrochemical' && ['K1', 'K2', 'A3'].includes(rule.id)) {
+                    level = rule.base; priority = 'Medium'; // implicit for petrochemical
+                }
+
+                level = Math.min(5, Math.max(0, level));
+                results.push({ id: rule.id, level, priority, evidence: evidence || '(ngầm ẩn)' });
+            });
+
+            return results;
+        }
+
+        function generateSummary(jd) {
+            const words = jd.split(/\s+/).length;
+            const client = document.getElementById('clientName').value || 'khách hàng';
+            const title = document.getElementById('jobTitle').value || 'vị trí';
+            return `JD ${words} từ cho vị trí "${title}" tại ${client}. Yêu cầu chính: nghiệp vụ kỹ thuật (DCS/vận hành), tuân thủ an toàn (SOP/HSE), và phối hợp nhóm (ca xoay/đa quốc gia). Trọng tâm kỹ thuật chiếm ưu thế, phù hợp profile Junior Engineer với kinh nghiệm 1-3 năm.`;
+        }
+
+        // ── Render Matrix ──
+        function renderMatrix() {
+            const el = document.getElementById('compMatrix'); el.innerHTML = '';
+            demandData.competencies.forEach((dc, i) => {
+                const comp = COMPS.find(c => c.id === dc.id);
+                if (!comp) return;
+                const pClass = PRIORITY_CLASSES[dc.priority] || 'priority-low';
+                el.innerHTML += `<div class="comp-matrix-row">
+      <span class="comp-matrix-tag" style="background:${comp.color}">${dc.id}</span>
+      <span class="comp-matrix-name">${comp.name}</span>
+      <span class="comp-matrix-evidence" title="${dc.evidence}">${dc.evidence}</span>
+      <div class="comp-matrix-controls">
+        <select class="level-select" id="level_${i}" onchange="updateLevel(${i},this.value)">
+          <option value="0" ${dc.level === 0 ? 'selected' : ''}>—</option>
+          <option value="1" ${dc.level === 1 ? 'selected' : ''}>1</option>
+          <option value="2" ${dc.level === 2 ? 'selected' : ''}>2</option>
+          <option value="3" ${dc.level === 3 ? 'selected' : ''}>3</option>
+          <option value="4" ${dc.level === 4 ? 'selected' : ''}>4</option>
+          <option value="5" ${dc.level === 5 ? 'selected' : ''}>5</option>
+        </select>
+        <button class="priority-tag ${pClass}" id="prio_${i}" onclick="cyclePriority(${i})">${dc.priority}</button>
+      </div>
+    </div>`;
+            });
+        }
+
+        function updateLevel(idx, val) {
+            demandData.competencies[idx].level = parseInt(val);
+            document.getElementById('compCount').textContent = demandData.competencies.filter(c => c.level > 0).length + ' / 11';
+            drawRadar(); renderKatz();
+        }
+
+        function cyclePriority(idx) {
+            const curr = demandData.competencies[idx].priority;
+            const next = PRIORITIES[(PRIORITIES.indexOf(curr) + 1) % PRIORITIES.length];
+            demandData.competencies[idx].priority = next;
+            const btn = document.getElementById('prio_' + idx);
+            btn.textContent = next;
+            btn.className = 'priority-tag ' + PRIORITY_CLASSES[next];
+        }
+
+        // ── Radar Chart ──
+        function drawRadar() {
+            if (!demandData) return;
+            const canvas = document.getElementById('radarCanvas'), ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1; canvas.width = 400 * dpr; canvas.height = 400 * dpr; canvas.style.width = '400px'; canvas.style.height = '400px'; ctx.scale(dpr, dpr);
+            const W = 400, H = 400, cx = W / 2, cy = H / 2, R = 150;
+            const n = COMPS.length, step = (Math.PI * 2) / n;
+            ctx.clearRect(0, 0, W, H);
+
+            // Grid rings
+            for (let ring = 1; ring <= 5; ring++) {
+                const r = R * (ring / 5);
+                ctx.beginPath();
+                for (let i = 0; i <= n; i++) { const a = i * step - Math.PI / 2; const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r; i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y) }
+                ctx.closePath(); ctx.strokeStyle = 'rgba(0,0,0,.06)'; ctx.lineWidth = 1; ctx.stroke();
+                ctx.fillStyle = 'rgba(0,0,0,.1)'; ctx.font = '500 9px Inter'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(ring, cx - 5, cy - r);
+            }
+
+            // Axes
+            COMPS.forEach((_, i) => { const a = i * step - Math.PI / 2; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R); ctx.strokeStyle = 'rgba(0,0,0,.04)'; ctx.stroke() });
+
+            // Target area
+            const levels = demandData.competencies.map(c => c.level);
+            ctx.beginPath();
+            levels.forEach((lv, i) => { const a = i * step - Math.PI / 2, r = R * (lv / 5); const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r; i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y) });
+            ctx.closePath(); ctx.fillStyle = 'rgba(0,113,227,.08)'; ctx.fill(); ctx.strokeStyle = 'rgba(0,113,227,.5)'; ctx.lineWidth = 2; ctx.stroke();
+
+            // Points + labels
+            levels.forEach((lv, i) => {
+                if (lv === 0) return;
+                const a = i * step - Math.PI / 2, r = R * (lv / 5);
+                const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+                ctx.fillStyle = COMPS[i].color; ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
+                const lx = cx + Math.cos(a) * (R + 14), ly = cy + Math.sin(a) * (R + 14);
+                ctx.fillStyle = COMPS[i].color; ctx.font = "600 9px 'JetBrains Mono',monospace"; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(COMPS[i].id, lx, ly);
+            });
+        }
+
+        // ── Katz Distribution ──
+        function renderKatz() {
+            if (!demandData) return;
+            const el = document.getElementById('katzDistrib'); el.innerHTML = '';
+            const totals = { TECHNICAL: 0, INTERPERSONAL: 0, CONCEPTUAL: 0 };
+            demandData.competencies.forEach(dc => {
+                const comp = COMPS.find(c => c.id === dc.id);
+                if (comp && dc.level > 0) totals[comp.katz] += dc.level;
+            });
+            const sum = Object.values(totals).reduce((a, b) => a + b, 0) || 1;
+            Object.entries(totals).forEach(([k, v]) => {
+                const pct = Math.round(v / sum * 100);
+                el.innerHTML += `<div class="katz-bar">
+      <span class="katz-bar-label" style="color:${KATZ_COLORS[k]}">${KATZ_LABELS[k]}</span>
+      <div class="katz-bar-track"><div class="katz-bar-fill" style="width:${pct}%;background:${KATZ_COLORS[k]}"></div></div>
+      <span class="katz-bar-pct">${pct}%</span>
+    </div>`;
+            });
+        }
+
+        // ── Confirm Demand ──
+        function confirmDemand() {
+            if (!demandData) return;
+            const active = demandData.competencies.filter(c => c.level > 0);
+            if (active.length === 0) { alert('Cần ít nhất 1 năng lực có level > 0'); return }
+
+            // Save to localStorage array
+            const saved = {
+                ...demandData,
+                timestamp: new Date().toISOString(),
+                id: 'DEMAND_' + Date.now()
+            };
+            const demands = JSON.parse(localStorage.getItem('fnx_demands') || '[]');
+            demands.unshift(saved);
+            localStorage.setItem('fnx_demands', JSON.stringify(demands));
+            // Also keep last for backward compat
+            localStorage.setItem('fnx_last_demand', JSON.stringify(saved));
+
+            // Update process bar
+            document.querySelector('.process-step.active')?.classList.remove('active');
+            document.querySelectorAll('.process-step')[0].classList.add('completed');
+            document.querySelectorAll('.process-step')[1]?.classList.add('active');
+
+            // Show summary + assess link
+            const highComps = active.filter(c => c.priority === 'High').map(c => COMPS.find(cc => cc.id === c.id)?.name).join(', ');
+            document.getElementById('summaryText').textContent =
+                `${active.length} năng lực · Trọng tâm: ${highComps || '(chưa có High priority)'}`;
+            document.getElementById('demandSummary').classList.add('visible');
+            const assessBtn = document.getElementById('goAssessBtn');
+            assessBtn.href = '/assess?demand=' + saved.id;
+            assessBtn.style.display = 'inline-flex';
+
+            renderDemandList();
+        }
+
+        // ── Demand List ──
+        function renderDemandList() {
+            const demands = JSON.parse(localStorage.getItem('fnx_demands') || '[]');
+            const el = document.getElementById('demandList');
+            document.getElementById('demandListCount').textContent = demands.length;
+            if (demands.length === 0) {
+                el.innerHTML = '<p style="font-size:.78rem;color:var(--text-caption);padding:8px">Chưa có yêu cầu nào. Nhập JD và giải mã để bắt đầu.</p>';
+                return;
+            }
+            el.innerHTML = demands.map(d => {
+                const activeCount = d.competencies.filter(c => c.level > 0).length;
+                const date = new Date(d.timestamp).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                return `<div class="demand-list-item">
+                    <div class="demand-list-info">
+                        <div class="demand-list-title">${d.jobTitle || '(chưa đặt tên)'} — ${d.client || ''}</div>
+                        <div class="demand-list-meta">${d.industry} · ${d.seniority} · ${date}</div>
+                    </div>
+                    <span class="demand-list-count">${activeCount}/11</span>
+                    <a href="/assess?demand=${d.id}" class="btn-assess">→ Assess</a>
+                </div>`;
+            }).join('');
+        }
+
+        // ── Init ──
+        document.addEventListener('DOMContentLoaded', () => { renderDemandList(); initDropZone('jdDropZone', 'jdFileInput', 'jdText'); });
+
+        // ── PDF Upload ──
+        function initDropZone(zoneId, inputId, textareaId) {
+            const zone = document.getElementById(zoneId);
+            const input = document.getElementById(inputId);
+            const textarea = document.getElementById(textareaId);
+
+            ['dragenter', 'dragover'].forEach(e => zone.addEventListener(e, ev => { ev.preventDefault(); zone.classList.add('dragover'); }));
+            ['dragleave', 'drop'].forEach(e => zone.addEventListener(e, ev => { ev.preventDefault(); zone.classList.remove('dragover'); }));
+            zone.addEventListener('drop', ev => { const file = ev.dataTransfer.files[0]; if (file) handleFile(file, zone, textarea); });
+            input.addEventListener('change', ev => { const file = ev.target.files[0]; if (file) handleFile(file, zone, textarea); });
+        }
+
+        async function handleFile(file, zone, textarea) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            zone.classList.remove('loaded');
+            zone.classList.add('extracting');
+
+            try {
+                let text = '';
+                if (ext === 'pdf') {
+                    text = await extractPDF(file);
+                } else if (ext === 'txt') {
+                    text = await file.text();
+                } else if (ext === 'docx' || ext === 'doc') {
+                    text = await extractDOCX(file);
+                } else {
+                    throw new Error('Unsupported file type: ' + ext);
+                }
+
+                textarea.value = text;
+                zone.classList.remove('extracting');
+                zone.classList.add('loaded');
+                zone.querySelector('.drop-filename').textContent = file.name;
+                zone.querySelector('.drop-wordcount').textContent = text.split(/\s+/).length + ' từ';
+            } catch (err) {
+                zone.classList.remove('extracting');
+                alert('Lỗi đọc file: ' + err.message);
+            }
+        }
+
+        async function extractPDF(file) {
+            // Load PDF.js dynamically
+            if (!window.pdfjsLib) {
+                await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            }
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            let text = '';
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const content = await page.getTextContent();
+                const pageText = content.items.map(item => item.str).join(' ');
+                text += pageText + '\n\n';
+            }
+            return text.trim();
+        }
+
+        async function extractDOCX(file) {
+            if (!window.mammoth) {
+                await loadScript('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js');
+            }
+            const arrayBuffer = await file.arrayBuffer();
+            const result = await mammoth.extractRawText({ arrayBuffer });
+            return result.value;
+        }
+
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = src; s.onload = resolve; s.onerror = reject;
+                document.head.appendChild(s);
+            });
+        }
+    </script>
+</body>
+
+</html>

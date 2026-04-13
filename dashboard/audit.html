@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Internal Competency Audit | FNX Talent Factory</title>
+    <meta name="description" content="Hệ thống đánh giá định kỳ nhân sự nội bộ (Batch Processing).">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="wizard.css">
+    
+    <style>
+        .audit-card {
+            margin-top: 2rem;
+        }
+
+        .roles-table-container {
+            margin-top: 2rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: none;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        table.competency-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #fff;
+            margin-top: 1rem;
+        }
+
+        table.competency-table th, table.competency-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        table.competency-table th {
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: #111;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 2rem;
+            overflow-y: auto;
+            color: #ddd;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+        
+        .modal-body pre {
+            white-space: pre-wrap;
+            font-family: 'Inter', sans-serif;
+            background: rgba(255,255,255,0.03);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .close-btn {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: none;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .close-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        /* Loading Overlay */
+        #loadingOverlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            backdrop-filter: blur(5px);
+        }
+        
+        .spinner-ring {
+            width: 50px; height: 50px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-left-color: #5ac8fa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        
+        .btn-gen {
+            background: linear-gradient(135deg, #af52de, #5ac8fa);
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-gen:hover { opacity: 0.9; transform: translateY(-1px); }
+    </style>
+</head>
+
+<body>
+    <div class="ambient-bg">
+        <div class="ambient-orb orb-1"></div>
+        <div class="ambient-orb orb-2"></div>
+        <div class="ambient-orb orb-3"></div>
+    </div>
+
+    <div class="wizard-container">
+        <!-- Header -->
+        <header class="wizard-header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 32 32" fill="none">
+                        <path d="M16 2L28 8V24L16 30L4 24V8L16 2Z" stroke="currentColor" stroke-width="1.5"
+                            fill="none" />
+                        <circle cx="16" cy="16" r="3" fill="currentColor" opacity="0.8" />
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <span class="logo-name">FNX</span>
+                    <span class="logo-sub">Talent Factory</span>
+                </div>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <a href="/" class="header-link">✨ Tuyển dụng</a>
+                <a href="/history" class="header-link">📋 Lịch sử</a>
+            </div>
+        </header>
+
+        <main class="step-panels">
+            <section class="panel active">
+                <div class="panel-card audit-card">
+                    <div class="panel-header">
+                        <h2>👥 Phân tích & Gom cụm nhân sự định kỳ (Internal Audit)</h2>
+                        <p class="panel-desc">Tải lên sơ đồ tổ chức (Org Chart) dưới dạng file Excel hoặc CSV để tính năng AI Batch Processing tự động nhóm chức danh và kiến tạo Combat Scenarios.</p>
+                    </div>
+
+                    <!-- Upload Zone -->
+                    <div class="drop-zone" id="auditDropZone">
+                        <input type="file" class="drop-input" id="fileInput" accept=".csv, .xlsx, .xls" />
+                        <div class="drop-zone-content">
+                            <span class="drop-icon">📊</span>
+                            <span class="drop-text" id="dropText">Kéo thả file Excel hoặc CSV lưới nhân sự vào đây</span>
+                            <span class="drop-sub">hỗ trợ .csv, .xlsx, .xls</span>
+                        </div>
+                    </div>
+
+                    <!-- Roles Table Zone -->
+                    <div class="roles-table-container" id="rolesContainer">
+                        <div class="panel-header" style="margin-bottom: 0;">
+                            <h3>🎯 Danh sách chức danh đã thu thập</h3>
+                        </div>
+                        <table class="competency-table" id="rolesTable">
+                            <thead>
+                                <tr>
+                                    <th>Chức danh (Role)</th>
+                                    <th>Số lượng</th>
+                                    <th>Kiến tạo Combat Test</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rolesBody">
+                                <!-- JS populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <div class="wizard-footer">
+            <p>FNX Talent Factory v2 · Internal Audit Engine · Framework: Building 21</p>
+        </div>
+    </div>
+
+    <!-- Modal for Combat View -->
+    <div class="modal-overlay" id="combatModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Kịch bản Combat</h3>
+                <button class="close-btn" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Content here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Loader -->
+    <div id="loadingOverlay">
+        <div class="spinner-ring"></div>
+        <p style="color: #fff; font-weight: 500; font-size: 1.1rem; letter-spacing: 0.5px;" id="loadingText">Hệ thống đang xử lý...</p>
+    </div>
+
+    <!-- SheetJS for Excel to CSV conversion -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="/audit.js"></script>
+</body>
+
+</html>

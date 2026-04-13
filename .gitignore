@@ -32,3 +32,8 @@ data/store/
 # Agent workspace
 .agent/skills/*/scripts/__pycache__/
 .vercel
+
+# Google API credentials (NEVER commit these)
+credentials/
+*.credentials.json
+token.json

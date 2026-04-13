@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FNX Competency Taxonomy v1.0 — Visualizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --bg: #0a0e1a;
+            --surface: #111827;
+            --surface2: #1a2236;
+            --surface3: #222d44;
+            --border: #2a3550;
+            --text: #e2e8f0;
+            --text2: #94a3b8;
+            --text3: #64748b;
+            --accent: #6366f1;
+            --accent2: #818cf8;
+            --accent-glow: rgba(99, 102, 241, .15);
+            --green: #22c55e;
+            --green2: #4ade80;
+            --blue: #3b82f6;
+            --orange: #f59e0b;
+            --pink: #ec4899;
+            --cyan: #06b6d4;
+            --red: #ef4444;
+            --group-knowledge: #3b82f6;
+            --group-hard: #22c55e;
+            --group-soft: #f59e0b;
+            --group-culture: #ec4899;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, .4);
+        }
+
+        html {
+            font-size: 14px
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            font-weight: 700;
+            letter-spacing: -.02em
+        }
+
+        /* ── HEADER ── */
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 2rem 0;
+            position: relative;
+            overflow: hidden
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(99, 102, 241, .08) 0%, transparent 50%);
+            pointer-events: none
+        }
+
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: .25rem
+        }
+
+        .header .subtitle {
+            color: var(--text2);
+            font-size: .95rem
+        }
+
+        .version-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            margin-top: .75rem;
+            padding: .35rem .85rem;
+            background: var(--accent-glow);
+            border: 1px solid rgba(99, 102, 241, .3);
+            border-radius: 20px;
+            font-size: .8rem;
+            color: var(--accent2)
+        }
+
+        .version-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--orange);
+            animation: pulse 2s infinite
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .4
+            }
+        }
+
+        /* ── LAYOUT ── */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem
+        }
+
+        .section {
+            margin-bottom: 3rem
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: .6rem
+        }
+
+        .section-title span {
+            font-size: 1.4rem
+        }
+
+        /* ── STATS BAR ── */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2.5rem
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            text-align: center;
+            transition: transform .2s, border-color .2s
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent)
+        }
+
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent2), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        .stat-card .label {
+            font-size: .8rem;
+            color: var(--text2);
+            margin-top: .25rem
+        }
+
+        /* ── TAXONOMY TREE ── */
+        .taxonomy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem
+        }
+
+        .group-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: all .3s
+        }
+
+        .group-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(99, 102, 241, .1)
+        }
+
+        .group-header {
+            padding: 1.25rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            border-left: 4px solid var(--group-color)
+        }
+
+        .group-header .icon {
+            font-size: 1.6rem;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, .05);
+            border-radius: 10px;
+            flex-shrink: 0
+        }
+
+        .group-header .info {
+            flex: 1
+        }
+
+        .group-header .info h3 {
+            font-size: 1rem;
+            margin-bottom: .15rem
+        }
+
+        .group-header .info .source {
+            font-size: .75rem;
+            color: var(--text3);
+            display: flex;
+            align-items: center;
+            gap: .3rem
+        }
+
+        .group-header .count {
+            font-size: .75rem;
+            color: var(--text3);
+            background: var(--surface2);
+            padding: .2rem .6rem;
+            border-radius: 12px
+        }
+
+        .comp-list {
+            padding: 0 1.25rem 1.25rem
+        }
+
+        .comp-item {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            margin-bottom: .6rem;
+            overflow: hidden;
+            transition: all .2s
+        }
+
+        .comp-item:last-child {
+            margin-bottom: 0
+        }
+
+        .comp-item:hover {
+            border-color: rgba(255, 255, 255, .15)
+        }
+
+        .comp-item-header {
+            padding: .75rem 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            font-size: .9rem
+        }
+
+        .comp-item-header .comp-id {
+            font-family: 'SF Mono', monospace;
+            font-size: .75rem;
+            font-weight: 600;
+            padding: .15rem .5rem;
+            border-radius: 4px;
+            color: #fff;
+            flex-shrink: 0
+        }
+
+        .comp-item-header .comp-name {
+            flex: 1;
+            font-weight: 500
+        }
+
+        .comp-item-header .chevron {
+            color: var(--text3);
+            transition: transform .2s;
+            font-size: .8rem
+        }
+
+        .comp-item.open .chevron {
+            transform: rotate(90deg)
+        }
+
+        .comp-detail {
+            display: none;
+            padding: 0 1rem 1rem;
+            animation: slideDown .2s ease
+        }
+
+        .comp-item.open .comp-detail {
+            display: block
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-8px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .comp-desc {
+            font-size: .82rem;
+            color: var(--text2);
+            margin-bottom: .75rem;
+            padding: .6rem;
+            background: var(--surface3);
+            border-radius: 6px;
+            border-left: 3px solid var(--group-color)
+        }
+
+        .level-row {
+            display: flex;
+            align-items: flex-start;
+            gap: .6rem;
+            padding: .5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, .04);
+            font-size: .82rem
+        }
+
+        .level-row:last-child {
+            border-bottom: none
+        }
+
+        .level-num {
+            width: 30px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            font-weight: 700;
+            font-size: .75rem;
+            flex-shrink: 0;
+            color: #fff
+        }
+
+        .level-num.l1 {
+            background: var(--blue)
+        }
+
+        .level-num.l2 {
+            background: var(--cyan)
+        }
+
+        .level-num.l3 {
+            background: var(--green)
+        }
+
+        .level-num.l4 {
+            background: var(--orange)
+        }
+
+        .level-num.l5 {
+            background: var(--pink)
+        }
+
+        .level-text {
+            color: var(--text2);
+            line-height: 1.5
+        }
+
+        /* ── RADAR CHART ── */
+        .radar-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start
+        }
+
+        @media(max-width:768px) {
+            .radar-section {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .radar-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .radar-legend {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem
+        }
+
+        .radar-legend h3 {
+            font-size: 1rem;
+            margin-bottom: 1rem
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            padding: .5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, .04);
+            font-size: .85rem
+        }
+
+        .legend-item:last-child {
+            border-bottom: none
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            flex-shrink: 0
+        }
+
+        .legend-item .lid {
+            font-family: 'SF Mono', monospace;
+            font-size: .75rem;
+            color: var(--text3);
+            width: 28px
+        }
+
+        /* ── LEVEL MATRIX ── */
+        .level-matrix {
+            overflow-x: auto
+        }
+
+        .level-matrix table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden
+        }
+
+        .level-matrix th {
+            background: var(--surface2);
+            padding: .75rem 1rem;
+            font-size: .8rem;
+            font-weight: 600;
+            color: var(--text2);
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap
+        }
+
+        .level-matrix td {
+            padding: .75rem 1rem;
+            font-size: .82rem;
+            color: var(--text2);
+            border-bottom: 1px solid rgba(255, 255, 255, .03);
+            vertical-align: top
+        }
+
+        .level-matrix tr:last-child td {
+            border-bottom: none
+        }
+
+        .level-matrix tr:hover td {
+            background: rgba(99, 102, 241, .04)
+        }
+
+        .bloom-tag {
+            font-size: .7rem;
+            padding: .15rem .5rem;
+            border-radius: 4px;
+            font-weight: 500
+        }
+
+        .bloom-1 {
+            background: rgba(59, 130, 246, .15);
+            color: var(--blue)
+        }
+
+        .bloom-2 {
+            background: rgba(6, 182, 212, .15);
+            color: var(--cyan)
+        }
+
+        .bloom-3 {
+            background: rgba(34, 197, 94, .15);
+            color: var(--green)
+        }
+
+        .bloom-4 {
+            background: rgba(245, 158, 11, .15);
+            color: var(--orange)
+        }
+
+        .bloom-5 {
+            background: rgba(236, 72, 153, .15);
+            color: var(--pink)
+        }
+
+        /* ── WEIGHT PROFILES ── */
+        .weight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem
+        }
+
+        .weight-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            transition: border-color .2s
+        }
+
+        .weight-card:hover {
+            border-color: var(--accent)
+        }
+
+        .weight-card h4 {
+            font-size: .9rem;
+            margin-bottom: .85rem;
+            color: var(--text)
+        }
+
+        .weight-bar {
+            margin-bottom: .5rem
+        }
+
+        .weight-bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: .75rem;
+            margin-bottom: .25rem
+        }
+
+        .weight-bar-label span:first-child {
+            color: var(--text2)
+        }
+
+        .weight-bar-label span:last-child {
+            color: var(--text);
+            font-weight: 600
+        }
+
+        .weight-bar-track {
+            height: 6px;
+            background: var(--surface3);
+            border-radius: 3px;
+            overflow: hidden
+        }
+
+        .weight-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width .6s ease
+        }
+
+        /* ── FOOTER ── */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text3);
+            font-size: .8rem;
+            border-top: 1px solid var(--border);
+            margin-top: 2rem
+        }
+
+        /* ── SOURCE BADGE ── */
+        .source-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .5rem;
+            margin-top: 1rem
+        }
+
+        .source-badge {
+            font-size: .75rem;
+            padding: .3rem .7rem;
+            border-radius: 6px;
+            border: 1px solid;
+            display: flex;
+            align-items: center;
+            gap: .35rem
+        }
+
+        .source-badge.b21 {
+            border-color: rgba(59, 130, 246, .3);
+            color: var(--blue);
+            background: rgba(59, 130, 246, .08)
+        }
+
+        .source-badge.abb16 {
+            border-color: rgba(245, 158, 11, .3);
+            color: var(--orange);
+            background: rgba(245, 158, 11, .08)
+        }
+
+        .source-badge.abb24 {
+            border-color: rgba(236, 72, 153, .3);
+            color: var(--pink);
+            background: rgba(236, 72, 153, .08)
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="header-inner">
+            <h1>FNX Competency Taxonomy</h1>
+            <p class="subtitle">Khung năng lực chuẩn tích hợp Building 21 × ABB — Single Source of Truth</p>
+            <div class="version-badge"><span class="dot"></span> v1.0.0 — DRAFT • Pending Team Review</div>
+            <div class="source-badges">
+                <span class="source-badge b21">📘 Building 21 — Technical</span>
+                <span class="source-badge abb16">📕 ABB 2016 — Behavioral</span>
+                <span class="source-badge abb24">📗 ABB 4C 2024 — Culture</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="number">4</div>
+                <div class="label">Nhóm năng lực</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">15</div>
+                <div class="label">Năng lực</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">75</div>
+                <div class="label">Mô tả cấp độ</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">5</div>
+                <div class="label">Cấp độ (Bloom's)</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">5</div>
+                <div class="label">Trọng số mẫu</div>
+            </div>
+        </div>
+
+        <!-- Radar Preview -->
+        <div class="section">
+            <h2 class="section-title"><span>📊</span> Tổng quan Taxonomy — Radar Chart</h2>
+            <div class="radar-section">
+                <div class="radar-container">
+                    <canvas id="radarCanvas" width="420" height="420"></canvas>
+                </div>
+                <div class="radar-legend">
+                    <h3>15 Năng lực theo Nhóm</h3>
+                    <div id="radarLegend"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Level Matrix -->
+        <div class="section">
+            <h2 class="section-title"><span>📐</span> Thang đo 5 cấp độ</h2>
+            <div class="level-matrix">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Level</th>
+                            <th>Tên gọi</th>
+                            <th>Bloom's</th>
+                            <th>ABB Role</th>
+                            <th>Kinh nghiệm</th>
+                            <th>Mô tả</th>
+                        </tr>
+                    </thead>
+                    <tbody id="levelTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Taxonomy Tree -->
+        <div class="section">
+            <h2 class="section-title"><span>🌳</span> Chi tiết năng lực — Click để xem mô tả từng cấp độ</h2>
+            <div class="taxonomy-grid" id="taxonomyGrid"></div>
+        </div>
+
+        <!-- Weight Profiles -->
+        <div class="section">
+            <h2 class="section-title"><span>⚖️</span> Trọng số theo loại vị trí</h2>
+            <div class="weight-grid" id="weightGrid"></div>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        FNX Talent Factory — Competency Taxonomy v1.0.0 • Created 2026-03-13 • Sources: Building 21, ABB Values in
+        Action (2016), ABB The ABB Way (2024)
+    </div>
+
+    <script>
+        // ══════════════════════════════════════════════════════════════
+        // TAXONOMY DATA (mirrored from competency_taxonomy.yaml)
+        // ══════════════════════════════════════════════════════════════
+        const TAXONOMY = {
+            levels: [
+                { level: 1, name: "Foundational", name_vi: "Nền tảng", bloom: "Remember / Understand", abb_role: "Individual Contributor (basic)", exp: "0-1 năm", desc: "Hiểu biết sơ bộ, cần hướng dẫn chi tiết khi thực hiện." },
+                { level: 2, name: "Developing", name_vi: "Đang phát triển", bloom: "Apply", abb_role: "Individual Contributor (proficient)", exp: "1-3 năm", desc: "Thực hiện nhiệm vụ cơ bản, cần giám sát ít hơn." },
+                { level: 3, name: "Proficient", name_vi: "Thành thạo", bloom: "Analyze", abb_role: "Team Leader / Specialist", exp: "3-5 năm", desc: "Đạt chuẩn doanh nghiệp, thực hiện độc lập tốt." },
+                { level: 4, name: "Advanced", name_vi: "Nâng cao", bloom: "Evaluate", abb_role: "Management / Senior Specialist", exp: "5-8 năm", desc: "Giải quyết vấn đề phức tạp, tư duy hệ thống mạnh." },
+                { level: 5, name: "Mastery", name_vi: "Bậc thầy", bloom: "Create", abb_role: "Leadership / Expert", exp: "8+ năm", desc: "Chuyên gia đầu ngành, dẫn dắt và bảo chứng." },
+            ],
+            groups: [
+                {
+                    id: "KNOWLEDGE", name: "Kiến thức chuyên môn", name_en: "Professional Knowledge",
+                    source: "Building 21", icon: "📚", color: "#3b82f6",
+                    competencies: [
+                        {
+                            id: "K1", name: "Kiến thức nền tảng ngành", name_en: "Domain Fundamentals",
+                            desc: "Nắm vững khái niệm, nguyên lý cốt lõi của lĩnh vực chuyên môn.",
+                            levels: {
+                                1: "Hiểu biết cơ bản về khái niệm, thuật ngữ nền tảng. Nhận diện và mô tả lại nguyên lý cơ bản nhưng chưa tự vận dụng. Cần hướng dẫn chi tiết.",
+                                2: "Vận dụng kiến thức cơ bản xử lý công việc theo hướng dẫn. Giải thích mối liên hệ giữa các khái niệm. Cần kèm cặp thường xuyên.",
+                                3: "Chủ động phân tích, đề xuất giải pháp dựa trên kiến thức. Phân biệt, so sánh các cách tiếp cận và lựa chọn phương án phù hợp.",
+                                4: "Đánh giá các đề xuất, lựa chọn giải pháp hiệu quả nhất dựa trên kiến thức chuyên sâu. Đánh giá tính đúng đắn và hiệu quả phương pháp.",
+                                5: "Sáng tạo phương pháp mới dựa trên kiến thức cốt lõi. Đóng góp phát triển kiến thức chuyên ngành. Đào tạo và chia sẻ cho tổ chức."
+                            }
+                        },
+                        {
+                            id: "K2", name: "Kiến thức chuyên sâu kỹ thuật", name_en: "Technical Expertise",
+                            desc: "Nắm vững kiến thức kỹ thuật chuyên sâu, ứng dụng vào tình huống phức tạp.",
+                            levels: {
+                                1: "Biết công cụ, kỹ thuật cơ bản nhưng chưa áp dụng thực tế. Thực hiện tác vụ đơn giản dưới giám sát.",
+                                2: "Sử dụng được nhiều công cụ, thực hiện quy trình chuẩn hóa. Bắt đầu tích lũy kinh nghiệm từ dự án thực.",
+                                3: "Hiểu sâu về công nghệ, tự nghiên cứu và lựa chọn giải pháp kỹ thuật phù hợp. Thành thạo áp dụng thực tế.",
+                                4: "Thành thạo, định hướng kỹ thuật cho nhóm. Đánh giá giải pháp phức tạp. Giám sát chất lượng chuyên sâu.",
+                                5: "Bậc thầy kỹ thuật, nghiên cứu và phát triển phương pháp mới. Dẫn dắt kỹ thuật cấp tổ chức. Chuyên gia ngành."
+                            }
+                        },
+                        {
+                            id: "K3", name: "Kiến thức liên ngành & xu hướng", name_en: "Cross-domain & Trends",
+                            desc: "Nhận biết xu hướng, kết nối kiến thức đa lĩnh vực tạo giá trị mới.",
+                            levels: {
+                                1: "Biết xu hướng cơ bản trong ngành. Theo dõi thông tin thụ động.",
+                                2: "Nhận ra mối liên hệ giữa chuyên môn và ngành liên quan. Chủ động tìm hiểu xu hướng mới.",
+                                3: "Kiến thức rộng, hiểu rõ liên ngành. Áp dụng kiến thức lĩnh vực khác vào chuyên môn.",
+                                4: "Tổng hợp kiến thức đa ngành đề xuất giải pháp sáng tạo. Dự đoán xu hướng cho tổ chức.",
+                                5: "Dẫn dắt tư duy liên ngành cấp tổ chức. Tạo framework kết nối kiến thức. Thought leader."
+                            }
+                        },
+                    ]
+                },
+                {
+                    id: "HARD_SKILLS", name: "Nghiệp vụ chuyên môn", name_en: "Professional Hard Skills",
+                    source: "Building 21", icon: "⚙️", color: "#22c55e",
+                    competencies: [
+                        {
+                            id: "H1", name: "Phân tích & Giải quyết vấn đề", name_en: "Analysis & Problem Solving",
+                            desc: "Nhận diện, phân tích vấn đề và đưa ra giải pháp bằng tư duy logic và dữ liệu.",
+                            levels: {
+                                1: "Nhận diện vấn đề khi được chỉ ra. Phân tích cơ bản theo quy trình có sẵn. Cần hỗ trợ.",
+                                2: "Tự phát hiện vấn đề đơn giản, thu thập dữ liệu và phân tích theo khuôn mẫu. Đề xuất 1-2 phương án.",
+                                3: "Phân tích vấn đề phức tạp đa chiều, xác định nguyên nhân gốc rễ. Thực thi giải pháp độc lập.",
+                                4: "Giải quyết vấn đề hệ thống, liên bộ phận. Thiết kế quy trình phân tích cho team.",
+                                5: "Giải quyết vấn đề chiến lược tầm tổ chức. Xây dựng framework phân tích mới."
+                            }
+                        },
+                        {
+                            id: "H2", name: "Quản lý dự án & công việc", name_en: "Project & Work Management",
+                            desc: "Lập kế hoạch, tổ chức, theo dõi và hoàn thành công việc đúng hạn và chất lượng.",
+                            levels: {
+                                1: "Thực hiện theo kế hoạch được giao. Quản lý thời gian cá nhân ở mức cơ bản.",
+                                2: "Tự lập kế hoạch cá nhân, sắp xếp ưu tiên. Phối hợp với 1-2 người hoàn thành task.",
+                                3: "Quản lý dự án nhỏ-trung từ đầu đến cuối. Lập kế hoạch, phân bổ nguồn lực, theo dõi milestone.",
+                                4: "Quản lý nhiều dự án song song hoặc dự án phức tạp. Xây dựng quy trình cho team.",
+                                5: "Quản lý portfolio dự án chiến lược. Thiết kế hệ thống PMO cho tổ chức."
+                            }
+                        },
+                        {
+                            id: "H3", name: "Sử dụng công cụ & công nghệ", name_en: "Tools & Technology",
+                            desc: "Sử dụng thành thạo công cụ và công nghệ để thực hiện công việc hiệu quả.",
+                            levels: {
+                                1: "Sử dụng công cụ cơ bản (email, office, chat). Cần hướng dẫn khi dùng phần mềm chuyên dụng.",
+                                2: "Thành thạo công cụ phổ biến trong chuyên ngành. Tự học tính năng mới. Automation đơn giản.",
+                                3: "Thành thạo nhiều công cụ chuyên sâu, tối ưu workflow. Đề xuất công cụ mới cho team.",
+                                4: "Chuyên gia hệ sinh thái công cụ. Đào tạo người khác. Đánh giá ROI công nghệ.",
+                                5: "Định hướng chiến lược công nghệ cho tổ chức. Nghiên cứu và piloting công nghệ mới."
+                            }
+                        },
+                        {
+                            id: "H4", name: "Giao tiếp chuyên nghiệp", name_en: "Professional Communication",
+                            desc: "Truyền đạt thông tin rõ ràng, thuyết phục phù hợp đối tượng và ngữ cảnh.",
+                            levels: {
+                                1: "Giao tiếp cơ bản: email, chat, báo cáo đơn giản. Trình bày ý kiến trong nhóm nhỏ.",
+                                2: "Giao tiếp rõ ràng có cấu trúc. Trình bày trước nhóm 5-10 người. Tóm tắt information phức tạp.",
+                                3: "Giao tiếp thuyết phục, trình bày trước khách hàng hoặc quản lý cấp cao. Viết tài liệu chuyên môn.",
+                                4: "Giao tiếp chiến lược: truyền tải tầm nhìn, dẫn dắt thay đổi. Thuyết trình trước C-level.",
+                                5: "Giao tiếp tầm thought leader: public speaking, brand ambassador. Định hình narrative tổ chức."
+                            }
+                        },
+                    ]
+                },
+                {
+                    id: "SOFT_SKILLS", name: "Tác phong & Ownership", name_en: "Professional Behaviors",
+                    source: "ABB 2016", icon: "💼", color: "#f59e0b",
+                    competencies: [
+                        {
+                            id: "S1", name: "An toàn & Chính trực", name_en: "Safety & Integrity",
+                            desc: "Tuân thủ đạo đức, bảo vệ con người và thông tin, hành động đúng đắn.",
+                            levels: {
+                                1: "Tuân thủ quy tắc an toàn và đạo đức cơ bản. Nhận diện hành vi đúng/sai. Trung thực.",
+                                2: "Chủ động tuân thủ không cần giám sát. Báo cáo ngay rủi ro. Từ chối hành vi thiếu chính trực.",
+                                3: "Xây dựng văn hóa chính trực trong nhóm. Coaching đồng nghiệp. Quyết định dựa trên đạo đức.",
+                                4: "Thiết kế và triển khai chính sách compliance cho bộ phận. Role model. Giải quyết tình huống phức tạp.",
+                                5: "Định hình văn hóa chính trực tầm tổ chức. Tích hợp đạo đức vào chiến lược. Hệ thống speak-up."
+                            }
+                        },
+                        {
+                            id: "S2", name: "Định hướng KH & Chất lượng", name_en: "Customer Focus & Quality",
+                            desc: "Hiểu nhu cầu khách hàng, cải tiến liên tục, đảm bảo chất lượng đầu ra.",
+                            levels: {
+                                1: "Hiểu ai là \"khách hàng\". Thực hiện đạt chất lượng tối thiểu. Hỏi feedback khi được chỉ ra.",
+                                2: "Chủ động tìm hiểu nhu cầu stakeholder. Kiểm tra chất lượng trước khi bàn giao. Đề xuất cải tiến.",
+                                3: "Dẫn dắt cải tiến chất lượng nhóm. Xây dựng quy trình QA/QC. Vượt kỳ vọng khách hàng.",
+                                4: "Thiết kế trải nghiệm khách hàng. Xây dựng metric đo lường. Cải tiến theo phương pháp luận.",
+                                5: "Định hướng chiến lược khách hàng cho tổ chức. Văn hóa customer-first. Trusted advisor."
+                            }
+                        },
+                        {
+                            id: "S3", name: "Đổi mới & Tốc độ", name_en: "Innovation & Speed",
+                            desc: "Sáng tạo, tìm cách tốt hơn nhanh hơn. Chấp nhận rủi ro có tính toán.",
+                            levels: {
+                                1: "Tò mò cách làm mới, sẵn sàng thử khi được hướng dẫn. Hoàn thành đúng hạn.",
+                                2: "Chủ động đề xuất cải tiến nhỏ. Tối ưu thời gian. Sẵn sàng thử cách tiếp cận mới.",
+                                3: "Dẫn dắt sáng kiến đổi mới nhóm. Tạo môi trường an toàn thử nghiệm. Tư duy \"yes, and...\".",
+                                4: "Xây dựng innovation pipeline. Đánh giá ROI đổi mới. Coaching team về mindset đổi mới.",
+                                5: "Định hướng chiến lược đổi mới tổ chức. Văn hóa innovation. Kết nối startup/academia."
+                            }
+                        },
+                        {
+                            id: "S4", name: "Chủ động & Hiệu suất", name_en: "Ownership & Performance",
+                            desc: "Chịu trách nhiệm kết quả, chủ động hành động, cam kết hiệu suất cao.",
+                            levels: {
+                                1: "Nhận trách nhiệm task được giao, hoàn thành đúng hạn. Hỏi khi gặp khó. Không đổ lỗi.",
+                                2: "Chủ động nhận thêm việc. Tự đặt mục tiêu cao hơn yêu cầu. Theo dõi KPI cá nhân.",
+                                3: "Chủ động hoàn toàn, chỉ cần giám sát kết quả. Dẫn dắt delivery nhóm. Giải quyết phát sinh.",
+                                4: "Chịu trách nhiệm kết quả cả team/dự án. Văn hóa accountability. Thiết lập OKR bộ phận.",
+                                5: "Chịu trách nhiệm kết quả tầm tổ chức. Hệ thống đo lường hiệu suất. Truyền cảm hứng."
+                            }
+                        },
+                    ]
+                },
+                {
+                    id: "CULTURE", name: "Giao tiếp & Phối hợp", name_en: "Culture & Collaboration",
+                    source: "ABB 4C 2024", icon: "🤝", color: "#ec4899",
+                    competencies: [
+                        {
+                            id: "TW", name: "Hợp tác & Tin tưởng", name_en: "Collaboration & Trust",
+                            desc: "Làm việc nhóm hiệu quả, xây dựng niềm tin, kết nối xuyên bộ phận.",
+                            levels: {
+                                1: "Lắng nghe và góp ý tích cực nhóm nhỏ. Chia sẻ thông tin khi được yêu cầu. Hoàn thành đúng cam kết.",
+                                2: "Chủ động trao đổi, thấu hiểu đồng nghiệp. Chia sẻ kiến thức. Hỗ trợ member khi cần.",
+                                3: "Lan tỏa năng lượng tích cực, xây dựng niềm tin. Hợp tác cross-functional. Giải quyết mâu thuẫn.",
+                                4: "Xây dựng đội ngũ hiệu suất cao. Kết nối xuyên bộ phận. Psychological safety.",
+                                5: "Văn hóa cộng tác tầm tổ chức. Phá bỏ silos. Platform chia sẻ kiến thức toàn công ty."
+                            }
+                        },
+                        {
+                            id: "A1", name: "Dũng cảm", name_en: "Courage",
+                            desc: "Dám nói, dám thử, dám thất bại. Hành động đúng khi đối mặt thử thách.",
+                            levels: {
+                                1: "Dám hỏi khi không hiểu, thừa nhận chưa biết. Sẵn sàng thử điều mới. Nói thật về tiến độ.",
+                                2: "Dám đưa ý kiến khác biệt khi tin là đúng. Nhận lỗi nhanh. Đề xuất dù chưa hoàn hảo.",
+                                3: "Dám đề xuất thay đổi quy trình cũ. Thách thức status quo xây dựng. Học từ thất bại.",
+                                4: "Dám ra quyết định khó trong mập mờ. Bảo vệ team trước áp lực không hợp lý. Transparency.",
+                                5: "Dẫn dắt tổ chức qua chuyển đổi. Văn hóa \"safe to fail\". Quyết định chiến lược không phổ biến."
+                            }
+                        },
+                        {
+                            id: "A2", name: "Quan tâm", name_en: "Care",
+                            desc: "Quan tâm con người, cộng đồng. Đối xử công bằng, bao dung, hỗ trợ lẫn nhau.",
+                            levels: {
+                                1: "Tôn trọng thời gian và công việc đồng nghiệp. Lịch sự, thân thiện. Ý thức tác động hành vi.",
+                                2: "Chủ động hỗ trợ đồng nghiệp gặp khó. Quan tâm sức khỏe tinh thần nhóm. Chia sẻ kiến thức.",
+                                3: "Tạo môi trường supportive. Lắng nghe sâu, empathize. Mentoring junior. Cân bằng wellbeing.",
+                                4: "Chính sách wellbeing bộ phận. D&I champion. Phát triển career path cho team member.",
+                                5: "Văn hóa care tầm tổ chức. Wellbeing vào chiến lược HR. Giá trị human-first."
+                            }
+                        },
+                        {
+                            id: "A3", name: "Tò mò & Học hỏi", name_en: "Curiosity",
+                            desc: "Ham học hỏi, tự phát triển bản thân liên tục. Đặt câu hỏi, chia sẻ kiến thức.",
+                            levels: {
+                                1: "Có ý thức học hỏi, tiếp thu. Hỏi \"tại sao?\" khi chưa hiểu. Tham gia training khi được đề xuất.",
+                                2: "Chủ động tự học ngoài giờ. Đặt câu hỏi về root cause. Thử cách làm mới. Chia sẻ.",
+                                3: "Thói quen học tập có hệ thống (learning roadmap). Nghiên cứu best practices. Knowledge sharing.",
+                                4: "Tạo learning culture cho team. Thiết kế learning path. R&D. Cộng đồng chuyên gia bên ngoài.",
+                                5: "Learning organization chiến lược. Knowledge management. Publish nghiên cứu, speaker conferences."
+                            }
+                        },
+                    ]
+                }
+            ],
+            weight_profiles: [
+                { id: "technical", name: "IT / Technical", weights: { KNOWLEDGE: .30, HARD_SKILLS: .25, SOFT_SKILLS: .25, CULTURE: .20 } },
+                { id: "management", name: "Management", weights: { KNOWLEDGE: .15, HARD_SKILLS: .15, SOFT_SKILLS: .35, CULTURE: .35 } },
+                { id: "specialist", name: "Specialist / IC", weights: { KNOWLEDGE: .30, HARD_SKILLS: .30, SOFT_SKILLS: .20, CULTURE: .20 } },
+                { id: "customer_facing", name: "Sales / Customer", weights: { KNOWLEDGE: .20, HARD_SKILLS: .20, SOFT_SKILLS: .30, CULTURE: .30 } },
+                { id: "default", name: "Balanced (default)", weights: { KNOWLEDGE: .25, HARD_SKILLS: .25, SOFT_SKILLS: .25, CULTURE: .25 } },
+            ]
+        };
+
+        const GROUP_COLORS = { KNOWLEDGE: "#3b82f6", HARD_SKILLS: "#22c55e", SOFT_SKILLS: "#f59e0b", CULTURE: "#ec4899" };
+        const GROUP_NAMES = { KNOWLEDGE: "📚 Knowledge", HARD_SKILLS: "⚙️ Hard Skills", SOFT_SKILLS: "💼 Soft Skills", CULTURE: "🤝 Culture" };
+
+        // ══════════════════════════════════════════════════════════════
+        // RENDER FUNCTIONS
+        // ══════════════════════════════════════════════════════════════
+
+        function renderLevelTable() {
+            const tbody = document.getElementById('levelTable');
+            TAXONOMY.levels.forEach(l => {
+                tbody.innerHTML += `<tr>
+      <td><span class="level-num l${l.level}">${l.level}</span></td>
+      <td><strong>${l.name_vi}</strong><br><span style="color:var(--text3);font-size:.75rem">${l.name}</span></td>
+      <td><span class="bloom-tag bloom-${l.level}">${l.bloom}</span></td>
+      <td style="font-size:.8rem">${l.abb_role}</td>
+      <td>${l.exp}</td>
+      <td>${l.desc}</td>
+    </tr>`;
+            });
+        }
+
+        function renderTaxonomyGrid() {
+            const grid = document.getElementById('taxonomyGrid');
+            TAXONOMY.groups.forEach(g => {
+                let compsHtml = '';
+                g.competencies.forEach(c => {
+                    let levelsHtml = '';
+                    for (let i = 1; i <= 5; i++) {
+                        levelsHtml += `<div class="level-row">
+          <span class="level-num l${i}">${i}</span>
+          <span class="level-text">${c.levels[i]}</span>
+        </div>`;
+                    }
+                    compsHtml += `<div class="comp-item" onclick="this.classList.toggle('open')">
+        <div class="comp-item-header">
+          <span class="comp-id" style="background:${g.color}">${c.id}</span>
+          <span class="comp-name">${c.name}</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="comp-detail" style="--group-color:${g.color}">
+          <div class="comp-desc">${c.desc}<br><em style="font-size:.75rem;color:var(--text3)">${c.name_en}</em></div>
+          ${levelsHtml}
+        </div>
+      </div>`;
+                });
+                grid.innerHTML += `<div class="group-card" style="--group-color:${g.color}">
+      <div class="group-header" style="border-left-color:${g.color}">
+        <div class="icon">${g.icon}</div>
+        <div class="info">
+          <h3>${g.name}</h3>
+          <div class="source">📎 ${g.source}</div>
+        </div>
+        <span class="count">${g.competencies.length}</span>
+      </div>
+      <div class="comp-list">${compsHtml}</div>
+    </div>`;
+            });
+        }
+
+        function renderWeightGrid() {
+            const grid = document.getElementById('weightGrid');
+            TAXONOMY.weight_profiles.forEach(wp => {
+                let barsHtml = '';
+                Object.entries(wp.weights).forEach(([gid, w]) => {
+                    const pct = Math.round(w * 100);
+                    const color = GROUP_COLORS[gid] || '#888';
+                    barsHtml += `<div class="weight-bar">
+        <div class="weight-bar-label"><span>${GROUP_NAMES[gid] || gid}</span><span>${pct}%</span></div>
+        <div class="weight-bar-track"><div class="weight-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+      </div>`;
+                });
+                grid.innerHTML += `<div class="weight-card"><h4>${wp.name}</h4>${barsHtml}</div>`;
+            });
+        }
+
+        function renderRadarLegend() {
+            const el = document.getElementById('radarLegend');
+            TAXONOMY.groups.forEach(g => {
+                g.competencies.forEach(c => {
+                    el.innerHTML += `<div class="legend-item">
+        <div class="legend-dot" style="background:${g.color}"></div>
+        <span class="lid">${c.id}</span>
+        <span>${c.name}</span>
+      </div>`;
+                });
+            });
+        }
+
+        // ── RADAR CHART (Canvas) ──
+        function drawRadar() {
+            const canvas = document.getElementById('radarCanvas');
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width, H = canvas.height, cx = W / 2, cy = H / 2, R = 160;
+
+            // Collect all competencies
+            const allComps = [];
+            TAXONOMY.groups.forEach(g => g.competencies.forEach(c => allComps.push({ ...c, color: g.color })));
+            const n = allComps.length;
+            const angleStep = (Math.PI * 2) / n;
+
+            // Draw grid rings
+            ctx.strokeStyle = 'rgba(255,255,255,.08)';
+            ctx.lineWidth = 1;
+            for (let ring = 1; ring <= 5; ring++) {
+                const r = R * (ring / 5);
+                ctx.beginPath();
+                for (let i = 0; i <= n; i++) {
+                    const a = i * angleStep - Math.PI / 2;
+                    const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+                    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+                }
+                ctx.closePath(); ctx.stroke();
+            }
+
+            // Draw axis lines + labels
+            allComps.forEach((c, i) => {
+                const a = i * angleStep - Math.PI / 2;
+                const x2 = cx + Math.cos(a) * R, y2 = cy + Math.sin(a) * R;
+                ctx.strokeStyle = 'rgba(255,255,255,.06)';
+                ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(x2, y2); ctx.stroke();
+
+                // Label
+                const lx = cx + Math.cos(a) * (R + 18), ly = cy + Math.sin(a) * (R + 18);
+                ctx.fillStyle = c.color; ctx.font = 'bold 11px Inter'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(c.id, lx, ly);
+            });
+
+            // Draw sample data polygon (level 3 for all — "Proficient" baseline)
+            const sampleLevels = allComps.map(() => 3);
+            ctx.beginPath();
+            sampleLevels.forEach((lv, i) => {
+                const a = i * angleStep - Math.PI / 2;
+                const r = R * (lv / 5);
+                const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            });
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(99,102,241,.12)'; ctx.fill();
+            ctx.strokeStyle = 'rgba(99,102,241,.6)'; ctx.lineWidth = 2; ctx.stroke();
+
+            // Draw dots + sample "candidate" polygon (varied)
+            const candidateLevels = [4, 3, 2, 5, 4, 3, 4, 3, 4, 5, 4, 3, 4, 3, 5];
+            ctx.beginPath();
+            candidateLevels.forEach((lv, i) => {
+                const a = i * angleStep - Math.PI / 2;
+                const r = R * (lv / 5);
+                const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            });
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(34,197,94,.1)'; ctx.fill();
+            ctx.strokeStyle = 'rgba(34,197,94,.7)'; ctx.lineWidth = 2; ctx.stroke();
+
+            // Draw dots for candidate
+            candidateLevels.forEach((lv, i) => {
+                const a = i * angleStep - Math.PI / 2;
+                const r = R * (lv / 5);
+                const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+                ctx.fillStyle = allComps[i].color;
+                ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
+            });
+
+            // Legend
+            ctx.font = '11px Inter';
+            ctx.fillStyle = 'rgba(99,102,241,.8)'; ctx.fillRect(20, H - 50, 12, 12);
+            ctx.fillStyle = 'var(--text2)'; ctx.textAlign = 'left'; ctx.fillText('Baseline (L3)', 38, H - 40);
+            ctx.fillStyle = 'rgba(34,197,94,.8)'; ctx.fillRect(20, H - 30, 12, 12);
+            ctx.fillStyle = 'var(--text2)'; ctx.fillText('Sample Candidate', 38, H - 20);
+        }
+
+        // ── INIT ──
+        renderLevelTable();
+        renderTaxonomyGrid();
+        renderWeightGrid();
+        renderRadarLegend();
+        drawRadar();
+    </script>
+</body>
+
+</html>

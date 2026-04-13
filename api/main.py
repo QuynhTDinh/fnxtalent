@@ -2,9 +2,15 @@
 FNX Talent Factory — FastAPI Server
 
 Endpoints:
-    POST /api/pipeline/run    → Run full DAG pipeline
-    GET  /api/pipeline/{id}   → Get pipeline run status & results
-    GET  /api/health          → Health check
+    POST /api/pipeline/run       → Run full DAG pipeline
+    GET  /api/pipeline/{id}      → Get pipeline run status & results
+    GET  /api/health             → Health check
+    POST /api/survey/design      → AI-design a survey
+    POST /api/survey/evaluate    → Evaluate a survey blueprint
+    GET  /api/survey/templates   → List survey templates
+    POST /api/survey/publish     → Publish to Google Forms
+    GET  /api/survey/auth/status → Check Google auth status
+    POST /api/survey/auth/login  → Start Google OAuth flow
 """
 
 import asyncio
@@ -83,9 +89,11 @@ class CVRequest(BaseModel):
 # ── Standalone agents (for wizard step-by-step calls) ──
 from core.agents.jd_decoder_agent import JDDecoderAgent
 from core.agents.assessment_agent import AssessmentAgent
+from core.agents.combat_designer_agent import CombatDesignerAgent
 
 _jd_agent = JDDecoderAgent(framework_path=framework_path, llm_provider="gemini")
 _cv_agent = AssessmentAgent(framework_path=framework_path, llm_provider="gemini")
+_combat_agent = CombatDesignerAgent(llm_provider="gemini")
 
 # ── History (in-memory for now; Supabase in future phase) ──
 import uuid
@@ -109,6 +117,16 @@ from core.agents.survey_evaluator_agent import SurveyEvaluatorAgent
 
 _survey_designer = SurveyDesignerAgent(llm_provider="gemini")
 _survey_evaluator = SurveyEvaluatorAgent(llm_provider="gemini")
+_survey_publisher = None  # Lazy init — requires Google credentials
+
+
+def _get_publisher():
+    """Lazy-initialize SurveyPublisherAgent (requires Google credentials)."""
+    global _survey_publisher
+    if _survey_publisher is None:
+        from core.agents.survey_publisher_agent import SurveyPublisherAgent
+        _survey_publisher = SurveyPublisherAgent()
+    return _survey_publisher
 
 
 class SurveyRequest(BaseModel):
@@ -117,6 +135,20 @@ class SurveyRequest(BaseModel):
     target_audience: Optional[str] = None
     num_questions: int = 15
     additional_context: Optional[str] = None
+
+
+class SurveyPublishRequest(BaseModel):
+    blueprint: dict
+    folder_id: Optional[str] = None
+
+
+class CombatRoleRequest(BaseModel):
+    role: str
+    seniority: Optional[str] = "Junior"
+    jd: Optional[str] = "Tự động phân tích theo Role"
+
+class CombatBatchRequest(BaseModel):
+    roles: list[CombatRoleRequest]
 
 
 # ── Routes ──
@@ -331,6 +363,85 @@ async def list_survey_templates():
             continue
     return templates
 
+
+@app.post("/api/survey/publish")
+async def publish_survey(request: SurveyPublishRequest):
+    """Publish a survey blueprint to Google Forms."""
+    try:
+        publisher = _get_publisher()
+        result = publisher.publish(request.blueprint, folder_id=request.folder_id)
+        return result
+    except RuntimeError as e:
+        raise HTTPException(
+            status_code=401,
+            detail=f"Google authentication required: {str(e)}"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/survey/auth/status")
+async def survey_auth_status():
+    """Check if Google Forms API credentials are configured."""
+    try:
+        from core.integrations.google_auth import check_auth_status
+        return check_auth_status()
+    except Exception as e:
+        return {
+            "authenticated": False,
+            "error": str(e),
+        }
+
+
+@app.post("/api/survey/auth/login")
+async def survey_auth_login():
+    """Trigger Google OAuth2 login flow (local dev only)."""
+    if IS_VERCEL:
+        raise HTTPException(
+            status_code=400,
+            detail="OAuth flow not available on Vercel. Use service account."
+        )
+    try:
+        from core.integrations.google_auth import get_google_credentials
+        creds = get_google_credentials()
+        return {
+            "status": "authenticated",
+            "valid": creds.valid if creds else False,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ── Internal Audit Routes ──
+
+@app.post("/api/audit/org-chart/upload")
+async def upload_org_chart(file: UploadFile = File(...)):
+    """Upload CSV File, Parse and Cluster by Role."""
+    from core.utils.excel_parser import parse_org_chart_csv
+    try:
+        content = await file.read()
+        result = parse_org_chart_csv(content)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Org chart parsing error: {str(e)}")
+
+@app.post("/api/audit/combat/generate-batch")
+async def generate_combat_batch(request: CombatBatchRequest):
+    """Generate combat scenarios for a list of roles."""
+    try:
+        results = []
+        for req_role in request.roles:
+            data = {
+                "role": req_role.role,
+                "seniority": req_role.seniority,
+                "jd": req_role.jd
+            }
+            scenario = _combat_agent.design(data)
+            results.append(scenario)
+        return {"scenarios": results}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ── Serve Dashboard (local dev only — Vercel handles static via vercel.json) ──
 
 if not IS_VERCEL:
@@ -348,6 +459,10 @@ if not IS_VERCEL:
         async def serve_history():
             return FileResponse(os.path.join(dashboard_dir, "history.html"))
 
+        @app.get("/audit")
+        async def serve_audit():
+            return FileResponse(os.path.join(dashboard_dir, "audit.html"))
+
         # Mount static AFTER explicit routes so /api/* takes priority
         app.mount("/", StaticFiles(directory=dashboard_dir), name="dashboard")
 
@@ -358,4 +473,4 @@ if not IS_VERCEL:
 # ── Local dev ──
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("api.main:app", host="0.0.0.0", port=8000, reload=True)
