@@ -129,6 +129,14 @@ def _get_publisher():
     return _survey_publisher
 
 
+# ── Presentation Agent ──
+from core.agents.slide_agent import SlideAgent
+_slide_agent = SlideAgent()
+
+class PresentationRequest(BaseModel):
+    topic: str
+    context_materials: Optional[str] = None
+
 class SurveyRequest(BaseModel):
     category: str = "student_career"  # student_career | enterprise_hr | working_pro
     objective: str = "Khảo sát chung"
@@ -162,6 +170,16 @@ async def health():
         "store": store.__class__.__name__,
         "vercel": bool(IS_VERCEL),
     }
+
+@app.get("/api/taxonomy")
+async def get_taxonomy_config():
+    """Return taxonomy configuration (levels, groups, TLD mapping)."""
+    try:
+        from core.taxonomy import get_taxonomy
+        tax = get_taxonomy()
+        return tax.to_dict()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/api/file/extract")
@@ -442,6 +460,14 @@ async def generate_combat_batch(request: CombatBatchRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ── Presentation Routes ──
+@app.post("/api/presentation/generate")
+async def generate_presentation(request: PresentationRequest):
+    result = _slide_agent.handle_event("GENERATE_SLIDE", request.dict())
+    if result.get("status") == "success":
+        return {"markdown": result["markdown"]}
+    raise HTTPException(status_code=500, detail=result.get("message", "Unknown error generation slide"))
+
 # ── Serve Dashboard (local dev only — Vercel handles static via vercel.json) ──
 
 if not IS_VERCEL:
@@ -450,6 +476,14 @@ if not IS_VERCEL:
         @app.get("/")
         async def serve_wizard():
             return FileResponse(os.path.join(dashboard_dir, "wizard.html"))
+
+        @app.get("/demand")
+        async def serve_demand():
+            return FileResponse(os.path.join(dashboard_dir, "demand.html"))
+
+        @app.get("/assess")
+        async def serve_assess():
+            return FileResponse(os.path.join(dashboard_dir, "assess.html"))
 
         @app.get("/report")
         async def serve_report():
@@ -463,6 +497,14 @@ if not IS_VERCEL:
         async def serve_audit():
             return FileResponse(os.path.join(dashboard_dir, "audit.html"))
 
+        @app.get("/taxonomy")
+        async def serve_taxonomy():
+            return FileResponse(os.path.join(dashboard_dir, "taxonomy.html"))
+
+        @app.get("/presentation")
+        async def serve_presentation():
+            return FileResponse(os.path.join(dashboard_dir, "presentation.html"))
+
         # Mount static AFTER explicit routes so /api/* takes priority
         app.mount("/", StaticFiles(directory=dashboard_dir), name="dashboard")
 
@@ -473,4 +515,4 @@ if not IS_VERCEL:
 # ── Local dev ──
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("api.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("api.main:app", host="0.0.0.0", port=8005, reload=True)

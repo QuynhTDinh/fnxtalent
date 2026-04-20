@@ -16,23 +16,56 @@ let radar = null;
 
 const API_BASE = '';
 
-const AREA_INFO = {
-    'HOS': { short: 'Tư duy', full: 'Habits of Success', group: 'Mindset' },
-    'PD': { short: 'Phát triển', full: 'Personal Development', group: 'Mindset' },
-    'WF': { short: 'Kỹ năng nghề', full: 'Workforce Readiness', group: 'Skills' },
-    'ELA': { short: 'Ngôn ngữ', full: 'English Language Arts', group: 'Skills' },
-    'SCI': { short: 'Khoa học KT', full: 'Science', group: 'Knowledge' },
-    'MATH': { short: 'Toán học', full: 'Mathematics', group: 'Knowledge' },
-    'SS': { short: 'Xã hội', full: 'Social Studies', group: 'Knowledge' },
+let AREA_INFO = {
+    'K': { short: 'Kiến thức', full: 'Knowledge — Kiến thức', group: 'Knowledge' },
+    'S': { short: 'Kỹ năng', full: 'Skill — Kỹ năng', group: 'Skills' },
+    'A': { short: 'Thái độ', full: 'Attitude — Thái độ', group: 'Attitude' },
 };
 
-const LEVEL_NAMES = {
+let LEVEL_NAMES = {
     1: 'Nền tảng',
     2: 'Đang phát triển',
     3: 'Thành thạo',
     4: 'Nâng cao',
     5: 'Bậc thầy',
+    6: 'Tiên phong'
 };
+
+let TOTAL_LEVELS = 6;
+let TAXONOMY_DATA = null;
+
+async function loadTaxonomy() {
+    try {
+        const resp = await fetch(`${API_BASE}/api/taxonomy`);
+        if (!resp.ok) throw new Error('API Error');
+        const data = await resp.json();
+        TAXONOMY_DATA = data;
+        
+        // Dynamically rebuild LEVEL_NAMES
+        LEVEL_NAMES = {};
+        let maxLvl = 0;
+        for (const [lvl, info] of Object.entries(data.levels)) {
+            LEVEL_NAMES[lvl] = info.vi;
+            if (parseInt(lvl) > maxLvl) maxLvl = parseInt(lvl);
+        }
+        TOTAL_LEVELS = maxLvl || 6;
+        
+        // Dynamically rebuild AREA_INFO
+        AREA_INFO = {};
+        data.ask_groups.forEach(g => {
+            AREA_INFO[g.id] = {
+                short: g.vi,
+                full: `${g.name} — ${g.vi}`,
+                group: g.id === 'K' ? 'Knowledge' : (g.id === 'S' ? 'Skills' : 'Attitude')
+            };
+        });
+        
+        console.log("✓ Taxonomy loaded successfully from API", TAXONOMY_DATA);
+    } catch (err) {
+        console.warn("⚠ Failed to load taxonomy from API, using fallback cache in memory.", err);
+    }
+}
+
 
 // ── Step Navigation ──
 
@@ -340,7 +373,7 @@ function renderReport(assessment, jdResult, matchResult) {
     document.getElementById('reportTitle').textContent =
         `${assessment.fullName || 'Ứng viên'} ↔ ${jdResult.role || 'Vị trí'}`;
     document.getElementById('reportMeta').textContent =
-        `Đánh giá dựa trên khung Building 21 · ${new Date().toLocaleDateString('vi-VN')}`;
+        `Đánh giá dựa trên khung FNX Taxonomy · ${new Date().toLocaleDateString('vi-VN')}`;
 
     // Tags
     const strengths = matchResult.strengths || [];
@@ -389,9 +422,9 @@ function renderCandidateProfile(assessment) {
 
 function renderDomainBars(assessment) {
     const domains = {
-        'Mindset': { areas: ['HOS', 'PD'], color: '#af52de', items: [] },
-        'Skills': { areas: ['WF', 'ELA'], color: '#5ac8fa', items: [] },
-        'Knowledge': { areas: ['SCI', 'MATH', 'SS'], color: '#34c759', items: [] },
+        'Knowledge': { areas: ['K'], color: '#34c759', items: [] },
+        'Skills': { areas: ['S'], color: '#5ac8fa', items: [] },
+        'Attitude': { areas: ['A'], color: '#af52de', items: [] },
     };
 
     (assessment.competencies || []).forEach(c => {
@@ -467,34 +500,35 @@ function animateNumber(el, target) {
 
 function renderRadarChart(assessment, jdResult) {
     if (!radar) {
-        radar = new RadarChart('radarCanvas', { width: 480, height: 480 });
+        radar = new RadarChart('radarCanvas', { width: 480, height: 480, levels: TOTAL_LEVELS });
     }
 
-    const candidateComps = assessment.competencies || [];
-    const jdComps = jdResult.required_competencies || [];
+    // ── SHADOW MAPPING: ASK (11) → TLD (3 Axes) ──
+    const tldMapping = {
+        'TECHNICAL': { name: 'Kỹ thuật (Technical)', ids: ['K1', 'K2', 'K2', 'S2'], color: '#34c759', area: 'K' },
+        'INTERPERSONAL': { name: 'Giao tiếp (Interpersonal)', ids: ['S1', 'S5', 'A2', 'A3'], color: '#5ac8fa', area: 'S' },
+        'CONCEPTUAL': { name: 'Tư duy (Conceptual)', ids: ['S3', 'S4', 'A1'], color: '#af52de', area: 'A' }
+    };
 
-    // Merge into unified axes
-    const codeMap = new Map();
-    candidateComps.forEach(c => {
-        codeMap.set(c.code, { code: c.code, name: c.name, area: c.area, actual: c.level, target: 0 });
+    const axes = Object.values(tldMapping).map(m => ({ code: m.name, name: m.name, area: m.area }));
+    
+    // Calculate candidate values
+    const candidateValues = Object.values(tldMapping).map(m => {
+        const scores = (assessment.competencies || [])
+            .filter(c => m.ids.includes(c.code))
+            .map(c => c.level);
+        return scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
     });
-    jdComps.forEach(c => {
-        if (codeMap.has(c.code)) {
-            codeMap.get(c.code).target = c.target_level;
-        } else {
-            codeMap.set(c.code, { code: c.code, name: c.name, area: c.area, actual: 0, target: c.target_level });
-        }
+
+    // Calculate target values
+    const targetValues = Object.values(tldMapping).map(m => {
+        const scores = (jdResult.required_competencies || [])
+            .filter(c => m.ids.includes(c.code))
+            .map(c => c.target_level);
+        return scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
     });
 
-    const entries = Array.from(codeMap.values());
-    const areaOrder = { HOS: 0, PD: 1, WF: 2, ELA: 3, SCI: 4, MATH: 5, SS: 6 };
-    entries.sort((a, b) => (areaOrder[a.area] ?? 99) - (areaOrder[b.area] ?? 99));
-
-    radar.setData(
-        entries.map(e => ({ code: e.code, name: e.name, area: e.area })),
-        entries.map(e => e.actual),
-        entries.map(e => e.target),
-    );
+    radar.setData(axes, candidateValues, targetValues);
 }
 
 function renderGapAnalysis(matchResult) {
@@ -534,11 +568,14 @@ function renderCompetencyTable(assessment) {
     const comps = assessment.competencies || [];
     const tbody = document.getElementById('compTableBody');
 
-    tbody.innerHTML = comps.map(c => `
+    tbody.innerHTML = comps.map(c => {
+        const safeArea = c.area || (c.code ? c.code.charAt(0) : 'K');
+        const areaLabel = AREA_INFO[safeArea]?.short || safeArea;
+        return `
         <tr>
             <td>
                 <span style="font-weight:600; color: var(--accent-blue); font-size: 0.72rem;">${c.code}</span>
-                <br><span style="font-size: 0.58rem; color: var(--text-caption);">${AREA_INFO[c.area]?.short || c.area}</span>
+                <br><span style="font-size: 0.58rem; color: var(--text-caption);">${areaLabel}</span>
             </td>
             <td style="font-weight:500; color: var(--text-primary);">${c.name || ''}</td>
             <td>
@@ -547,7 +584,7 @@ function renderCompetencyTable(assessment) {
             </td>
             <td style="font-size: 0.75rem; max-width: 250px;">${c.evidence || '—'}</td>
         </tr>
-    `).join('');
+    `}).join('');
 }
 
 
@@ -648,7 +685,7 @@ async function exportPDF() {
         // Footer on last page
         pdf.setTextColor(150, 150, 150);
         pdf.setFontSize(6);
-        pdf.text('FNX Talent Factory v2 · Powered by Gemini AI · Framework: Building 21', pageW / 2, pageH - 5, { align: 'center' });
+        pdf.text('FNX Talent Factory v2 · Powered by Gemini AI · Framework: FNX Taxonomy', pageW / 2, pageH - 5, { align: 'center' });
 
         // Download
         const candName = document.getElementById('reportCandidateName')?.textContent || 'candidate';
@@ -750,7 +787,8 @@ async function handleFileUpload(file, zone, targetTextareaId) {
 
 // ── Init ──
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
+    await loadTaxonomy();
     goToStep(1);
     initDropZones();
 });

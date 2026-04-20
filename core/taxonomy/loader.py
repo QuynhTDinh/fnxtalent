@@ -22,6 +22,7 @@ class LevelDefinition:
     name: str
     vi: str
     bloom: str
+    career_alias: str
     abb_role: str
     experience: str
     description: str
@@ -64,15 +65,33 @@ class KatzZone:
 
 
 @dataclass
+class TldZone:
+    """T-L-D engine zone (v2.1): Technique, Language, Digital."""
+    id: str
+    name: str
+    vi: str
+    description: str
+    formula: str
+    ui_alias: str
+    color: str
+    competency_ids: List[str] = field(default_factory=list)
+
+
+@dataclass
 class RoleProfile:
     """Dual-weighted role profile — ASK weights for training, Katz weights for career path."""
     id: str
-    name: str
+    name: str # e.g. "Fresher Mua sắm"
     en: str
     description: str
     expected_level: str
     ask_weights: Dict[str, int] = field(default_factory=dict)
     katz_weights: Dict[str, int] = field(default_factory=dict)
+    department_id: str = ""
+    department_name: str = ""
+    job_title_id: str = ""
+    job_title_name: str = ""
+    competency_targets: Dict[str, int] = field(default_factory=dict)
 
 
 @dataclass
@@ -87,6 +106,7 @@ class Taxonomy:
     levels: Dict[int, LevelDefinition] = field(default_factory=dict)
     ask_groups: List[AskGroup] = field(default_factory=list)
     katz_zones: Dict[str, KatzZone] = field(default_factory=dict)
+    tld_zones: Dict[str, TldZone] = field(default_factory=dict)
     role_profiles: Dict[str, RoleProfile] = field(default_factory=dict)
 
     # ── Backward-compatible aliases ──
@@ -187,6 +207,11 @@ class Taxonomy:
 
         return "\n".join(lines)
 
+    def to_dict(self) -> dict:
+        """Convert Taxonomy to dictionary for JSON serialization."""
+        import dataclasses
+        return dataclasses.asdict(self)
+
     def __repr__(self) -> str:
         n_comps = sum(len(g.competencies) for g in self.ask_groups)
         n_levels = len(self.levels)
@@ -225,10 +250,11 @@ class TaxonomyLoader:
             levels[int(lv_num)] = LevelDefinition(
                 level=int(lv_num),
                 name=lv_data["name"],
-                vi=lv_data["vi"],
-                bloom=lv_data["bloom"],
-                abb_role=lv_data["abb_role"],
-                experience=lv_data["experience"],
+                vi=lv_data.get("vi", ""),
+                bloom=lv_data.get("bloom", ""),
+                career_alias=lv_data.get("career_alias", ""),
+                abb_role=lv_data.get("abb_role", ""),
+                experience=lv_data.get("experience", ""),
                 description=lv_data["description"],
                 assessment_method=lv_data["assessment_method"],
             )
@@ -272,18 +298,40 @@ class TaxonomyLoader:
                 competency_ids=zone_data.get("competency_ids", []),
             )
 
-        # Role Profiles
-        role_profiles = {}
-        for pid, pdata in data.get("role_profiles", {}).items():
-            role_profiles[pid] = RoleProfile(
-                id=pid,
-                name=pdata["name"],
-                en=pdata["en"],
-                description=pdata["description"],
-                expected_level=pdata["expected_level"],
-                ask_weights=pdata.get("ask_weights", {}),
-                katz_weights=pdata.get("katz_weights", {}),
+        # T-L-D Zones
+        tld_zones = {}
+        for zone_id, zone_data in data.get("tld_zones", {}).items():
+            tld_zones[zone_id] = TldZone(
+                id=zone_id,
+                name=zone_data["name"],
+                vi=zone_data["vi"],
+                description=zone_data["description"],
+                formula=zone_data.get("formula", ""),
+                ui_alias=zone_data.get("ui_alias", ""),
+                color=zone_data.get("color", "#666"),
+                competency_ids=zone_data.get("competency_ids", []),
             )
+
+        # Role Profiles from Departments
+        role_profiles = {}
+        for dept_id, dept_data in data.get("departments", {}).items():
+            for title_id, title_data in dept_data.get("job_titles", {}).items():
+                for level_id, level_data in title_data.get("career_levels", {}).items():
+                    pid = f"{title_id}_{level_id}"
+                    role_profiles[pid] = RoleProfile(
+                        id=pid,
+                        name=level_data.get("name", title_data.get("name", "")),
+                        en=level_data.get("en", ""),
+                        description=level_data.get("description", ""),
+                        expected_level=level_data.get("expected_level", ""),
+                        ask_weights=level_data.get("ask_weights", {}),
+                        katz_weights=level_data.get("katz_weights", {}),
+                        department_id=dept_id,
+                        department_name=dept_data.get("name", ""),
+                        job_title_id=title_id,
+                        job_title_name=title_data.get("name", ""),
+                        competency_targets=level_data.get("competency_targets", {})
+                    )
 
         self._taxonomy = Taxonomy(
             version=meta.get("version", "0.0.0"),
@@ -295,6 +343,7 @@ class TaxonomyLoader:
             levels=levels,
             ask_groups=ask_groups,
             katz_zones=katz_zones,
+            tld_zones=tld_zones,
             role_profiles=role_profiles,
         )
         return self._taxonomy

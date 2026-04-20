@@ -66,4 +66,40 @@ class JDDecoderAgent(BaseAgent):
                 "error": str(e),
             }
 
+        # ── Baseline Fallback Logic ──
+        # Ensure Interpersonal (S1, S5, A2, A3) and Conceptual (S2, S3, S4, A1) are not entirely empty
+        comps = result.get("required_competencies", [])
+        
+        interpersonal_ids = ["S1", "S5", "A2", "A3"]
+        conceptual_ids = ["S2", "S3", "S4", "A1"]
+        
+        has_interpersonal = any(c.get("code") in interpersonal_ids for c in comps)
+        has_conceptual = any(c.get("code") in conceptual_ids for c in comps)
+        
+        if not has_interpersonal and len(comps) > 0:
+            comps.append({
+                "ask_type": "S",
+                "code": "S1",
+                "area": "S",
+                "name": "Giao tiếp kỹ thuật",
+                "target_level": 2,
+                "priority": "Medium",
+                "extracted_from": "[Auto-Baseline] Ngầm định yêu cầu giao tiếp cơ bản."
+            })
+            self.log("Baseline Fallback: Injected S1 Level 2 (Interpersonal)")
+
+        if not has_conceptual and len(comps) > 0:
+            comps.append({
+                "ask_type": "A",
+                "code": "A1",
+                "area": "A",
+                "name": "Chủ động - Cải tiến",
+                "target_level": 2,
+                "priority": "Medium",
+                "extracted_from": "[Auto-Baseline] Ngầm định yêu cầu tư duy chủ động."
+            })
+            self.log("Baseline Fallback: Injected A1 Level 2 (Conceptual)")
+
+        result["required_competencies"] = comps
+
         return result

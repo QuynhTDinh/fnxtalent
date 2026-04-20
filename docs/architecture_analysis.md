@@ -38,11 +38,57 @@ Dành cho quy mô xử lý hàng chục ngàn hồ sơ đồng thời.
 
 ---
 
-## 3. Lời khuyên của Antigravity
+## 4. Kiến trúc Tri thức 3 Lớp (3-Layer Knowledge Architecture)
 
-> [!TIP]
-> **Giai đoạn hiện tại (R&D):** Tôi khuyên bạn nên giữ **kiến trúc hiện tại (JS)** để chúng ta hoàn thiện Logic và Giao diện Dashboard thật nhanh.
-> 
-> **Giai đoạn mở rộng:** Khi hệ thống bắt đầu xử lý dữ liệu khoa học/hóa học phức tạp và cần dùng đến các thư viện chuyên sâu, tôi sẽ hỗ trợ bạn **"Python hóa"** các lõi xử lý (Option A) mà không làm ảnh hưởng đến giao diện đã xây dựng.
+Để giải quyết việc nâng cấp lõi tính toán mà không làm xáo trộn giao diện người dùng, hệ thống FNX sử dụng mô hình **Mapping Bridge (Cầu nối Ánh xạ)**.
 
-Bạn có muốn tôi thử chuyển đổi một Agent (ví dụ AssessmentAgent) sang Python để bạn xem thử sự khác biệt không?
+### 4.1 Sơ đồ Ánh xạ (The Mapping Bridge)
+
+```mermaid
+graph TD
+    subgraph "Lớp 1: Dữ liệu đầu vào (ASK)"
+        K[Knowledge - Kiến thức]
+        S[Skill - Kỹ năng]
+        A[Attitude - Thái độ]
+    end
+
+    subgraph "Lớp 2: Lõi tính toán (Engine - T-L-D)"
+        T[Technique<br/>K + S]
+        L[Language<br/>S + A]
+        D[Digital<br/>A + S + K]
+    end
+
+    subgraph "Lớp 3: Hiển thị giao diện (UI Aliases)"
+        UT[Technical]
+        UI[Interpersonal]
+        UC[Conceptual]
+    end
+
+    K & S --> T
+    S & A --> L
+    A & S & K --> D
+
+    T -.->|Map| UT
+    L -.->|Map| UI
+    D -.->|Map| UC
+
+    style T fill:#f9f,stroke:#333,stroke-width:2px
+    style L fill:#f9f,stroke:#333,stroke-width:2px
+    style D fill:#f9f,stroke:#333,stroke-width:2px
+```
+
+### 4.2 Chi tiết ánh xạ logic (Shadow Mapping)
+
+| Lớp Hiển thị (UI - Katz) | Lớp Tính toán (Engine - T-L-D) | Công thức (ASK Mapping) | Giải thích |
+| :--- | :--- | :--- | :--- |
+| **Technical** | **Technique** | $K + S$ | Tập trung vào tri thức thực chứng và khả năng thao tác kỹ thuật. |
+| **Interpersonal** | **Language** | $S + A$ | Tập trung vào khả năng giao tiếp, ngoại ngữ và sự hợp tác. |
+| **Conceptual** | **Digital** | $A + S + K$ | Tập trung vào thái độ linh hoạt, kỹ năng số và tư duy thích nghi. |
+
+> [!NOTE]
+> Chiến lược này giúp chúng ta nâng cấp độ chính xác của AI và các bộ máy tính điểm mà không cần phải đào tạo lại người dùng về các thuật ngữ mới ngay lập tức.
+
+---
+
+## 5. Lời khuyên của Antigravity
+...

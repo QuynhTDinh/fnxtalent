@@ -33,6 +33,7 @@ levels:
     name: "Foundational"
     vi: "Nền tảng"
     bloom: "Remember / Understand"
+    career_alias: "Fresher"
     abb_role: "Individual Contributor (basic)"
     experience: "0–1 năm"
     description: "Hiểu biết sơ bộ, cần hướng dẫn chi tiết khi thực hiện."
@@ -41,6 +42,7 @@ levels:
     name: "Developing"
     vi: "Đang phát triển"
     bloom: "Apply"
+    career_alias: "Junior"
     abb_role: "Individual Contributor (proficient)"
     experience: "1–3 năm"
     description: "Thực hiện nhiệm vụ cơ bản, cần giám sát ít hơn."
@@ -49,6 +51,7 @@ levels:
     name: "Proficient"
     vi: "Thành thạo"
     bloom: "Analyze"
+    career_alias: "Middle"
     abb_role: "Team Leader / Specialist"
     experience: "3–5 năm"
     description: "Đạt chuẩn doanh nghiệp, thực hiện độc lập tốt."
@@ -57,6 +60,7 @@ levels:
     name: "Advanced"
     vi: "Nâng cao"
     bloom: "Evaluate"
+    career_alias: "Senior"
     abb_role: "Management / Senior Specialist"
     experience: "5–8 năm"
     description: "Giải quyết vấn đề phức tạp, tư duy hệ thống mạnh."
@@ -65,6 +69,7 @@ levels:
     name: "Mastery"
     vi: "Bậc thầy"
     bloom: "Create"
+    career_alias: "Expert / Lead"
     abb_role: "Leadership / Expert"
     experience: "8+ năm"
     description: "Chuyên gia đầu ngành, dẫn dắt và bảo chứng."
@@ -74,6 +79,7 @@ levels:
     name: "Pioneer"
     vi: "Tiên phong"
     bloom: "Create / Innovate"
+    career_alias: "Pioneer / Director"
     abb_role: "Industry Leader / Visionary"
     experience: "12+ năm"
     description: "Kiến tạo tiêu chuẩn mới cho toàn ngành, định hình tương lai."
@@ -152,10 +158,10 @@ ask_groups:
     competencies:
 
       - id: "S1"
-        name: "Giao tiếp kỹ thuật"
-        en: "Technical Communication"
+        name: "Ngoại ngữ & Giao tiếp"
+        en: "Technical Communication & Language"
         katz_zone: "INTERPERSONAL"
-        description: "Truyền đạt thông tin kỹ thuật rõ ràng, thuyết phục, phù hợp đối tượng và ngữ cảnh."
+        description: "Sử dụng hiệu quả ngoại ngữ (Language) như công cụ tương tác, truyền đạt chuyên môn thay vì học thuật thuần túy."
         source: "Building 21 ELA"
         levels:
           1: "Giao tiếp cơ bản: email, chat, báo cáo đơn giản. Trình bày ý kiến trong nhóm nhỏ. Viết tài liệu theo template."
@@ -292,20 +298,20 @@ tld_zones:
     competency_ids: ["K1", "K2", "K3", "S2"]
   LANGUAGE:
     name: "Language (Ngoại ngữ & Giao tiếp)"
-    vi: "Giao tiếp"
-    description: "Ngoại ngữ, giao tiếp, sự hợp tác (L=S+A)"
+    vi: "L - Ngoại ngữ & Giao tiếp"
+    description: "Ưu tiên sự tự tin (A) và ứng biến biểu đạt (S) thay vì ngữ pháp (K). L=S+A"
     formula: "S + A"
     ui_alias: "INTERPERSONAL"
     color: "#ff9500"
     competency_ids: ["S1", "S5", "A2", "A3"]
   DIGITAL:
     name: "Digital (Kỹ năng số & Thích nghi)"
-    vi: "Thích ứng số"
-    description: "Thái độ linh hoạt, kỹ năng quản lý và làm việc (D=A+S+K)"
+    vi: "D - Kỹ năng số & Thích nghi"
+    description: "Khát khao học hỏi (A), thao tác linh hoạt (S) và nắm vững công cụ (K). D=A+S+K"
     formula: "A + S + K"
     ui_alias: "CONCEPTUAL"
     color: "#af52de"
-    competency_ids: ["S3", "S4", "A1"]
+    competency_ids: ["S3", "S4", "A1", "K3"]
 
 # LAYER 4: KATZ MAPPING (LEGACY COMPATIBILITY)
 # ══════════════════════════════════════════════════════════════════
@@ -331,62 +337,196 @@ katz_zones:
     competency_ids: ["S2", "S3", "S4", "A1"]
 
 # ══════════════════════════════════════════════════════════════════
-# ROLE PROFILES
+# DEPARTMENTS & ROLE BENCHMARKS (MATRIX TARGETS)
 # ══════════════════════════════════════════════════════════════════
 
-role_profiles:
-  fresher:
-    name: "Kỹ sư Fresher"
-    en: "Fresher Engineer"
-    description: "Mới tốt nghiệp, tập trung học kiến thức và kỹ năng nền tảng."
-    expected_level: "1–2"
-    ask_weights:
-      K: 35
-      S: 50
-      A: 15
-    katz_weights:
-      TECHNICAL: 70
-      INTERPERSONAL: 20
-      CONCEPTUAL: 10
+departments:
+  pmb:
+    name: "Ban Quản lý Dự án"
+    vi: "Ban QLDA"
+    description: "Khối điều phối thi công, mua sắm và quản trị dự án theo chuẩn PMI."
+    job_titles:
+      pmb_pm:
+        name: "Project Manager (Chủ nhiệm dự án)"
+        description: "Quản trị rủi ro và quản lý thay đổi."
+        career_levels:
+          pro:
+            name: "Chủ nhiệm Dự án"
+            expected_level: "4-5"
+            ask_weights: { K: 20, S: 40, A: 40 }
+            katz_weights: { TECHNICAL: 20, INTERPERSONAL: 40, CONCEPTUAL: 40 }
+            competency_targets: { K1: 5, K2: 5, K3: 4, S1: 4, S2: 5, S3: 5, S4: 5, S5: 4, A1: 5, A2: 5, A3: 5 }
 
-  junior:
-    name: "Kỹ sư Junior"
-    en: "Junior Engineer"
-    description: "1–3 năm kinh nghiệm, bắt đầu tự chủ và xây dựng phẩm chất nghề nghiệp."
-    expected_level: "2–3"
-    ask_weights:
-      K: 30
-      S: 40
-      A: 30
-    katz_weights:
-      TECHNICAL: 55
-      INTERPERSONAL: 25
-      CONCEPTUAL: 20
+      pmb_coordinator:
+        name: "Điều phối dự án"
+        description: "Quản lý tiến độ và luồng công việc."
+        career_levels:
+          pro:
+            name: "Điều phối viên"
+            expected_level: "3-4"
+            ask_weights: { K: 25, S: 45, A: 30 }
+            katz_weights: { TECHNICAL: 30, INTERPERSONAL: 40, CONCEPTUAL: 30 }
+            competency_targets: { K1: 3, K2: 3, K3: 4, S1: 4, S2: 3, S3: 5, S4: 4, S5: 3, A1: 4, A2: 4, A3: 4 }
 
-  pm:
-    name: "Quản lý dự án"
-    en: "Project Manager"
-    description: "Điều phối đội nhóm, quản lý delivery, giao tiếp stakeholder."
-    expected_level: "3–4"
-    ask_weights:
-      K: 15
-      S: 40
-      A: 45
-    katz_weights:
-      TECHNICAL: 25
-      INTERPERSONAL: 35
-      CONCEPTUAL: 40
+      pmb_cost:
+        name: "Quản lý chi phí - thanh toán"
+        description: "Dự toán, kiểm soát chi phí (QS/Cost Control)."
+        career_levels:
+          pro:
+            name: "Chuyên viên QL Chi phí"
+            expected_level: "3-4"
+            ask_weights: { K: 40, S: 40, A: 20 }
+            katz_weights: { TECHNICAL: 60, INTERPERSONAL: 20, CONCEPTUAL: 20 }
+            competency_targets: { K1: 4, K2: 2, K3: 4, S1: 2, S2: 4, S3: 4, S4: 2, S5: 2, A1: 4, A2: 3, A3: 4 }
 
-  expert:
-    name: "Chuyên gia"
-    en: "Expert / Specialist"
-    description: "Chuyên sâu kỹ thuật, dẫn dắt về mặt chuyên môn, bảo chứng năng lực."
-    expected_level: "4–6"
-    ask_weights:
-      K: 30
-      S: 35
-      A: 35
-    katz_weights:
-      TECHNICAL: 40
-      INTERPERSONAL: 20
-      CONCEPTUAL: 40
+      pmb_document:
+        name: "Quản lý tài liệu"
+        description: "Kiểm soát hồ sơ, văn bản dự án (Document Controller)."
+        career_levels:
+          pro:
+            name: "Chuyên viên QL Tài liệu"
+            expected_level: "2-3"
+            ask_weights: { K: 30, S: 50, A: 20 }
+            katz_weights: { TECHNICAL: 50, INTERPERSONAL: 30, CONCEPTUAL: 20 }
+            competency_targets: { K1: 2, K2: 1, K3: 4, S1: 2, S2: 2, S3: 4, S4: 2, S5: 1, A1: 4, A2: 3, A3: 3 }
+
+      pmb_developer:
+        name: "Phát triển dự án"
+        description: "Quản lý pháp chế, pháp lý dự án."
+        career_levels:
+          pro:
+            name: "Chuyên viên Pháp lý"
+            expected_level: "3-4"
+            ask_weights: { K: 50, S: 30, A: 20 }
+            katz_weights: { TECHNICAL: 50, INTERPERSONAL: 30, CONCEPTUAL: 20 }
+            competency_targets: { K1: 5, K2: 1, K3: 3, S1: 4, S2: 4, S3: 3, S4: 4, S5: 3, A1: 3, A2: 4, A3: 5 }
+
+      pmb_technical:
+        name: "Quản lý kỹ thuật"
+        description: "Kiểm soát chất lượng và giải pháp kỹ thuật thi công."
+        career_levels:
+          pro:
+            name: "Kỹ sư trưởng / QL Kỹ thuật"
+            expected_level: "4-5"
+            ask_weights: { K: 40, S: 40, A: 20 }
+            katz_weights: { TECHNICAL: 60, INTERPERSONAL: 20, CONCEPTUAL: 20 }
+            competency_targets: { K1: 3, K2: 5, K3: 3, S1: 3, S2: 5, S3: 4, S4: 3, S5: 5, A1: 3, A2: 3, A3: 3 }
+
+      pmb_procurement:
+        name: "Quản lý mua sắm"
+        description: "Lựa chọn nhà thầu và quản lý hợp đồng."
+        career_levels:
+          pro:
+            name: "Chuyên viên Mua sắm"
+            expected_level: "3-4"
+            ask_weights: { K: 30, S: 40, A: 30 }
+            katz_weights: { TECHNICAL: 40, INTERPERSONAL: 40, CONCEPTUAL: 20 }
+            competency_targets: { K1: 4, K2: 3, K3: 3, S1: 4, S2: 4, S3: 4, S4: 4, S5: 2, A1: 4, A2: 4, A3: 4 }
+
+  engineering:
+    name: "Khối Kỹ Thuật & Thiết kế"
+    vi: "Kỹ Thuật"
+    description: "Thực hiện thiết kế, giám sát và thẩm định kỹ thuật công trình."
+    job_titles:
+      eng_civil:
+        name: "Kỹ sư Xây dựng (Civil)"
+        description: "Thiết kế, giám sát kết cấu xây dựng."
+        career_levels:
+          pro:
+            name: "Chuyên viên Kỹ thuật XD"
+            expected_level: "3-4"
+            ask_weights: { K: 50, S: 30, A: 20 }
+            katz_weights: { TECHNICAL: 70, INTERPERSONAL: 10, CONCEPTUAL: 20 }
+            competency_targets: { K1: 5, K2: 4, K3: 4, S1: 2, S2: 4, S3: 3, S4: 2, S5: 2, A1: 4, A2: 2, A3: 3 }
+      
+      eng_mep:
+        name: "Kỹ sư Cơ điện (MEP)"
+        description: "Hệ thống điện, cấp thoát nước và điều hoà."
+        career_levels:
+          pro:
+            name: "Chuyên viên MEP"
+            expected_level: "3-4"
+            ask_weights: { K: 45, S: 35, A: 20 }
+            katz_weights: { TECHNICAL: 65, INTERPERSONAL: 15, CONCEPTUAL: 20 }
+            competency_targets: { K1: 5, K2: 5, K3: 3, S1: 2, S2: 4, S3: 3, S4: 2, S5: 2, A1: 4, A2: 2, A3: 3 }
+      
+      eng_architect:
+        name: "Kiến trúc sư"
+        description: "Quy hoạch và thiết kế không gian kiến trúc."
+        career_levels:
+          pro:
+            name: "Kiến trúc sư"
+            expected_level: "3-4"
+            ask_weights: { K: 30, S: 50, A: 20 }
+            katz_weights: { TECHNICAL: 40, INTERPERSONAL: 20, CONCEPTUAL: 40 }
+            competency_targets: { K1: 4, K2: 5, K3: 3, S1: 3, S2: 3, S3: 3, S4: 4, S5: 5, A1: 3, A2: 3, A3: 4 }
+
+  operations:
+    name: "Khối Vận hành & Sản xuất"
+    vi: "Vận hành"
+    description: "Quản lý thi công trực tiếp, HSE và QA/QC."
+    job_titles:
+      ops_hse:
+        name: "Kỹ sư An toàn (HSE)"
+        description: "Quản lý an toàn, sức khoẻ và môi trường."
+        career_levels:
+          pro:
+            name: "Chuyên viên HSE"
+            expected_level: "3-4"
+            ask_weights: { K: 40, S: 30, A: 30 }
+            katz_weights: { TECHNICAL: 40, INTERPERSONAL: 40, CONCEPTUAL: 20 }
+            competency_targets: { K1: 4, K2: 2, K3: 4, S1: 3, S2: 3, S3: 3, S4: 4, S5: 1, A1: 5, A2: 3, A3: 3 }
+      
+      ops_qaqc:
+        name: "Kiểm soát Chất lượng (QA/QC)"
+        description: "Đảm bảo chất lượng vật tư và tiêu chuẩn thi công."
+        career_levels:
+          pro:
+            name: "Kỹ sư QA/QC"
+            expected_level: "3-4"
+            ask_weights: { K: 50, S: 20, A: 30 }
+            katz_weights: { TECHNICAL: 60, INTERPERSONAL: 20, CONCEPTUAL: 20 }
+            competency_targets: { K1: 5, K2: 3, K3: 4, S1: 2, S2: 4, S3: 3, S4: 3, S5: 1, A1: 5, A2: 2, A3: 3 }
+
+  hr_admin:
+    name: "Khối Nhân sự & Tổng hợp"
+    vi: "Nhân Sự"
+    description: "Quản trị nguồn nhân lực, đào tạo và văn hoá."
+    job_titles:
+      hr_recruitment:
+        name: "Tuyển dụng (TA)"
+        description: "Tìm kiếm và thu hút nhân tài (Talent Acquisition)."
+        career_levels:
+          pro:
+            name: "Chuyên viên Tuyển dụng"
+            expected_level: "3-4"
+            ask_weights: { K: 20, S: 50, A: 30 }
+            katz_weights: { TECHNICAL: 20, INTERPERSONAL: 60, CONCEPTUAL: 20 }
+            competency_targets: { K1: 3, K2: 2, K3: 4, S1: 5, S2: 3, S3: 3, S4: 4, S5: 3, A1: 3, A2: 5, A3: 4 }
+            
+      hr_cbm:
+        name: "Lương thưởng (C&B)"
+        description: "Quản lý phúc lợi, thuế và bảo hiểm."
+        career_levels:
+          pro:
+            name: "Chuyên viên C&B"
+            expected_level: "3-4"
+            ask_weights: { K: 50, S: 30, A: 20 }
+            katz_weights: { TECHNICAL: 50, INTERPERSONAL: 30, CONCEPTUAL: 20 }
+            competency_targets: { K1: 5, K2: 4, K3: 3, S1: 2, S2: 4, S3: 3, S4: 2, S5: 1, A1: 5, A2: 3, A3: 3 }
+
+  biz_dev:
+    name: "Khối Phát triển Kinh doanh"
+    vi: "Kinh Doanh"
+    description: "Tiếp thị, bán hàng và phát triển quan hệ đối tác."
+    job_titles:
+      biz_sales:
+        name: "Kinh doanh (Sales)"
+        description: "Bán hàng B2B, phát triển doanh thu."
+        career_levels:
+          pro:
+            name: "Chuyên viên Kinh doanh"
+            expected_level: "3-4"
+            ask_weights: { K: 15, S: 55, A: 30 }
+            katz_weights: { TECHNICAL: 10, INTERPERSONAL: 60, CONCEPTUAL: 30 }
+            competency_targets: { K1: 3, K2: 2, K3: 4, S1: 4, S2: 3, S3: 3, S4: 5, S5: 4, A1: 4, A2: 5, A3: 5 }

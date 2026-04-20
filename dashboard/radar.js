@@ -30,7 +30,7 @@ class RadarChart {
 
         this.center = { x: this.logicalWidth / 2, y: this.logicalHeight / 2 };
         this.radius = Math.min(this.logicalWidth, this.logicalHeight) / 2 - 65;
-        this.levels = options.levels || 5;
+        this.levels = options.levels || 6;
 
         // Styling — Apple HIG colors
         this.colors = {
@@ -44,15 +44,11 @@ class RadarChart {
             axisLabelActive: '#1d1d1f',
         };
 
-        // Domain color mapping (Apple system colors)
+        // Domain color mapping (ASK v2.1)
         this.domainColors = {
-            'HOS': '#af52de', // Mindset - purple
-            'PD': '#af52de',
-            'WF': '#5ac8fa',  // Skills - teal
-            'ELA': '#5ac8fa',
-            'SCI': '#34c759', // Knowledge - green
-            'MATH': '#34c759',
-            'SS': '#34c759',
+            'K': '#34c759', // Knowledge - green
+            'S': '#5ac8fa', // Skills - blue
+            'A': '#af52de', // Attitude - purple
         };
 
         // Data
@@ -314,7 +310,7 @@ class RadarChart {
 
     _drawLevelLabels() {
         const { ctx, center, radius, levels } = this;
-        const levelNames = ['', 'Foundation', 'Developing', 'Proficient', 'Advanced', 'Mastery'];
+        const levelNames = ['', 'Foundation', 'Developing', 'Proficient', 'Advanced', 'Mastery', 'Pioneer'];
 
         for (let lvl = 1; lvl <= levels; lvl++) {
             const r = (radius / levels) * lvl;

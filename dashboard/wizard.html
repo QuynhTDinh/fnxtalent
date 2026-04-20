@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FNX Talent Factory — Đánh giá năng lực</title>
-    <meta name="description" content="Hệ thống đánh giá năng lực ứng viên dựa trên khung Building 21, sử dụng AI.">
+    <meta name="description" content="Hệ thống đánh giá năng lực ứng viên dựa trên khung FNX Taxonomy, sử dụng AI.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -146,7 +146,7 @@
                     <div class="panel-header">
                         <h2>👤 Hồ sơ ứng viên (CV)</h2>
                         <p class="panel-desc">Dán nội dung CV vào bên dưới. AI sẽ đánh giá năng lực dựa trên khung
-                            Building 21.</p>
+                            FNX Taxonomy.</p>
                     </div>
 
                     <div class="form-group">
@@ -274,7 +274,7 @@
                     <div class="panel-card">
                         <div class="panel-header">
                             <h3>📊 Phân tích theo nhóm năng lực</h3>
-                            <span class="panel-badge">Building 21</span>
+                            <span class="panel-badge">FNX Taxonomy</span>
                         </div>
                         <div class="domain-bars" id="domainBars"></div>
                     </div>
@@ -314,39 +314,36 @@
                             <div class="legend-section">
                                 <h4 class="legend-section-title">Mã vùng năng lực (Area Code)</h4>
                                 <p class="legend-section-desc">Mỗi năng lực được mã hóa theo dạng
-                                    <strong>AREA.số</strong> — trong đó AREA là vùng năng lực theo khung Building 21:
+                                    <strong>ASK.số</strong> — trong đó K/S/A là vùng năng lực cốt lõi:
                                 </p>
                                 <div class="legend-grid">
-                                    <div class="legend-area-item" style="border-left-color: #af52de;">
-                                        <span class="legend-area-badge"
-                                            style="background:rgba(175,82,222,0.1); color:#af52de;">Mindset</span>
-                                        <span class="legend-area-label">Tư duy & Thái độ</span>
-                                        <div class="legend-area-codes">
-                                            <span><strong>HOS</strong> — Habits of Success <em>(Thói quen thành
-                                                    công)</em></span>
-                                            <span><strong>PD</strong> — Personal Development <em>(Phát triển cá
-                                                    nhân)</em></span>
-                                        </div>
-                                    </div>
-                                    <div class="legend-area-item" style="border-left-color: #5ac8fa;">
-                                        <span class="legend-area-badge"
-                                            style="background:rgba(90,200,250,0.1); color:#5ac8fa;">Skills</span>
-                                        <span class="legend-area-label">Kỹ năng thực hành</span>
-                                        <div class="legend-area-codes">
-                                            <span><strong>WF</strong> — Workforce Readiness <em>(Kỹ năng
-                                                    nghề)</em></span>
-                                            <span><strong>ELA</strong> — English Language Arts <em>(Ngôn ngữ & Giao
-                                                    tiếp)</em></span>
-                                        </div>
-                                    </div>
-                                    <div class="legend-area-item" style="border-left-color: #34c759;">
-                                        <span class="legend-area-badge"
-                                            style="background:rgba(52,199,89,0.1); color:#34c759;">Knowledge</span>
+                                    <div class="legend-area-item" style="border-left-color: #0071e3;">
+                                        <span class="legend-area-badge" style="background:rgba(0,113,227,0.1); color:#0071e3;">K - Knowledge</span>
                                         <span class="legend-area-label">Kiến thức chuyên môn</span>
                                         <div class="legend-area-codes">
-                                            <span><strong>SCI</strong> — Science <em>(Khoa học & Kỹ thuật)</em></span>
-                                            <span><strong>MATH</strong> — Mathematics <em>(Toán & Phân tích)</em></span>
-                                            <span><strong>SS</strong> — Social Studies <em>(Khoa học xã hội)</em></span>
+                                            <span><strong>K1</strong> — Kiến thức chuyên ngành</span>
+                                            <span><strong>K2</strong> — Kiến thức \& Nghiệp vụ kỹ thuật</span>
+                                            <span><strong>K3</strong> — Công cụ \& Công nghệ</span>
+                                        </div>
+                                    </div>
+                                    <div class="legend-area-item" style="border-left-color: #ff9500;">
+                                        <span class="legend-area-badge" style="background:rgba(255,149,0,0.1); color:#ff9500;">S - Skill</span>
+                                        <span class="legend-area-label">Kỹ năng thực hành</span>
+                                        <div class="legend-area-codes">
+                                            <span><strong>S1</strong> — Giao tiếp kỹ thuật</span>
+                                            <span><strong>S2</strong> — Phân tích \& Giải quyết vấn đề</span>
+                                            <span><strong>S3</strong> — Quản lý \& Lên kế hoạch</span>
+                                            <span><strong>S4</strong> — Tư duy hệ thống</span>
+                                            <span><strong>S5</strong> — Phối hợp \& Giao việc</span>
+                                        </div>
+                                    </div>
+                                    <div class="legend-area-item" style="border-left-color: #af52de;">
+                                        <span class="legend-area-badge" style="background:rgba(175,82,222,0.1); color:#af52de;">A - Attitude</span>
+                                        <span class="legend-area-label">Thái độ \& Phẩm chất</span>
+                                        <div class="legend-area-codes">
+                                            <span><strong>A1</strong> — Chủ động - Cải tiến</span>
+                                            <span><strong>A2</strong> — Hợp tác - Tin tưởng</span>
+                                            <span><strong>A3</strong> — Quan tâm - Hỗ trợ</span>
                                         </div>
                                     </div>
                                 </div>
@@ -433,7 +430,7 @@
 
         <!-- Footer -->
         <div class="wizard-footer">
-            <p>FNX Talent Factory v2 · Assessment powered by Gemini AI · Framework: Building 21</p>
+            <p>FNX Talent Factory v2 · Assessment powered by Gemini AI · Framework: FNX Taxonomy</p>
         </div>
     </div>
 

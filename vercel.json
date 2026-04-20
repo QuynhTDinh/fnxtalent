@@ -40,6 +40,10 @@
             "dest": "/dashboard/taxonomy.html"
         },
         {
+            "src": "/presentation",
+            "dest": "/dashboard/presentation.html"
+        },
+        {
             "src": "/history",
             "dest": "/dashboard/history.html"
         },

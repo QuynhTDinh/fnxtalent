@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FNX Presentation Agent</title>
+    
+    <!-- Design System Base -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Reveal.js Core CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+    
+    <!-- Reveal.js Themes (Using white as base, custom dark overrides in prompt) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/simple.min.css" id="theme">
+    
+    <!-- Highlight.js for code blocks -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/monokai.min.css">
+
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            font-family: var(--font-primary, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+        }
+        
+        /* Command Bar Overlay */
+        .gamma-command-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .gamma-command-bar.hidden {
+            transform: translateY(-100%);
+        }
+
+        .gamma-logo {
+            font-family: "JetBrains Mono", monospace;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--accent-blue, #0071e3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        
+        .gamma-logo::before {
+            content: '';
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: var(--accent-blue, #0071e3);
+            border-radius: 2px;
+            box-shadow: 14px 0 0 rgba(0, 113, 227, 0.4);
+        }
+
+        .command-input-wrapper {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            background: #f1f3f5;
+            border-radius: 8px;
+            padding: 4px 12px;
+            border: 1px solid transparent;
+        }
+        
+        .command-input-wrapper:focus-within {
+            background: #fff;
+            border-color: var(--accent-blue, #0071e3);
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+        }
+
+        .command-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 8px;
+            font-size: 0.95rem;
+            color: #333;
+            outline: none;
+        }
+
+        .generate-btn {
+            background: var(--accent-blue, #0071e3);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .generate-btn:hover {
+            background: #005bb5;
+            transform: translateY(-1px);
+        }
+        
+        .generate-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Loading Screen */
+        .gamma-loader {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255, 255, 255, 0.98);
+            z-index: 900;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .gamma-loader.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 4px solid rgba(0, 113, 227, 0.1);
+            border-left-color: var(--accent-blue, #0071e3);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        
+        .loader-text {
+            margin-top: 16px;
+            font-size: 0.9rem;
+            color: #666;
+            font-family: "JetBrains Mono", monospace;
+        }
+
+        /* Presentation Container Override */
+        .reveal {
+            font-family: inherit;
+        }
+        
+        .reveal h1, .reveal h2, .reveal h3 {
+            font-family: inherit;
+            font-weight: 700;
+            text-transform: none;
+            letter-spacing: -0.02em;
+        }
+        
+        .reveal h1 { color: var(--accent-blue, #0071e3); }
+        .reveal .dark-slide h1, .reveal .dark-slide h2 { color: #fff; }
+        .reveal .dark-slide { color: rgba(255,255,255,0.9); }
+        
+        /* Help Button */
+        .toggle-nav {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        .back-nav {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-right: 12px;
+            padding: 6px 12px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .back-nav:hover {
+            background: rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Command Bar -->
+    <div class="gamma-command-bar" id="commandBar">
+        <a href="/report" class="back-nav">← Dashboard</a>
+        <div class="gamma-logo">FNX Slides</div>
+        <div class="command-input-wrapper" style="flex-direction:column; align-items:flex-start; padding: 8px 12px; gap:4px">
+            <input type="text" id="topicInput" class="command-input" placeholder="Nhập chủ đề... VD: Báo cáo khung năng lực TLD cho Ban Giám đốc" style="padding:0;" />
+            <div style="font-size: 0.72rem; color: #888; font-weight: 500;">
+                💡 <b>Mật ngữ (C-R-A):</b> [Context / Khán giả] + [Request / Yêu cầu giải thích điểm cốt lõi] + [Action / Tone giọng, Giới hạn trang]
+            </div>
+        </div>
+        <button class="generate-btn" id="generateBtn" onclick="generatePresentation()" style="align-self: center;">Generate Pitch Deck</button>
+    </div>
+
+    <!-- Toggle Nav Button -->
+    <button class="toggle-nav" onclick="document.getElementById('commandBar').classList.toggle('hidden')" title="Hiện/Ẩn Menu">
+        ≡
+    </button>
+
+    <!-- Loading Screen -->
+    <div class="gamma-loader" id="loader">
+        <div class="spinner"></div>
+        <div class="loader-text" id="loaderText">AI đang thiết kế cấu trúc Slide...</div>
+    </div>
+
+    <!-- Reveal.js Container -->
+    <div class="reveal">
+        <div class="slides" id="slideContainer">
+            <!-- Default Welcome Slide -->
+            <section data-markdown>
+                <textarea data-template>
+                    ## Welcome to FNX Pitch Deck
+                    
+                    Nhập chủ đề vào thanh điều hướng phía trên để AI tự động xây dựng bài trình chiếu chuyên nghiệp.
+                    
+                    *   Kiến trúc: **FNX Gamma** (Slide Agent)
+                    *   Hiển thị: Reveal.js HTML5
+                    
+                    <!-- .slide: data-background-color="#f4f6f8" -->
+                </textarea>
+            </section>
+        </div>
+    </div>
+
+    <!-- Reveal.js Core Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.js"></script>
+
+    <script>
+        // Init Reveal
+        let deck = new Reveal({
+            plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ],
+            hash: true,
+            slideNumber: true,
+            transition: 'slide' // none/fade/slide/convex/concave/zoom
+        });
+        deck.initialize();
+
+        async function generatePresentation() {
+            const input = document.getElementById('topicInput');
+            const btn = document.getElementById('generateBtn');
+            const loader = document.getElementById('loader');
+            const loaderText = document.getElementById('loaderText');
+            const topic = input.value.trim();
+
+            if(!topic) {
+                alert("Vui lòng nhập chủ đề slide!");
+                return;
+            }
+
+            // UI State
+            input.disabled = true;
+            btn.disabled = true;
+            loader.classList.add('active');
+            
+            // Text morphing
+            const texts = ["Đang phân tích yêu cầu...", "Đang đọc kiến trúc Core Taxonomy...", "Đang biên soạn Dàn ý (Agenda)...", "Đang đổ thiết kế nội dung..."];
+            let idx = 0;
+            const textInterval = setInterval(() => {
+                idx = (idx + 1) % texts.length;
+                loaderText.textContent = texts[idx];
+            }, 2500);
+
+            try {
+                const response = await fetch('/api/presentation/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topic: topic })
+                });
+
+                if(!response.ok) {
+                    throw new Error("Lỗi kết nối tới Agent API");
+                }
+
+                const data = await response.json();
+                
+                if(data.markdown) {
+                    // Inject into Reveal
+                    const container = document.getElementById('slideContainer');
+                    // We must create a new section with data-markdown
+                    container.innerHTML = `
+                        <section data-markdown>
+                            <textarea data-template>
+                                ${data.markdown}
+                            </textarea>
+                        </section>
+                    `;
+                    
+                    // Re-initialize/sync Reveal wrapper for dynamic content
+                    deck.destroy(); 
+                    deck = new Reveal({
+                        plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ],
+                        hash: true,
+                        slideNumber: true,
+                        transition: 'slide'
+                    });
+                    
+                    // Let DOM update before re-init
+                    setTimeout(() => {
+                        deck.initialize();
+                        // Hide command bar after success
+                        document.getElementById('commandBar').classList.add('hidden');
+                    }, 100);
+                }
+
+            } catch (err) {
+                alert("Có lỗi xảy ra: " + err.message);
+            } finally {
+                clearInterval(textInterval);
+                input.disabled = false;
+                btn.disabled = false;
+                loader.classList.remove('active');
+            }
+        }
+
+        // Enter key to submit
+        document.getElementById('topicInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                generatePresentation();
+            }
+        });
+    </script>
+</body>
+</html>

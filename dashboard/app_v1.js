@@ -8,64 +8,34 @@
  */
 
 // ── Initialize ──
-const API_BASE = '';
-let radar = null; // Will initialize dynamically
+const radar = new RadarChart('radarCanvas');
 
 // Set current date
 document.getElementById('reportDate').textContent =
     new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-// ── Area Names Lookup (ASK - v2.1) ──
-let AREA_NAMES = {
-    'K': { short: 'Kiến thức', full: 'Knowledge — Kiến thức', group: 'Knowledge' },
-    'S': { short: 'Kỹ năng', full: 'Skill — Kỹ năng', group: 'Skills' },
-    'A': { short: 'Thái độ', full: 'Attitude — Thái độ', group: 'Attitude' },
+// ── Area Names Lookup (Building 21 → Vietnamese) ──
+const AREA_NAMES = {
+    'HOS': { short: 'Tư duy', full: 'Habits of Success — Thói quen thành công', group: 'Mindset' },
+    'PD': { short: 'Phát triển', full: 'Personal Development — Phát triển cá nhân', group: 'Mindset' },
+    'WF': { short: 'Kỹ năng nghề', full: 'Workforce Readiness — Kỹ năng nghề nghiệp', group: 'Skills' },
+    'ELA': { short: 'Giao tiếp', full: 'English Language Arts — Ngôn ngữ & Giao tiếp', group: 'Skills' },
+    'SCI': { short: 'Khoa học KT', full: 'Science — Khoa học & Kỹ thuật', group: 'Knowledge' },
+    'MATH': { short: 'Phân tích', full: 'Mathematics — Toán & Phân tích', group: 'Knowledge' },
+    'SS': { short: 'Xã hội', full: 'Social Studies — Khoa học xã hội', group: 'Knowledge' },
 };
 
-let LEVEL_NAMES = {
+const LEVEL_NAMES = {
     1: 'Nền tảng',
     2: 'Đang phát triển',
     3: 'Thành thạo',
     4: 'Nâng cao',
     5: 'Bậc thầy',
-    6: 'Tiên phong',
 };
 
-let TOTAL_LEVELS = 6;
-let TAXONOMY_DATA = null;
-
-async function loadTaxonomy() {
-    try {
-        const resp = await fetch(`${API_BASE}/api/taxonomy`);
-        if (!resp.ok) throw new Error('API Error');
-        const data = await resp.json();
-        TAXONOMY_DATA = data;
-        
-        LEVEL_NAMES = {};
-        let maxLvl = 0;
-        for (const [lvl, info] of Object.entries(data.levels)) {
-            LEVEL_NAMES[lvl] = info.vi;
-            if (parseInt(lvl) > maxLvl) maxLvl = parseInt(lvl);
-        }
-        TOTAL_LEVELS = maxLvl || 6;
-        
-        AREA_NAMES = {};
-        data.ask_groups.forEach(g => {
-            AREA_NAMES[g.id] = {
-                short: g.vi,
-                full: `${g.name} — ${g.vi}`,
-                group: g.id === 'K' ? 'Knowledge' : (g.id === 'S' ? 'Skills' : 'Attitude')
-            };
-        });
-        console.log("✓ Taxonomy loaded successfully from API", TAXONOMY_DATA);
-    } catch (err) {
-        console.warn("⚠ Failed to load taxonomy from API, using fallback cache in memory.", err);
-    }
-}
-
 function getAreaLabel(code) {
-    const area = code ? code.charAt(0).toUpperCase() : '?';
-    return AREA_NAMES[area] || { short: code, full: code, group: '?' };
+    const area = code?.split('.')[0];
+    return AREA_NAMES[area] || { short: area, full: area, group: '?' };
 }
 
 // ── Legend toggle ──
@@ -76,37 +46,84 @@ function toggleLegend() {
     toggle.textContent = content.classList.contains('collapsed') ? 'Mở rộng ▼' : 'Thu gọn ▲';
 }
 
-// ── Demo Data (Updated to 11 ASK Competencies) ──
+// ── Demo Data (from actual Gemini LLM pipeline run) ──
 const DEMO_ASSESSMENT = {
     candidateId: "cand_001",
     fullName: "Nguyễn Văn A",
     competencies: [
-        { area: "K", code: "K1", name: "Kiến thức chuyên môn", level: 5, evidence: "Kỹ sư trưởng tại PetroVietnam", reasoning: "Kinh nghiệm thực chiến dày dạn." },
-        { area: "K", code: "K2", name: "Nghiệp vụ kỹ thuật", level: 4, evidence: "Xây dựng hệ thống an toàn tự động", reasoning: "Am hiểu sâu về vận hành hệ thống." },
-        { area: "S", code: "S2", name: "Giải quyết vấn đề", level: 4, evidence: "Giảm 20% chi phí vận hành", reasoning: "Khả năng phân tích tốt." },
-        { area: "S", code: "S1", name: "Giao tiếp kỹ thuật", level: 3, evidence: "Điều phối đội ngũ 15 người", reasoning: "Giao tiếp ở mức khá." },
-        { area: "A", code: "A1", name: "Chủ động - Cải tiến", level: 4, evidence: "Bằng sáng chế: Hệ thống lọc (2022)", reasoning: "Tinh thần đổi mới cao." }
+        {
+            area: "WF",
+            code: "WF.1",
+            name: "Quản lý dự án",
+            level: 3,
+            evidence: "Quản lý dây chuyền sản xuất nhựa PP",
+            reasoning: "Quản lý một dây chuyền sản xuất cho thấy khả năng quản lý dự án ở mức độ thành thạo."
+        },
+        {
+            area: "SCI",
+            code: "SCI.2",
+            name: "Ứng dụng KHKT",
+            level: 4,
+            evidence: "Xây dựng hệ thống giám sát an toàn tự động",
+            reasoning: "Xây dựng một hệ thống tự động đòi hỏi kiến thức chuyên sâu và khả năng ứng dụng KHKT ở mức cao."
+        },
+        {
+            area: "SCI",
+            code: "SCI.3",
+            name: "Giải quyết vấn đề KT",
+            level: 4,
+            evidence: "Thiết kế các giải pháp xử lý nước thải công nghiệp",
+            reasoning: "Thiết kế giải pháp cho thấy khả năng giải quyết vấn đề kỹ thuật phức tạp."
+        },
+        {
+            area: "HOS",
+            code: "HOS.4",
+            name: "Tư duy hệ thống",
+            level: 4,
+            evidence: "Áp dụng tư duy hệ thống để giảm 20% chi phí vận hành",
+            reasoning: "Áp dụng tư duy hệ thống và đạt được kết quả giảm chi phí cho thấy khả năng ở mức cao."
+        },
+        {
+            area: "SCI",
+            code: "SCI.4",
+            name: "Sáng tạo & đổi mới",
+            level: 4,
+            evidence: "Bằng sáng chế: Hệ thống lọc khí thải đa tầng (2022)",
+            reasoning: "Sở hữu bằng sáng chế chứng tỏ khả năng sáng tạo và đổi mới ở mức cao."
+        },
+        {
+            area: "WF",
+            code: "WF.2",
+            name: "Lãnh đạo nhóm",
+            level: 3,
+            evidence: "Điều phối đội ngũ 15 kỹ sư",
+            reasoning: "Điều phối một đội ngũ kỹ sư cho thấy khả năng lãnh đạo nhóm ở mức thành thạo."
+        }
     ],
-    overallStrength: "Ứng viên có kiến thức chuyên môn cực kỳ vững chắc, nổi bật với khả năng giải quyết vấn đề kỹ thuật và tư duy cải tiến.",
-    developmentAreas: "Cần cải thiện thêm kỹ năng giao tiếp tiếng Anh và phối hợp đa văn hóa."
+    overallStrength: "Ứng viên có kinh nghiệm quản lý và điều phối dự án, tư duy hệ thống tốt và khả năng sáng tạo cao thể hiện qua bằng sáng chế.",
+    developmentAreas: "Để phát triển hơn nữa, ứng viên có thể tập trung vào việc nâng cao kỹ năng giao tiếp và thuyết trình."
 };
 
 const DEMO_JD_RESULT = {
     job_id: "job_001",
     role: "Trưởng phòng Kỹ thuật Hóa dầu",
     required_competencies: [
-        { area: "K", code: "K1", name: "Kiến thức chuyên môn", target_level: 5, priority: "High" },
-        { area: "K", code: "K2", name: "Nghiệp vụ kỹ thuật", target_level: 4, priority: "High" },
-        { area: "S", code: "S2", name: "Giải quyết vấn đề", target_level: 4, priority: "High" },
-        { area: "S", code: "S1", name: "Giao tiếp kỹ thuật", target_level: 4, priority: "Medium" },
-        { area: "A", code: "A1", name: "Chủ động - Cải tiến", target_level: 3, priority: "Low" },
+        { area: "WF", code: "WF.1", name: "Quản lý dự án và nguồn lực", target_level: 4, priority: "High" },
+        { area: "SCI", code: "SCI.3", name: "Ứng dụng kiến thức chuyên ngành", target_level: 4, priority: "High" },
+        { area: "HOS", code: "HOS.4", name: "Giải quyết vấn đề và ra quyết định", target_level: 4, priority: "High" },
+        { area: "SCI", code: "SCI.5", name: "Tuân thủ quy định và tiêu chuẩn", target_level: 3, priority: "Medium" },
+        { area: "ELA", code: "ELA.1", name: "Giao tiếp hiệu quả", target_level: 3, priority: "Medium" },
+        { area: "WF", code: "WF.3", name: "Quản lý chất lượng", target_level: 3, priority: "Low" },
     ]
 };
 
 const DEMO_MATCH = {
-    fitScore: 84.5,
+    fitScore: 61.1,
     gaps: [
-        { code: "S1", target: 4, actual: 3, gap: 1, priority: "Medium" },
+        { code: "WF.1", target: 4, actual: 3, gap: 1, priority: "High" },
+        { code: "SCI.5", target: 3, actual: 0, gap: 3, priority: "Medium" },
+        { code: "ELA.1", target: 3, actual: 0, gap: 3, priority: "Medium" },
+        { code: "WF.3", target: 3, actual: 0, gap: 3, priority: "Low" },
     ]
 };
 
@@ -143,34 +160,32 @@ function renderCandidateInfo(candidate, assessment) {
 }
 
 function renderRadarChart(assessment, jdResult) {
-    if (!radar) {
-        radar = new RadarChart('radarCanvas', { levels: TOTAL_LEVELS });
-    }
-    
-    // ── SHADOW MAPPING: ASK (11) → TLD (3 Axes) ──
-    const tldMapping = {
-        'TECHNICAL': { name: 'Kỹ thuật (Technical)', ids: ['K1', 'K2', 'K3', 'S2'], color: '#0071e3', area: 'K' },
-        'INTERPERSONAL': { name: 'Giao tiếp (Interpersonal)', ids: ['S1', 'S5', 'A2', 'A3'], color: '#ff9500', area: 'S' },
-        'CONCEPTUAL': { name: 'Tư duy (Conceptual)', ids: ['S3', 'S4', 'A1'], color: '#af52de', area: 'A' }
-    };
+    // Build unified axis list from all competencies mentioned in either assessment or JD
+    const codeMap = new Map();
 
-    const axes = Object.values(tldMapping).map(m => ({ code: m.name, name: m.name, area: m.area }));
-    
-    // Calculate candidate values
-    const candidateValues = Object.values(tldMapping).map(m => {
-        const scores = assessment.competencies
-            .filter(c => m.ids.includes(c.code))
-            .map(c => c.level);
-        return scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+    // Add assessment competencies
+    assessment.competencies.forEach(c => {
+        codeMap.set(c.code, { code: c.code, name: c.name, area: c.area, actual: c.level, target: 0 });
     });
 
-    // Calculate target values
-    const targetValues = Object.values(tldMapping).map(m => {
-        const scores = jdResult.required_competencies
-            .filter(c => m.ids.includes(c.code))
-            .map(c => c.target_level);
-        return scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+    // Add/merge JD requirements
+    jdResult.required_competencies.forEach(c => {
+        if (codeMap.has(c.code)) {
+            codeMap.get(c.code).target = c.target_level;
+        } else {
+            codeMap.set(c.code, { code: c.code, name: c.name, area: c.area, actual: 0, target: c.target_level });
+        }
     });
+
+    const entries = Array.from(codeMap.values());
+
+    // Sort by area for visual grouping
+    const areaOrder = { 'HOS': 0, 'PD': 1, 'WF': 2, 'ELA': 3, 'SCI': 4, 'MATH': 5, 'SS': 6 };
+    entries.sort((a, b) => (areaOrder[a.area] ?? 99) - (areaOrder[b.area] ?? 99));
+
+    const axes = entries.map(e => ({ code: e.code, name: e.name, area: e.area }));
+    const candidateValues = entries.map(e => e.actual);
+    const targetValues = entries.map(e => e.target);
 
     radar.setData(axes, candidateValues, targetValues);
 }
@@ -200,9 +215,9 @@ function renderFitScore(score) {
 
 function renderDomainBars(assessment) {
     const domains = {
-        'Knowledge': { areas: ['K'], color: 'var(--domain-knowledge)', icon: '#34d399', items: [] },
-        'Skills': { areas: ['S'], color: 'var(--domain-skills)', icon: '#22d3ee', items: [] },
-        'Attitude': { areas: ['A'], color: 'var(--domain-mindset)', icon: '#a78bfa', items: [] },
+        'Mindset': { areas: ['HOS', 'PD'], color: 'var(--domain-mindset)', icon: '#a78bfa', items: [] },
+        'Skills': { areas: ['WF', 'ELA'], color: 'var(--domain-skills)', icon: '#22d3ee', items: [] },
+        'Knowledge': { areas: ['SCI', 'MATH', 'SS'], color: 'var(--domain-knowledge)', icon: '#34d399', items: [] },
     };
 
     assessment.competencies.forEach(c => {
@@ -221,7 +236,7 @@ function renderDomainBars(assessment) {
         const avg = domain.items.length > 0
             ? domain.items.reduce((a, b) => a + b, 0) / domain.items.length
             : 0;
-        const pct = (avg / TOTAL_LEVELS) * 100;
+        const pct = (avg / 5) * 100;
         const areaLabels = domain.areas.join(', ');
 
         const el = document.createElement('div');
@@ -233,7 +248,7 @@ function renderDomainBars(assessment) {
                     <span class="domain-label">${name}</span>
                     <span class="domain-sublabel">(${areaLabels})</span>
                 </div>
-                <span class="domain-score" style="color: ${domain.icon}">${avg.toFixed(1)} / ${TOTAL_LEVELS}</span>
+                <span class="domain-score" style="color: ${domain.icon}">${avg.toFixed(1)} / 5</span>
             </div>
             <div class="domain-bar-track">
                 <div class="domain-bar-fill" style="background: linear-gradient(90deg, ${domain.icon}, ${domain.icon}88)" data-width="${pct}"></div>
@@ -296,8 +311,8 @@ function renderGapAnalysis(matchResult) {
     const priorityLabels = { 'High': 'Cao', 'Medium': 'TB', 'Low': 'Thấp' };
 
     gaps.forEach((gap, i) => {
-        const actualPct = (gap.actual / TOTAL_LEVELS) * 100;
-        const targetPct = (gap.target / TOTAL_LEVELS) * 100;
+        const actualPct = (gap.actual / 5) * 100;
+        const targetPct = (gap.target / 5) * 100;
         const areaInfo = getAreaLabel(gap.code);
         const gapName = gap.name || gap.code;
         const priLabel = priorityLabels[gap.priority] || gap.priority;
@@ -436,8 +451,7 @@ async function runFullPipeline() {
 }
 
 // ── Auto-load demo on page load ──
-window.addEventListener('DOMContentLoaded', async () => {
-    await loadTaxonomy();
+window.addEventListener('DOMContentLoaded', () => {
     // Slight delay to let CSS animations settle
     setTimeout(loadDemoData, 300);
 });
