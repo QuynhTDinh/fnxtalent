@@ -90,10 +90,13 @@ class CVRequest(BaseModel):
 from core.agents.jd_decoder_agent import JDDecoderAgent
 from core.agents.assessment_agent import AssessmentAgent
 from core.agents.combat_designer_agent import CombatDesignerAgent
+from core.agents.evaluator_agent import EvaluatorAgent
+from core.agents.llm_client import create_llm_client
 
 _jd_agent = JDDecoderAgent(framework_path=framework_path, llm_provider="gemini")
 _cv_agent = AssessmentAgent(framework_path=framework_path, llm_provider="gemini")
 _combat_agent = CombatDesignerAgent(llm_provider="gemini")
+_evaluator_agent = EvaluatorAgent(create_llm_client("gemini"))
 
 # ── History (in-memory for now; Supabase in future phase) ──
 import uuid
@@ -154,7 +157,10 @@ class CombatRoleRequest(BaseModel):
     role: str
     seniority: Optional[str] = "Junior"
     jd: Optional[str] = "Tự động phân tích theo Role"
-
+    group_tag: Optional[str] = "Operations/Technical"
+    industry: Optional[str] = "Hóa Dầu"
+    company: Optional[str] = "Đạm Cà Mau"
+    
 class CombatBatchRequest(BaseModel):
     roles: list[CombatRoleRequest]
 
@@ -445,17 +451,89 @@ async def upload_org_chart(file: UploadFile = File(...)):
 @app.post("/api/audit/combat/generate-batch")
 async def generate_combat_batch(request: CombatBatchRequest):
     """Generate combat scenarios for a list of roles."""
+    import uuid
     try:
         results = []
         for req_role in request.roles:
             data = {
                 "role": req_role.role,
                 "seniority": req_role.seniority,
-                "jd": req_role.jd
+                "jd": req_role.jd,
+                "group_tag": req_role.group_tag,
+                "industry": req_role.industry,
+                "company": req_role.company
             }
             scenario = _combat_agent.design(data)
+            
+            # Generate Link and Save to Persistent Store
+            if "error" not in scenario:
+                test_id = str(uuid.uuid4())[:8]
+                scenario["test_id"] = test_id
+                scenario["status"] = "pending_candidate"
+                store.save_audit_test(test_id, scenario)
+            
             results.append(scenario)
         return {"scenarios": results}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/audit/test/{test_id}")
+async def get_audit_test(test_id: str):
+    """Candidate loads the test via ID"""
+    test_data = store.get_audit_test(test_id)
+    if not test_data:
+        raise HTTPException(status_code=404, detail="Bài thi không tồn tại hoặc link không đúng.")
+    return test_data
+
+class TestSubmitRequest(BaseModel):
+    candidate_name: str
+    answers: dict
+
+@app.post("/api/audit/test/{test_id}/submit")
+async def submit_audit_test(test_id: str, request: TestSubmitRequest):
+    """Candidate submits the test"""
+    test_data = store.get_audit_test(test_id)
+    if not test_data:
+        raise HTTPException(status_code=404, detail="Bài kiểm tra không tồn tại.")
+    if test_data.get("status") == "completed":
+        raise HTTPException(status_code=400, detail="Bài thi này đã được nộp.")
+    
+    update_payload = {
+        "candidate_name": request.candidate_name,
+        "answers": request.answers,
+        "status": "completed",
+        "submitted_at": datetime.now().isoformat()
+    }
+    store.update_audit_test(test_id, update_payload)
+    return {"status": "success", "message": "Nộp bài thành công"}
+
+@app.post("/api/audit/test/{test_id}/evaluate")
+async def evaluate_audit_test(test_id: str):
+    """Trigged by Admin to let AI read the candidate answers and score."""
+    test_data = store.get_audit_test(test_id)
+    if not test_data:
+        raise HTTPException(status_code=404, detail="Bài thi không tồn tại.")
+        
+    if test_data.get("status") != "completed":
+        raise HTTPException(status_code=400, detail="Chỉ có thể chấm bài khi ở trạng thái completed.")
+
+    try:
+        role_data = {
+            "role": test_data.get("role", ""),
+            "seniority": test_data.get("seniority", ""),
+            "group_tag": test_data.get("group_tag", "")
+        }
+        candidate_answers = test_data.get("answers", {})
+        
+        evaluation_result = _evaluator_agent.evaluate(role_data, candidate_answers)
+        
+        update_payload = {
+            "evaluation_result": evaluation_result,
+            "status": "evaluated"
+        }
+        store.update_audit_test(test_id, update_payload)
+        
+        return {"status": "success", "evaluation": evaluation_result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -504,6 +582,10 @@ if not IS_VERCEL:
         @app.get("/presentation")
         async def serve_presentation():
             return FileResponse(os.path.join(dashboard_dir, "presentation.html"))
+            
+        @app.get("/test")
+        async def serve_test():
+            return FileResponse(os.path.join(dashboard_dir, "test.html"))
 
         # Mount static AFTER explicit routes so /api/* takes priority
         app.mount("/", StaticFiles(directory=dashboard_dir), name="dashboard")

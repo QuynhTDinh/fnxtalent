@@ -4,255 +4,334 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Internal Competency Audit | FNX Talent Factory</title>
-    <meta name="description" content="Hệ thống đánh giá định kỳ nhân sự nội bộ (Batch Processing).">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="wizard.css">
+    <title>Quản lý năng lực | FNX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        .audit-card {
-            margin-top: 2rem;
+        body {
+            background: #f8fafc;
+            color: #1e293b;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
         }
 
-        .roles-table-container {
-            margin-top: 2rem;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 12px;
-            padding: 1.5rem;
-            display: none;
-            border: 1px solid rgba(255,255,255,0.05);
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem;
         }
 
-        table.competency-table {
-            width: 100%;
-            border-collapse: collapse;
-            color: #fff;
-            margin-top: 1rem;
-        }
-
-        table.competency-table th, table.competency-table td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        table.competency-table th {
-            color: rgba(255, 255, 255, 0.6);
-            font-weight: 500;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-        }
-
-        /* Modal Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.85);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            backdrop-filter: blur(4px);
-        }
-
-        .modal-content {
-            background: #111;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 85vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-        }
-
-        .modal-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        .header {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-        
-        .modal-header h3 {
-            margin: 0;
-            font-size: 1.2rem;
-            font-weight: 600;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
-        .modal-body {
-            padding: 2rem;
-            overflow-y: auto;
-            color: #ddd;
-            line-height: 1.6;
+        .logo { font-weight: 700; font-size: 1.25rem; color: #0f172a; }
+        .logo span { color: #64748b; font-weight: 400; font-size: 0.95rem; margin-left: 8px; }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .select-input {
+            padding: 0.5rem 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            background: #fff;
+            color: #0f172a;
+            min-width: 250px;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.9rem;
+        }
+        .btn-primary:hover { background: #1d4ed8; }
+
+        .btn-secondary {
+            background: #fff;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.9rem;
+        }
+        .btn-secondary:hover { background: #f1f5f9; }
+
+        .btn-text {
+            background: none;
+            color: #2563eb;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 0;
+        }
+        .btn-text:hover { text-decoration: underline; }
+
+        .grid-container {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            color: #334155;
             font-size: 0.95rem;
         }
-        
-        .modal-body pre {
-            white-space: pre-wrap;
-            font-family: 'Inter', sans-serif;
-            background: rgba(255,255,255,0.03);
-            padding: 1rem;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.05);
+
+        tr:hover {
+            background: #f8fafc;
         }
 
-        .close-btn {
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-            border: none;
-            width: 32px; height: 32px;
-            border-radius: 50%;
-            font-size: 1.2rem;
-            cursor: pointer;
+        .badge {
+            padding: 0.25rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .badge-pending { background: #fef08a; color: #854d0e; }
+        .badge-ready { background: #dcfce3; color: #166534; }
+
+        /* Side Drawer */
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: -550px;
+            width: 500px;
+            height: 100vh;
+            background: #fff;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
             display: flex;
+            flex-direction: column;
+            border-left: 1px solid #e2e8f0;
+        }
+
+        .drawer.open { right: 0; }
+
+        .drawer-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
+            background: #f8fafc;
         }
-        
-        .close-btn:hover {
-            background: rgba(255,255,255,0.2);
+
+        .drawer-header h3 { margin: 0; color: #0f172a; font-size: 1.1rem; }
+        .btn-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94a3b8; }
+
+        .drawer-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
         }
-        
-        /* Loading Overlay */
-        #loadingOverlay {
+
+        .drawer-body h4 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            color: #475569;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .drawer-body pre {
+            white-space: pre-wrap;
+            font-family: inherit;
+            background: #f1f5f9;
+            padding: 1rem;
+            border-radius: 6px;
+            color: #334155;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .q-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-left: 3px solid #2563eb;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+        }
+
+        .q-meta { font-size: 0.8rem; color: #64748b; margin-bottom: 0.5rem; display: flex; gap: 8px; }
+        .q-meta span { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; border: 1px solid #e2e8f0;}
+        .q-text { color: #0f172a; font-size: 0.95rem; line-height: 1.5; }
+
+        .empty-state {
+            padding: 4rem 2rem;
+            text-align: center;
+            color: #64748b;
+        }
+
+        /* Loading */
+        #loader {
             display: none;
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.8);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            backdrop-filter: blur(5px);
-        }
-        
-        .spinner-ring {
-            width: 50px; height: 50px;
-            border: 4px solid rgba(255,255,255,0.1);
-            border-left-color: #5ac8fa;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 1rem;
-        }
-        
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        
-        .btn-gen {
-            background: linear-gradient(135deg, #af52de, #5ac8fa);
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
             color: #fff;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            font-size: 0.9rem;
+            z-index: 2000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        .btn-gen:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .inline-add {
+            display: none;
+            background: #f8fafc;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            gap: 1rem;
+            align-items: center;
+        }
+        .inline-add input { flex: 1; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px; font-family: inherit; }
     </style>
 </head>
 
 <body>
-    <div class="ambient-bg">
-        <div class="ambient-orb orb-1"></div>
-        <div class="ambient-orb orb-2"></div>
-        <div class="ambient-orb orb-3"></div>
-    </div>
+    <div id="loader">Đang xử lý dữ liệu...</div>
 
-    <div class="wizard-container">
+    <div class="container">
         <!-- Header -->
-        <header class="wizard-header">
-            <div class="logo">
-                <div class="logo-icon">
-                    <svg viewBox="0 0 32 32" fill="none">
-                        <path d="M16 2L28 8V24L16 30L4 24V8L16 2Z" stroke="currentColor" stroke-width="1.5"
-                            fill="none" />
-                        <circle cx="16" cy="16" r="3" fill="currentColor" opacity="0.8" />
-                    </svg>
-                </div>
-                <div class="logo-text">
-                    <span class="logo-name">FNX</span>
-                    <span class="logo-sub">Talent Factory</span>
-                </div>
+        <div class="header">
+            <div class="logo">Công ty Cổ phần Phân bón Dầu khí Cà Mau <span>Hệ thống Quản lý Năng lực</span></div>
+            <div>
+                <span style="font-size: 0.85rem; color: #64748b; border: 1px solid #e2e8f0; padding: 4px 8px; border-radius: 4px;">Ngành: Hóa dầu</span>
             </div>
-            <div style="display: flex; gap: 1rem;">
-                <a href="/" class="header-link">✨ Tuyển dụng</a>
-                <a href="/history" class="header-link">📋 Lịch sử</a>
+        </div>
+
+        <input type="hidden" id="companyContext" value="CTCP Phân Bón Cà Mau (PVCFC)">
+        <input type="hidden" id="industryContext" value="Hóa Dầu / Phân Bón">
+        <input type="file" id="fileInput" accept=".csv, .xlsx" style="display: none;">
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="input-group">
+                <label>Lựa chọn Khối phòng ban</label>
+                <select id="departmentSelect" class="select-input">
+                    <option value="Operations/Technical">Khối Vận hành và Kỹ thuật</option>
+                    <option value="Front-line">Khối Kinh doanh và Tiếp thị</option>
+                    <option value="Support">Khối Hành chính, Nhân sự, Kế toán</option>
+                    <option value="Ban QLDA">Khối Quản lý Dự án</option>
+                </select>
             </div>
-        </header>
+            <div style="display: flex; gap: 0.75rem;">
+                <button class="btn-secondary" onclick="document.getElementById('fileInput').click()">Tải tệp sơ đồ tổ chức</button>
+                <button class="btn-secondary" onclick="generateStandardList()">Tạo mẫu 5 chức danh</button>
+                <button class="btn-primary" onclick="toggleInlineAdd()">Thêm chức danh</button>
+            </div>
+        </div>
 
-        <main class="step-panels">
-            <section class="panel active">
-                <div class="panel-card audit-card">
-                    <div class="panel-header">
-                        <h2>👥 Phân tích & Gom cụm nhân sự định kỳ (Internal Audit)</h2>
-                        <p class="panel-desc">Tải lên sơ đồ tổ chức (Org Chart) dưới dạng file Excel hoặc CSV để tính năng AI Batch Processing tự động nhóm chức danh và kiến tạo Combat Scenarios.</p>
-                    </div>
+        <!-- Data Grid -->
+        <div class="grid-container">
+            <div class="inline-add" id="inlineAddRow">
+                <input type="text" id="inlineRoleName" placeholder="Nhập tên chức danh (Ví dụ: Kế toán trưởng)">
+                <button class="btn-primary" onclick="addSingleRole()">Thêm</button>
+                <button class="btn-text" onclick="toggleInlineAdd()" style="color: #64748b;">Hủy</button>
+            </div>
 
-                    <!-- Upload Zone -->
-                    <div class="drop-zone" id="auditDropZone">
-                        <input type="file" class="drop-input" id="fileInput" accept=".csv, .xlsx, .xls" />
-                        <div class="drop-zone-content">
-                            <span class="drop-icon">📊</span>
-                            <span class="drop-text" id="dropText">Kéo thả file Excel hoặc CSV lưới nhân sự vào đây</span>
-                            <span class="drop-sub">hỗ trợ .csv, .xlsx, .xls</span>
-                        </div>
-                    </div>
-
-                    <!-- Roles Table Zone -->
-                    <div class="roles-table-container" id="rolesContainer">
-                        <div class="panel-header" style="margin-bottom: 0;">
-                            <h3>🎯 Danh sách chức danh đã thu thập</h3>
-                        </div>
-                        <table class="competency-table" id="rolesTable">
-                            <thead>
-                                <tr>
-                                    <th>Chức danh (Role)</th>
-                                    <th>Số lượng</th>
-                                    <th>Kiến tạo Combat Test</th>
-                                </tr>
-                            </thead>
-                            <tbody id="rolesBody">
-                                <!-- JS populated -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-        </main>
-        
-        <div class="wizard-footer">
-            <p>FNX Talent Factory v2 · Internal Audit Engine · Framework: Building 21</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Chức danh</th>
+                        <th>Khối quy chiếu</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="gridBody">
+                    <tr>
+                        <td colspan="4">
+                            <div class="empty-state">
+                                Chức danh trống. Hãy "Thêm chức danh" hoặc "Tải tệp sơ đồ tổ chức" để bắt đầu.
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- Modal for Combat View -->
-    <div class="modal-overlay" id="combatModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">Kịch bản Combat</h3>
-                <button class="close-btn" onclick="closeModal()">✕</button>
-            </div>
-            <div class="modal-body" id="modalBody">
-                <!-- Content here -->
-            </div>
+    <!-- Side Drawer -->
+    <div class="drawer" id="sideDrawer">
+        <div class="drawer-header">
+            <h3 id="drawerTitle">Kịch bản đánh giá</h3>
+            <button class="btn-close" onclick="closeDrawer()">×</button>
+        </div>
+        <div class="drawer-body" id="drawerContent">
+            <!-- Render via JS -->
         </div>
     </div>
 
-    <!-- Global Loader -->
-    <div id="loadingOverlay">
-        <div class="spinner-ring"></div>
-        <p style="color: #fff; font-weight: 500; font-size: 1.1rem; letter-spacing: 0.5px;" id="loadingText">Hệ thống đang xử lý...</p>
-    </div>
-
-    <!-- SheetJS for Excel to CSV conversion -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="/audit.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/audit.js?v=2.4"></script>
 </body>
-
 </html>

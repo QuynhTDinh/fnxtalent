@@ -21,6 +21,7 @@ class LocalStore(StateStore):
             "nodes": os.path.join(data_dir, "node_results"),
             "candidates": os.path.join(data_dir, "candidates"),
             "jobs": os.path.join(data_dir, "jobs"),
+            "tests": os.path.join(data_dir, "tests"),
         }
         for d in self._dirs.values():
             os.makedirs(d, exist_ok=True)
@@ -130,3 +131,24 @@ class LocalStore(StateStore):
         return self._read(
             os.path.join(self._dirs["jobs"], f"{job_id}.json")
         )
+
+    # ── Tests (Internal Audit) ──
+    def save_audit_test(self, test_id: str, test_data: dict) -> dict:
+        test_data["id"] = test_id
+        test_data["created_at"] = self._now()
+        test_data["updated_at"] = self._now()
+        self._write(os.path.join(self._dirs["tests"], f"{test_id}.json"), test_data)
+        return test_data
+
+    def get_audit_test(self, test_id: str) -> Optional[dict]:
+        return self._read(os.path.join(self._dirs["tests"], f"{test_id}.json"))
+
+    def update_audit_test(self, test_id: str, update_data: dict) -> dict:
+        filepath = os.path.join(self._dirs["tests"], f"{test_id}.json")
+        test = self._read(filepath)
+        if not test:
+            raise ValueError(f"Test {test_id} not found")
+        test.update(update_data)
+        test["updated_at"] = self._now()
+        self._write(filepath, test)
+        return test

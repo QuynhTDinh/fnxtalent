@@ -50,9 +50,30 @@ def parse_org_chart_csv(file_content: bytes) -> dict:
         emp_name = row.get(name_col, '').strip()
         jd = row.get(jd_col, '').strip()
         
+        # --- AUTO-TAGGING ENGINE ---
+        role_lower = role.lower()
+        group_tag = "Unknown"
+        
+        # Heuristics for Ban QLDA
+        if any(k in role_lower for k in ['dự án', 'qlda', 'project', 'pm']):
+            group_tag = "Ban QLDA"
+        # Heuristics for Front-line
+        elif any(k in role_lower for k in ['kinh doanh', 'bán hàng', 'sales', 'marketing', 'khách hàng', 'truyền thông', 'cs', 'retail']):
+            group_tag = "Front-line"
+        # Heuristics for Support
+        elif any(k in role_lower for k in ['nhân sự', 'hr', 'hành chính', 'admin', 'kế toán', 'tài chính', 'finance', 'pháp chế', 'mua sắm', 'procurement']):
+            group_tag = "Support"
+        # Default to Operations if technical words or fallback
+        elif any(k in role_lower for k in ['kỹ', 'sư', 'vận hành', 'sản xuất', 'scada', 'cơ', 'điện', 'hóa', 'nhà máy', 'operator', 'engineer', 'tech', 'bảo dưỡng']):
+            group_tag = "Operations/Technical"
+        else:
+            # Fallback for PVCFC is likely Operations or Support
+            group_tag = "Operations/Technical"
+            
         if role not in clusters:
             clusters[role] = {
                 "title": role,
+                "group_tag": group_tag,
                 "employee_count": 0,
                 "employees": [],
                 "jd": jd

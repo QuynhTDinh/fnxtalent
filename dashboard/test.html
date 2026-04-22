@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Kiểm tra Năng lực | FNX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #f8fafc;
+            color: #1e293b;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .header h1 {
+            color: #0f172a;
+            font-size: 1.5rem;
+            margin: 0 0 0.5rem 0;
+        }
+        
+        .role-badge {
+            display: inline-block;
+            background: #eff6ff;
+            color: #2563eb;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .context-box {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 1.5rem;
+            border-radius: 6px;
+            margin-bottom: 2rem;
+        }
+
+        .context-box h3 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1rem; color: #7f1d1d;}
+
+        .question-block {
+            margin-bottom: 2.5rem;
+        }
+
+        .question-text {
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+        }
+
+        .competency-tag {
+            font-size: 0.75rem;
+            background: #f1f5f9;
+            color: #64748b;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            margin-left: 10px;
+            font-weight: 500;
+            vertical-align: middle;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            resize: vertical;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+
+        .candidate-info {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 2rem;
+        }
+
+        .input-text {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1rem;
+            box-sizing: border-box;
+            margin-top: 0.5rem;
+        }
+
+        .btn-submit {
+            display: block;
+            width: 100%;
+            background: #0f172a;
+            color: #fff;
+            border: none;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-submit:hover { background: #1e293b; }
+
+        .btn-submit:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        .auto-save {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            color: #10b981;
+            display: none;
+            font-weight: 500;
+            z-index: 1000;
+        }
+
+        #loadingState {
+            text-align: center;
+            padding: 4rem;
+            color: #64748b;
+        }
+        
+        #errorState, #successState {
+            display: none;
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        #testContent { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Đang tải -->
+        <div id="loadingState">
+            <h2>Đang tải dữ liệu bài thi...</h2>
+            <p>Vui lòng đợi giây lát.</p>
+        </div>
+
+        <!-- Lỗi Hỏng Link -->
+        <div id="errorState" class="card">
+            <h2 style="color: #dc2626;">Không tìm thấy bài thi</h2>
+            <p id="errorMsg">Đường dẫn không hợp lệ hoặc bài thi đã bị xóa.</p>
+        </div>
+
+        <!-- Thành công -->
+        <div id="successState" class="card">
+            <h2 style="color: #16a34a;">Nộp bài thành công!</h2>
+            <p>Kết quả của bạn đã được ghi nhận vào hệ thống. Ban Quản trị sẽ phản hồi cho bạn trong thời gian sớm nhất.</p>
+            <p>Bạn có thể đóng trình duyệt này.</p>
+        </div>
+
+        <!-- Giao diện làm bài -->
+        <div id="testContent" class="card">
+            <div class="header">
+                <h1>Bài Sát hạch Thực chiến <span style="font-size: 1rem; color: #64748b;" id="companyName"></span></h1>
+                <div class="role-badge" id="roleName">Đang tải...</div>
+            </div>
+
+            <div class="candidate-info">
+                <label style="font-weight: 600; color: #334155;">Họ và Tên của bạn:</label>
+                <input type="text" id="candidateName" class="input-text" placeholder="Nhập đầy đủ họ tên">
+            </div>
+
+            <div class="context-box">
+                <h3>⚠️ Bối cảnh Khủng hoảng</h3>
+                <div id="scenarioContext" style="font-size: 0.95rem;"></div>
+            </div>
+
+            <div id="questionsContainer">
+                <!-- Nội dung câu hỏi -->
+            </div>
+
+            <div style="margin-top: 3rem;">
+                <button id="submitBtn" class="btn-submit" onclick="submitTest()">NỘP BÀI KIỂM TRA</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="auto-save" id="autoSaveIndicator">✓ Đã lưu nháp</div>
+
+    <script src="/test.js?v=2.4"></script>
+</body>
+</html>
