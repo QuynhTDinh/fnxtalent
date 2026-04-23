@@ -17,16 +17,14 @@ Nhiệm vụ của bạn là lấy thông tin về một Chức danh (Role) và 
 
 {TAXONOMY_CONTEXT}
 
-## Quy tắc thiết kế bài test Combat
-1. Bối cảnh (Context): Phải là một sự cố chuyên ngành thực tế (ví dụ: dây chuyền đình trệ, khách hàng VIP khiếu nại, rò rỉ dữ liệu). Sự cố phải sát với chức danh được cung cấp.
-2. Yêu cầu số lượng: BẮT BUỘC sinh ra CHÍNH XÁC 5 câu hỏi tình huống thực chiến.
-3. Không hỏi lý thuyết suông. Câu hỏi phải ở dạng xử lý tình huống: "Bạn là [Role]. Hiện tại xảy ra [Sự cố]. Bạn làm gì?"
-4. Cấu trúc 5 câu hỏi phải quét đủ Khung năng lực A-S-K và T-L-D:
-   - Câu 1: SOP/Kiến thức cốt lõi (Knowledge) - Bloom 3.
-   - Câu 2: Kỹ thuật Chuyên môn (T - Technical Skill) - Bloom 4.
-   - Câu 3: Kỹ năng Điều phối/Lãnh đạo (L - Leadership Skill) - Bloom 4.
-   - Câu 4: Xử lý tình huống phụ/Giao tiếp (D - Delivery Skill) - Bloom 5.
-   - Câu 5: Chốt chặn Khủng hoảng (Crisis/Delivery) - Bloom 5.
+## Quy tắc thiết kế bài test Combat (Progressive Difficulty)
+1. Bối cảnh (Context): Phải là một sự kiện có thật hoặc mô phỏng sát với thực tế chuyên ngành, chứa "Tam giác rào cản": Áp lực thời gian, Rủi ro hậu quả (tài chính/uy tín), và Xung đột quy trình/tài nguyên.
+2. Yêu cầu số lượng: BẮT BUỘC sinh ra CHÍNH XÁC 7 câu hỏi theo mức độ từ dễ đến khó để ứng viên không bị ngợp.
+3. Giọng điệu (Tone & Voice): Chuyên nghiệp, tôn trọng, gợi mở. Sử dụng ngôn ngữ khuyến khích chia sẻ kinh nghiệm, tuyệt đối KHÔNG tạo cảm giác "hỏi cung" hay dồn ép tiêu cực. Đặt câu hỏi sao cho ứng viên cảm thấy được thể hiện năng lực tốt nhất.
+4. Cấu trúc 7 câu hỏi phải quét đủ Khung năng lực A-S-K và T-L-D:
+   - Câu 1, 2, 3 (Dễ - Basic): Dạng Functional/Knowledge. Kiểm tra hiểu biết về SOP, quy trình, khái niệm cốt lõi (Bloom 1-2).
+   - Câu 4, 5 (Trung bình - Medium): Dạng Situational Judgment Test (SJT). Tình huống giả định trong ca làm việc bình thường, yêu cầu phân tích và áp dụng kỹ năng (Bloom 3-4).
+   - Câu 6, 7 (Khó - Hard): Dạng Behavioral Event Interview (BEI) / Crisis. Yêu cầu ứng viên kể về kinh nghiệm quá khứ thực tế: "Hãy kể về một lần bạn đối mặt với tình huống tương tự...", qua đó đánh giá tư duy Lãnh đạo, Ra quyết định và Bài học rút ra (Bloom 5).
 
 ## Output Format (JSON)
 ```json
@@ -39,9 +37,9 @@ Nhiệm vụ của bạn là lấy thông tin về một Chức danh (Role) và 
             "id": "Q1",
             "targeted_competency": "<Ví dụ: Kiến thức SOP>",
             "question_text": "<Nội dung câu hỏi>",
-            "expected_bloom_level": 3
+            "expected_bloom_level": 1
         }},
-        ... // 4 câu hỏi tiếp theo
+        ... // 6 câu hỏi tiếp theo theo cấu trúc lũy tiến
     ]
 }}
 ```
@@ -68,28 +66,22 @@ def build_combat_prompt(role_data: dict) -> str:
     # Xây dựng ma trận Bloom phù hợp với Level
     if "4-5" in level:
         bloom_rules = """
-   - Câu 1: SOP/Kiến thức cốt lõi - Bloom 3 (Áp dụng).
-   - Câu 2: Kỹ thuật Chuyên môn (T) - Bloom 4 (Phân tích).
-   - Câu 3: Kỹ năng Lãnh đạo (L) - Bloom 4 (Phân tích).
-   - Câu 4: Ra quyết định (Delivery) - Bloom 5 (Đánh giá).
-   - Câu 5: Chốt chặn Khủng hoảng (Crisis) - Bloom 5 (Tổng hợp/Sáng tạo hệ thống mới).
+   - Câu 1, 2, 3 (Dễ): Kiến thức cốt lõi/SOP chuyên sâu - Bloom 2-3. (Hỏi về cách họ thiết lập hệ thống/quy trình).
+   - Câu 4, 5 (Trung bình): SJT Kỹ thuật & Lãnh đạo - Bloom 4. (Đưa ra biến cố, hỏi cách họ phân tích và điều phối nguồn lực).
+   - Câu 6, 7 (Khó): BEI Khủng hoảng & Chiến lược - Bloom 5. (Kể về một lần họ phải phá vỡ quy tắc để cứu dự án, hoặc quyết định khó khăn nhất từng đưa ra và bài học).
         """
     elif "3-4" in level:
         bloom_rules = """
-   - Câu 1: SOP/Kiến thức cốt lõi - Bloom 2 (Hiểu).
-   - Câu 2: Kỹ thuật Chuyên môn (T) - Bloom 3 (Áp dụng).
-   - Câu 3: Kỹ năng Lãnh đạo/Hợp tác (L) - Bloom 3 (Áp dụng).
-   - Câu 4: Xử lý tình huống (Delivery) - Bloom 4 (Phân tích).
-   - Câu 5: Chốt chặn Khủng hoảng (Crisis) - Bloom 4 (Phân tích/Điều phối).
+   - Câu 1, 2, 3 (Dễ): Kiến thức/SOP - Bloom 1-2. (Mô tả quy trình xử lý chuẩn).
+   - Câu 4, 5 (Trung bình): SJT Áp dụng & Phân tích - Bloom 3. (Tình huống trục trặc thực tế, bạn sẽ ưu tiên xử lý bước nào trước).
+   - Câu 6, 7 (Khó): BEI Phối hợp & Xử lý sự cố - Bloom 4-5. (Kể về một lần hệ thống/tiến độ bị đe dọa, bạn đã phối hợp cùng team giải quyết thế nào).
         """
     else:
         # Mặc định (Junior/Specialist)
         bloom_rules = """
-   - Câu 1: Kiến thức cốt lõi (Knowledge) - Bloom 1 (Nhớ).
-   - Câu 2: Nhận biết rủi ro (SOP) - Bloom 2 (Hiểu).
-   - Câu 3: Kỹ thuật Chuyên môn (T) - Bloom 3 (Áp dụng).
-   - Câu 4: Hợp tác/Báo cáo (L) - Bloom 3 (Áp dụng).
-   - Câu 5: Xử lý tình huống nhỏ (Delivery) - Bloom 3 (Áp dụng).
+   - Câu 1, 2, 3 (Dễ): Kiến thức căn bản/SOP - Bloom 1-2. (Nhận biết và hiểu đúng quy trình cơ bản).
+   - Câu 4, 5 (Trung bình): SJT Thực thi - Bloom 3. (Mô phỏng 1 ngày làm việc có sự cố nhỏ, hỏi cách họ áp dụng hướng dẫn để xử lý).
+   - Câu 6, 7 (Khó): BEI Cá nhân - Bloom 3-4. (Kể về một sai lầm trong công việc do bạn hoặc team gây ra, và cách bạn khắc phục).
         """
 
     return f"""
@@ -109,9 +101,9 @@ def build_combat_prompt(role_data: dict) -> str:
     {weights}
     
     === MA TRẬN BLOOM TÙY BIẾN CHO CẤP BẬC ===
-    Dựa trên cấp bậc {level}, Cấu trúc 5 câu hỏi phải quét theo độ khó giảm/tăng dần. Bạn có thể TỰ DO PHA TRỘN các nhánh kỹ năng T (Kỹ thuật), L (Lãnh đạo), D (Thực thi) cho bất kỳ câu hỏi nào, miễn là BẮT BUỘC tuân thủ đúng mức Bloom dưới đây:
+    Dựa trên cấp bậc {level}, Cấu trúc 7 câu hỏi phải quét theo độ khó LŨY TIẾN (Dễ -> Khó) để tạo cảm giác thân thiện, mở đường cho ứng viên tự tin trả lời:
     {bloom_rules}
     
-    Lưu ý: Tình huống (Scenario) phải nghẹt thở, có tính áp lực cao (time-bound). Đặt mình vào góc nhìn của {level} để đặt câu hỏi. Không hỏi câu vĩ mô của Giám đốc nếu họ chỉ là Chuyên viên.
-    TUYỆT ĐỐI KHÔNG chèn các tiền tố giải thích rườm rà như "[Bloom 3] hay [SOP - Bloom]" vào bên trong `question_text`. Nhập thẳng ngôn ngữ câu hỏi thực tế (ví dụ: "Ngay lúc này, bạn sẽ ưu tiên...").
+    Lưu ý: Bạn là người phỏng vấn chuyên nghiệp. Hãy dùng giọng điệu đồng cảm, tôn trọng năng lực của họ. Đặt mình vào góc nhìn của {level} để đặt câu hỏi. Không hỏi câu vĩ mô của Giám đốc nếu họ chỉ là Chuyên viên.
+    TUYỆT ĐỐI KHÔNG chèn các tiền tố giải thích rườm rà như "[Bloom 3] hay [SOP - Bloom]" vào bên trong `question_text`. Nhập thẳng ngôn ngữ câu hỏi thực tế (ví dụ: "Chào bạn, để bắt đầu, bạn có thể chia sẻ...").
     """

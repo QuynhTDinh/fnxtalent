@@ -95,21 +95,14 @@ function renderGrid() {
         let statusBadge = '';
         let actionBtn = '';
 
-        if (role.status === 'ready') {
-            statusBadge = `<span class="badge badge-ready">Đang chờ thi</span>`;
-            actionBtn = `<button class="btn-text" onclick="generateAssessment(${idx})" style="color: #64748b; margin-right: 10px;">📋 Copy Link</button> <button class="btn-text" onclick="checkStatus(${idx})">🔄 Kiểm tra</button>`;
-        } else if (role.status === 'completed') {
-            statusBadge = `<span class="badge" style="background: #e0e7ff; color: #4338ca;">Đợi chấm điểm</span>`;
-            actionBtn = `<button class="btn-text" onclick="triggerEvaluation(${idx})" style="color: #ea580c; font-weight: bold;">⭐ Chấm bằng AI</button>`;
-        } else if (role.status === 'evaluated') {
-            statusBadge = `<span class="badge" style="background: #dcfce3; color: #166534;">Hoàn tất</span>`;
-            actionBtn = `<button class="btn-text" onclick="showResult(${idx})">📊 Xem Báo cáo Radar</button>`;
+        if (role.status === 'active') {
+            statusBadge = `<span class="badge badge-ready">Đã tạo chiến dịch</span>`;
+            actionBtn = `<button class="btn-text" onclick="toggleSessions(${idx})" style="color: #64748b; font-weight: bold;">👥 Quản lý Ứng viên</button>`;
         } else {
             statusBadge = `<span class="badge badge-pending">Chờ xử lý</span>`;
-            actionBtn = `<button class="btn-text" onclick="generateAssessment(${idx})">Tạo bài đánh giá</button>`;
+            actionBtn = `<button class="btn-text" onclick="generateAssessment(${idx})">Tạo Chiến dịch</button>`;
         }
 
-        // Format label
         let groupLabel = role.group_tag;
         if(role.group_tag==="Operations/Technical") groupLabel="Khối Vận hành/Kỹ thuật";
         if(role.group_tag==="Support") groupLabel="Khối Hành chính/Hỗ trợ";
@@ -123,6 +116,19 @@ function renderGrid() {
             <td>${actionBtn}</td>
         `;
         tbody.appendChild(tr);
+
+        // Child row
+        const childTr = document.createElement('tr');
+        childTr.id = `sessions-row-${idx}`;
+        childTr.style.display = 'none';
+        childTr.innerHTML = `
+            <td colspan="4" style="background: #f8fafc; padding: 0;">
+                <div id="sessions-content-${idx}" style="padding: 1.5rem 2rem; border-left: 4px solid #2563eb;">
+                    Đang tải dữ liệu...
+                </div>
+            </td>
+        `;
+        tbody.appendChild(childTr);
     });
 }
 
@@ -228,11 +234,11 @@ async function generateAssessment(index) {
         }
 
         // Cập nhật trạng thái lưới
-        currentRoles[index].status = 'ready';
-        currentRoles[index].test_id = scenarioInfo.test_id;
+        currentRoles[index].status = 'active';
+        currentRoles[index].campaign_id = scenarioInfo.campaign_id;
         renderGrid();
         
-        // Mở drawer
+        // Mở drawer xem trước kịch bản (Tuỳ chọn)
         openDrawer(scenarioInfo);
     } catch (err) {
         console.error(err);
@@ -242,47 +248,109 @@ async function generateAssessment(index) {
     }
 }
 
-async function checkStatus(index) {
-    const role = currentRoles[index];
-    if (!role.test_id) return;
+async function toggleSessions(index) {
+    const row = document.getElementById(`sessions-row-${index}`);
+    if (row.style.display === 'table-row') {
+        row.style.display = 'none';
+        return;
+    }
+    row.style.display = 'table-row';
+    await fetchSessions(index);
+}
 
-    showLoading("Đang làm mới dữ liệu...");
+async function fetchSessions(index) {
+    const role = currentRoles[index];
+    const content = document.getElementById(`sessions-content-${index}`);
+    content.innerHTML = '<span style="color:#64748b">Đang tải danh sách ứng viên...</span>';
     try {
-        const res = await fetch(`/api/audit/test/${role.test_id}`);
-        if (!res.ok) throw new Error("Không thể kiểm tra trạng thái.");
+        const res = await fetch(`/api/audit/campaign/${role.campaign_id}/sessions`);
         const data = await res.json();
-        
-        if (data.status === 'completed') {
-            currentRoles[index].status = 'completed';
-        } else if (data.status === 'evaluated') {
-            currentRoles[index].status = 'evaluated';
-            currentRoles[index].evaluation = data.evaluation_result;
-        }
-        renderGrid();
+        role.sessions = data.sessions || [];
+        renderSessions(index);
     } catch(err) {
-        alert(err.message);
-    } finally {
-        hideLoading();
+        content.innerHTML = `<span style="color:red">Lỗi tải dữ liệu: ${err.message}</span>`;
     }
 }
 
-async function triggerEvaluation(index) {
+function renderSessions(index) {
     const role = currentRoles[index];
-    if (!role.test_id) return;
+    const content = document.getElementById(`sessions-content-${index}`);
+    
+    let html = `
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; align-items: center;">
+            <h4 style="margin: 0; color: #0f172a; font-size: 0.95rem;">Danh sách Ứng viên thi: ${role.title}</h4>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="link-${index}" readonly value="${window.location.origin}/test?id=${role.campaign_id}" style="padding:6px 12px; font-size:0.85rem; border:1px solid #cbd5e1; border-radius:4px; width: 350px; background: #fff; color: #334155;">
+                <button class="btn-primary" style="padding:6px 15px; font-size:0.85rem;" onclick="copyCampaignLink(${index})">Copy Link Thi</button>
+                <button class="btn-secondary" style="padding:6px 10px; font-size:0.85rem;" onclick="fetchSessions(${index})">🔄 Làm mới</button>
+            </div>
+        </div>
+    `;
 
+    if (role.sessions.length === 0) {
+        html += `<div class="empty-state" style="padding: 2rem; background: #fff; border: 1px dashed #cbd5e1; border-radius: 6px;">Chưa có ứng viên nào nộp bài. Hãy copy link và gửi cho ứng viên.</div>`;
+    } else {
+        html += `<table style="background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+            <thead>
+                <tr>
+                    <th style="background:#f1f5f9;">Tên Ứng viên</th>
+                    <th style="background:#f1f5f9;">Thời gian nộp</th>
+                    <th style="background:#f1f5f9;">Trạng thái</th>
+                    <th style="background:#f1f5f9; text-align:right;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+        `;
+        role.sessions.forEach((sess, sIdx) => {
+            let statusBadge = '';
+            let actionBtn = '';
+            if (sess.status === 'completed') {
+                statusBadge = `<span class="badge" style="background: #e0e7ff; color: #4338ca;">Đợi chấm điểm</span>`;
+                actionBtn = `<button class="btn-text" onclick="triggerEvaluation(${index}, '${sess.id}')" style="color: #ea580c; font-weight: 600;">⭐ Chấm bằng AI</button>`;
+            } else if (sess.status === 'evaluated') {
+                statusBadge = `<span class="badge" style="background: #dcfce3; color: #166534;">Hoàn tất</span>`;
+                actionBtn = `<button class="btn-text" onclick="showResult(${index}, ${sIdx})" style="font-weight: 600;">📊 Xem Báo cáo Radar</button>`;
+            }
+            const date = new Date(sess.submitted_at).toLocaleString('vi-VN');
+            html += `
+                <tr>
+                    <td style="font-weight: 500;">${sess.candidate_name}</td>
+                    <td style="color: #64748b; font-size: 0.85rem;">${date}</td>
+                    <td>${statusBadge}</td>
+                    <td style="text-align:right;">${actionBtn}</td>
+                </tr>
+            `;
+        });
+        html += `</tbody></table>`;
+    }
+    content.innerHTML = html;
+}
+
+function copyCampaignLink(index) {
+    const input = document.getElementById(`link-${index}`);
+    input.select();
+    document.execCommand("copy");
+    alert("Đã sao chép đường dẫn bài kiểm tra!");
+}
+
+async function triggerEvaluation(roleIndex, sessionId) {
     showLoading("Hệ thống FNX AI đang phân tích dữ liệu ứng viên. Vui lòng đợi...");
     try {
-        const res = await fetch(`/api/audit/test/${role.test_id}/evaluate`, {
+        const res = await fetch(`/api/audit/session/${sessionId}/evaluate`, {
             method: "POST"
         });
         if (!res.ok) throw new Error("Chấm điểm thất bại.");
         const data = await res.json();
         
-        currentRoles[index].status = 'evaluated';
-        currentRoles[index].evaluation = data.evaluation;
-        renderGrid();
+        // Fetch lại toàn bộ danh sách để cập nhật status
+        await fetchSessions(roleIndex);
         
-        showResult(index);
+        // Tự động mở báo cáo của ứng viên vừa chấm xong
+        const updatedRole = currentRoles[roleIndex];
+        const sessionIndex = updatedRole.sessions.findIndex(s => s.id === sessionId);
+        if(sessionIndex !== -1) {
+            showResult(roleIndex, sessionIndex);
+        }
     } catch(err) {
         alert(err.message);
     } finally {
@@ -292,19 +360,27 @@ async function triggerEvaluation(index) {
 
 let currentChart = null;
 
-function showResult(index) {
-    const role = currentRoles[index];
+function showResult(roleIndex, sessionIndex) {
+    const role = currentRoles[roleIndex];
+    const sess = role.sessions[sessionIndex];
     const drawer = document.getElementById('sideDrawer');
     const title = document.getElementById('drawerTitle');
     const content = document.getElementById('drawerContent');
     
-    title.innerText = `Báo Cáo Năng Lực: ${role.title}`;
+    title.innerHTML = `Báo Cáo Năng Lực<br><span style="font-size:0.85rem; color:#64748b; font-weight:400;">Ứng viên: <strong>${sess.candidate_name}</strong> - Vị trí: ${role.title}</span>`;
     
-    const ev = role.evaluation;
+    const ev = sess.evaluation_result;
     if (!ev) { alert("Thiếu dữ liệu kết quả chấm."); return; }
 
     const isStar = ev.eval_mode === "STAR";
     const modeLabel = isStar ? "Luồng Tư Duy Chiến Lược (STAR)" : "Luồng Tuân thủ Tiêu chuẩn (Red-Flag)";
+
+    const wcr = ev.world_class_report;
+    if (!wcr) { alert("Dữ liệu báo cáo bị lỗi định dạng mới."); return; }
+
+    let readinessColor = "#10b981"; // green
+    if (wcr.readiness_level.includes("Support")) readinessColor = "#f59e0b"; // yellow
+    if (wcr.readiness_level.includes("Not Ready")) readinessColor = "#ef4444"; // red
 
     let html = `
         <div style="background:#f8fafc; padding:15px; border-radius:6px; border:1px solid #e2e8f0; margin-bottom:20px;">
@@ -312,7 +388,10 @@ function showResult(index) {
                 <span style="font-weight:600; color:#334155;">Độ Phù Hợp:</span>
                 <span style="font-size:1.5rem; font-weight:700; color:${ev.fit_score_percentage > 70 ? '#10b981' : '#f59e0b'};">${ev.fit_score_percentage}%</span>
             </div>
-            <div style="font-size:0.85rem; color:#64748b;">Chế độ chấm: ${modeLabel}</div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:0.85rem; color:#64748b;">Chế độ chấm: ${modeLabel}</span>
+                <span style="background:${readinessColor}; color:#fff; padding:4px 10px; border-radius:4px; font-size:0.85rem; font-weight:600;">${wcr.readiness_level}</span>
+            </div>
         </div>
 
         <div style="width: 100%; height: 300px; margin-bottom: 2rem;">
@@ -320,15 +399,15 @@ function showResult(index) {
         </div>
 
         <div style="margin-bottom: 1.5rem;">
-            <h4 style="margin-bottom:0.5rem;">Kết luận từ FNX AI Evaluator:</h4>
-            <div style="font-style:italic; border-left:3px solid #2563eb; padding-left:10px; color:#334155;">${ev.executive_summary}</div>
+            <h4 style="margin-bottom:0.5rem; color:#0f172a;">Tổng quan năng lực:</h4>
+            <div style="font-style:italic; border-left:3px solid #2563eb; padding-left:10px; color:#334155;">${wcr.executive_summary}</div>
         </div>
     `;
 
     // Hybrid Render UI
     if (isStar && ev.star_analysis) {
         html += `
-            <div style="background:#fff; border:1px solid #cbd5e1; border-radius:6px; overflow:hidden;">
+            <div style="background:#fff; border:1px solid #cbd5e1; border-radius:6px; overflow:hidden; margin-bottom:1.5rem;">
                 <div style="background:#f1f5f9; padding:10px 15px; font-weight:600; color:#0f172a; border-bottom:1px solid #cbd5e1;">Phân Tích Cấu Trúc STAR</div>
                 <div style="padding:15px; display:flex; flex-direction:column; gap:10px;">
                     <div><strong style="color:#2563eb">S - Situation:</strong> <span style="color:#475569">${ev.star_analysis.situation_understanding}</span></div>
@@ -338,23 +417,30 @@ function showResult(index) {
                 </div>
             </div>
         `;
-    } else {
-        let rfHtml = ev.red_flags && ev.red_flags.length > 0
-            ? ev.red_flags.map(r => `<li style="color:#b91c1c;">${r}</li>`).join('')
-            : '<li style="color:#15803d;">Tuyệt vời, không có Cờ đỏ nghiêm trọng.</li>';
-
-        html += `
-            <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:6px; padding:15px; margin-bottom:1rem;">
-                <h4 style="margin-top:0; color:#b91c1c;">🚩 Cảnh báo Cờ Đỏ (Red Flags)</h4>
-                <ul style="margin:0; padding-left:20px;">${rfHtml}</ul>
-            </div>
-            
-            <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:10px; border:1px solid #e2e8f0; border-radius:4px;">
-                <span style="font-size:0.85rem; color:#475569;">Skin-in-the-game Index:</span>
-                <span style="font-weight:600; font-size:0.9rem;">${ev.skin_in_the_game_index || "N/A"}</span>
-            </div>
-        `;
     }
+
+    // World-class report modules
+    let strengthsHtml = wcr.core_strengths.map(s => `<li style="margin-bottom:4px;">${s}</li>`).join('');
+    let derailersHtml = wcr.potential_derailers.map(d => `<li style="margin-bottom:4px;">${d}</li>`).join('');
+    let devHtml = wcr.development_advice.map(d => `<li style="margin-bottom:4px;">${d}</li>`).join('');
+
+    html += `
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:1.5rem;">
+            <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:15px;">
+                <h4 style="margin-top:0; color:#15803d; font-size:0.9rem;">⭐ Vũ khí cốt lõi (Bright Side)</h4>
+                <ul style="margin:0; padding-left:20px; font-size:0.85rem; color:#166534;">${strengthsHtml}</ul>
+            </div>
+            <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:6px; padding:15px;">
+                <h4 style="margin-top:0; color:#b91c1c; font-size:0.9rem;">🚩 Rủi ro chệch hướng (Dark Side)</h4>
+                <ul style="margin:0; padding-left:20px; font-size:0.85rem; color:#991b1b;">${derailersHtml}</ul>
+            </div>
+        </div>
+
+        <div style="background:#fff7ed; border:1px solid #fed7aa; border-radius:6px; padding:15px; margin-bottom:1rem;">
+            <h4 style="margin-top:0; color:#c2410c; font-size:0.9rem;">🎯 Kế hoạch Hỗ trợ (Development Plan)</h4>
+            <ul style="margin:0; padding-left:20px; font-size:0.85rem; color:#9a3412;">${devHtml}</ul>
+        </div>
+    `;
 
     content.innerHTML = html;
     drawer.classList.add('open');
@@ -413,7 +499,7 @@ function openDrawer(scenario) {
     
     let html = `
         <div style="display: flex; gap: 10px; margin-bottom: 1.5rem;">
-            <input type="text" id="testLinkCopy" readonly style="flex: 1; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px; background: #f1f5f9; font-size: 0.85rem;" value="${window.location.origin}/test?id=${scenario.test_id || ''}">
+            <input type="text" id="testLinkCopy" readonly style="flex: 1; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px; background: #f1f5f9; font-size: 0.85rem;" value="${window.location.origin}/test?id=${scenario.campaign_id || ''}">
             <button onclick="copyTestLink()" style="background: #10b981; color: white; border: none; border-radius: 4px; padding: 0 1rem; font-weight: 500; cursor: pointer;">Copy Link</button>
         </div>
         <h4>Bối cảnh sự cố</h4>

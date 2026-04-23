@@ -58,6 +58,13 @@ class EvaluatorAgent:
             if mode == "STAR":
                 return {
                     "eval_mode": "STAR",
+                    "evidence_analysis": {
+                        "SOP": {"evidence": "N/A", "evidence_type": "action" if is_good else "theory"},
+                        "Technical": {"evidence": "N/A", "evidence_type": "action" if is_good else "theory"},
+                        "Leadership": {"evidence": "N/A", "evidence_type": "action" if is_good else "theory"},
+                        "Delivery": {"evidence": "N/A", "evidence_type": "action" if is_good else "theory"},
+                        "Crisis_Prevention": {"evidence": "N/A", "evidence_type": "action" if is_good else "theory"}
+                    },
                     "radar_scores": {
                         "SOP": 4 if is_good else 2,
                         "Technical": 4,
@@ -66,17 +73,24 @@ class EvaluatorAgent:
                         "Crisis_Prevention": 5 if is_good else 2
                     },
                     "fit_score_percentage": 85 if is_good else 45,
-                    "star_analysis": {
-                        "situation_understanding": "Nhìn nhận được tính cấp bách của rủi ro hợp đồng." if is_good else "Bỏ sót yếu tố thiệt hại tài chính cốt lõi.",
-                        "task_definition": "Khoanh vùng mục tiêu rõ ràng là bảo vệ tiến độ tổng thể.",
-                        "action_quality": "Giải pháp dồn tài nguyên rất quyết liệt và thực tiễn.",
-                        "result_orientation": "Có tư duy phòng ngừa rủi ro lặp lại." if is_good else "Chưa đưa ra được biện pháp khắc phục lâu dài."
-                    },
-                    "executive_summary": "Tư duy hệ thống rất tốt. Đạt chuẩn Lãnh đạo cấp trung." if is_good else "Phản xạ còn rập khuôn, thiếu bứt phá."
+                    "world_class_report": {
+                        "readiness_level": "Ready Now" if is_good else "Not Ready",
+                        "executive_summary": "Tư duy hệ thống rất tốt. Đạt chuẩn Lãnh đạo cấp trung." if is_good else "Phản xạ còn rập khuôn, thiếu bứt phá.",
+                        "core_strengths": ["Khả năng phân tích hệ thống", "Quyết đoán"] if is_good else ["Nắm lý thuyết cơ bản"],
+                        "potential_derailers": ["Có thể bỏ qua tiểu tiết"] if is_good else ["Thiếu quyết đoán", "Dễ hoảng loạn"],
+                        "development_advice": ["Trao quyền dự án lớn"] if is_good else ["Kèm cặp kỹ năng thực chiến", "Mô phỏng tình huống"]
+                    }
                 }
             else:
                 return {
                     "eval_mode": "REDFLAG",
+                    "evidence_analysis": {
+                        "SOP": {"evidence": "N/A", "evidence_type": "action" if is_good else "theory"},
+                        "Technical": {"evidence": "N/A", "evidence_type": "action" if is_good else "theory"},
+                        "Leadership": {"evidence": "N/A", "evidence_type": "action" if is_good else "theory"},
+                        "Delivery": {"evidence": "N/A", "evidence_type": "action" if is_good else "theory"},
+                        "Crisis_Prevention": {"evidence": "N/A", "evidence_type": "action" if is_good else "theory"}
+                    },
                     "radar_scores": {
                         "SOP": 5 if is_good else 2,
                         "Technical": 4,
@@ -85,8 +99,11 @@ class EvaluatorAgent:
                         "Crisis_Prevention": 4
                     },
                     "fit_score_percentage": 75 if is_good else 40,
-                    "skin_in_the_game_index": "High" if is_good else "Low (Textbook)",
-                    "red_flags": [] if is_good else ["Dấu hiệu đùn đẩy trách nhiệm cho Ban Giám đốc", "Xử lý cảm tính sai quy trình xả áp"],
-                    "strengths": ["Tuân thủ nguyên tắc Zero-Error rất tốt tại hiện trường"] if is_good else [],
-                    "executive_summary": "Đạt chuẩn Thực thi. An toàn để giao vị trí trực ca." if is_good else "Rủi ro sinh mạng/tài sản cao. Không đạt (Red-flag)."
+                    "world_class_report": {
+                        "readiness_level": "Ready with Support" if is_good else "Not Ready",
+                        "executive_summary": "Đạt chuẩn Thực thi. An toàn để giao vị trí trực ca." if is_good else "Rủi ro sinh mạng/tài sản cao. Không đạt (Red-flag).",
+                        "core_strengths": ["Tuân thủ SOP", "Hiểu an toàn cốt lõi"] if is_good else ["Biết quy định cơ bản"],
+                        "potential_derailers": ["Chưa linh hoạt"] if is_good else ["Dấu hiệu đùn đẩy trách nhiệm", "Xử lý cảm tính sai quy trình"],
+                        "development_advice": ["Cần tăng cường thực hành tình huống phức tạp"] if is_good else ["Đào tạo lại hoàn toàn về An toàn lao động"]
+                    }
                 }

@@ -21,7 +21,8 @@ class LocalStore(StateStore):
             "nodes": os.path.join(data_dir, "node_results"),
             "candidates": os.path.join(data_dir, "candidates"),
             "jobs": os.path.join(data_dir, "jobs"),
-            "tests": os.path.join(data_dir, "tests"),
+            "campaigns": os.path.join(data_dir, "campaigns"),
+            "sessions": os.path.join(data_dir, "sessions"),
         }
         for d in self._dirs.values():
             os.makedirs(d, exist_ok=True)
@@ -132,23 +133,56 @@ class LocalStore(StateStore):
             os.path.join(self._dirs["jobs"], f"{job_id}.json")
         )
 
-    # ── Tests (Internal Audit) ──
-    def save_audit_test(self, test_id: str, test_data: dict) -> dict:
-        test_data["id"] = test_id
-        test_data["created_at"] = self._now()
-        test_data["updated_at"] = self._now()
-        self._write(os.path.join(self._dirs["tests"], f"{test_id}.json"), test_data)
-        return test_data
+    # ── Campaigns (Internal Audit) ──
+    def save_campaign(self, campaign_id: str, data: dict) -> dict:
+        data["id"] = campaign_id
+        data["created_at"] = self._now()
+        data["updated_at"] = self._now()
+        self._write(os.path.join(self._dirs["campaigns"], f"{campaign_id}.json"), data)
+        return data
 
-    def get_audit_test(self, test_id: str) -> Optional[dict]:
-        return self._read(os.path.join(self._dirs["tests"], f"{test_id}.json"))
+    def get_campaign(self, campaign_id: str) -> Optional[dict]:
+        return self._read(os.path.join(self._dirs["campaigns"], f"{campaign_id}.json"))
 
-    def update_audit_test(self, test_id: str, update_data: dict) -> dict:
-        filepath = os.path.join(self._dirs["tests"], f"{test_id}.json")
-        test = self._read(filepath)
-        if not test:
-            raise ValueError(f"Test {test_id} not found")
-        test.update(update_data)
-        test["updated_at"] = self._now()
-        self._write(filepath, test)
-        return test
+    def get_all_campaigns(self) -> list:
+        results = []
+        d = self._dirs["campaigns"]
+        if not os.path.exists(d): return results
+        for fname in os.listdir(d):
+            if fname.endswith(".json"):
+                results.append(self._read(os.path.join(d, fname)))
+        return results
+
+    # ── Sessions (Internal Audit) ──
+    def save_session(self, session_id: str, data: dict) -> dict:
+        data["id"] = session_id
+        data["created_at"] = self._now()
+        data["updated_at"] = self._now()
+        self._write(os.path.join(self._dirs["sessions"], f"{session_id}.json"), data)
+        return data
+
+    def get_session(self, session_id: str) -> Optional[dict]:
+        return self._read(os.path.join(self._dirs["sessions"], f"{session_id}.json"))
+
+    def update_session(self, session_id: str, update_data: dict) -> dict:
+        filepath = os.path.join(self._dirs["sessions"], f"{session_id}.json")
+        session = self._read(filepath)
+        if not session:
+            raise ValueError(f"Session {session_id} not found")
+        session.update(update_data)
+        session["updated_at"] = self._now()
+        self._write(filepath, session)
+        return session
+
+    def get_sessions_by_campaign(self, campaign_id: str) -> list:
+        results = []
+        d = self._dirs["sessions"]
+        if not os.path.exists(d): return results
+        for fname in os.listdir(d):
+            if fname.endswith(".json"):
+                sess = self._read(os.path.join(d, fname))
+                if sess and sess.get("campaign_id") == campaign_id:
+                    results.append(sess)
+        # sort by created_at descending
+        results.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+        return results

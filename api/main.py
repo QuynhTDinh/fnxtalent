@@ -467,63 +467,75 @@ async def generate_combat_batch(request: CombatBatchRequest):
             
             # Generate Link and Save to Persistent Store
             if "error" not in scenario:
-                test_id = str(uuid.uuid4())[:8]
-                scenario["test_id"] = test_id
-                scenario["status"] = "pending_candidate"
-                store.save_audit_test(test_id, scenario)
+                campaign_id = str(uuid.uuid4())[:8]
+                scenario["campaign_id"] = campaign_id
+                scenario["status"] = "active"
+                store.save_campaign(campaign_id, scenario)
             
             results.append(scenario)
         return {"scenarios": results}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/audit/test/{test_id}")
-async def get_audit_test(test_id: str):
-    """Candidate loads the test via ID"""
-    test_data = store.get_audit_test(test_id)
-    if not test_data:
+@app.get("/api/audit/test/{campaign_id}")
+async def get_audit_campaign(campaign_id: str):
+    """Candidate loads the test via campaign ID"""
+    campaign_data = store.get_campaign(campaign_id)
+    if not campaign_data:
         raise HTTPException(status_code=404, detail="Bài thi không tồn tại hoặc link không đúng.")
-    return test_data
+    return campaign_data
 
 class TestSubmitRequest(BaseModel):
     candidate_name: str
     answers: dict
 
-@app.post("/api/audit/test/{test_id}/submit")
-async def submit_audit_test(test_id: str, request: TestSubmitRequest):
-    """Candidate submits the test"""
-    test_data = store.get_audit_test(test_id)
-    if not test_data:
+@app.post("/api/audit/test/{campaign_id}/submit")
+async def submit_audit_test(campaign_id: str, request: TestSubmitRequest):
+    """Candidate submits the test, creating a unique session"""
+    import uuid
+    campaign_data = store.get_campaign(campaign_id)
+    if not campaign_data:
         raise HTTPException(status_code=404, detail="Bài kiểm tra không tồn tại.")
-    if test_data.get("status") == "completed":
-        raise HTTPException(status_code=400, detail="Bài thi này đã được nộp.")
     
-    update_payload = {
+    session_id = str(uuid.uuid4())[:8]
+    session_payload = {
+        "session_id": session_id,
+        "campaign_id": campaign_id,
         "candidate_name": request.candidate_name,
         "answers": request.answers,
         "status": "completed",
         "submitted_at": datetime.now().isoformat()
     }
-    store.update_audit_test(test_id, update_payload)
-    return {"status": "success", "message": "Nộp bài thành công"}
+    store.save_session(session_id, session_payload)
+    return {"status": "success", "message": "Nộp bài thành công", "session_id": session_id}
 
-@app.post("/api/audit/test/{test_id}/evaluate")
-async def evaluate_audit_test(test_id: str):
+@app.get("/api/audit/campaign/{campaign_id}/sessions")
+async def get_campaign_sessions(campaign_id: str):
+    """Admin loads all candidate sessions for a specific campaign"""
+    sessions = store.get_sessions_by_campaign(campaign_id)
+    return {"sessions": sessions}
+
+@app.post("/api/audit/session/{session_id}/evaluate")
+async def evaluate_audit_session(session_id: str):
     """Trigged by Admin to let AI read the candidate answers and score."""
-    test_data = store.get_audit_test(test_id)
-    if not test_data:
-        raise HTTPException(status_code=404, detail="Bài thi không tồn tại.")
+    session_data = store.get_session(session_id)
+    if not session_data:
+        raise HTTPException(status_code=404, detail="Phiên làm bài không tồn tại.")
         
-    if test_data.get("status") != "completed":
+    if session_data.get("status") != "completed":
         raise HTTPException(status_code=400, detail="Chỉ có thể chấm bài khi ở trạng thái completed.")
+
+    campaign_data = store.get_campaign(session_data.get("campaign_id"))
+    if not campaign_data:
+        raise HTTPException(status_code=404, detail="Không tìm thấy kịch bản thi gốc.")
 
     try:
         role_data = {
-            "role": test_data.get("role", ""),
-            "seniority": test_data.get("seniority", ""),
-            "group_tag": test_data.get("group_tag", "")
+            "role": campaign_data.get("role", ""),
+            "seniority": campaign_data.get("seniority", ""),
+            "group_tag": campaign_data.get("group_tag", "")
         }
-        candidate_answers = test_data.get("answers", {})
+        candidate_answers = session_data.get("answers", {})
         
         evaluation_result = _evaluator_agent.evaluate(role_data, candidate_answers)
         
@@ -531,7 +543,7 @@ async def evaluate_audit_test(test_id: str):
             "evaluation_result": evaluation_result,
             "status": "evaluated"
         }
-        store.update_audit_test(test_id, update_payload)
+        store.update_session(session_id, update_payload)
         
         return {"status": "success", "evaluation": evaluation_result}
     except Exception as e:

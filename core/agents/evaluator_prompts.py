@@ -45,7 +45,22 @@ Trả về JSON:
         "action_quality": "<Đánh giá hành động thực thi>",
         "result_orientation": "<Đánh giá tính bền vững>"
     }},
-    "executive_summary": "<Lời phê 2 câu tóm gọn cho Giám đốc>"
+    "world_class_report": {{
+        "readiness_level": "<Ready Now / Ready with Support / Not Ready>",
+        "executive_summary": "<Chân dung tổng quan 3-4 câu về phong cách làm việc, tư duy và độ fit>",
+        "core_strengths": [
+            "<Điểm mạnh cốt lõi 1 (Bright Side)>",
+            "<Điểm mạnh cốt lõi 2>"
+        ],
+        "potential_derailers": [
+            "<Rủi ro chệch hướng 1 khi gặp áp lực (Dark Side)>",
+            "<Rủi ro chệch hướng 2>"
+        ],
+        "development_advice": [
+            "<Lời khuyên 1 cho Manager: Cần đào tạo/kèm cặp gì?>",
+            "<Lời khuyên 2>"
+        ]
+    }}
 }}
 ```
 """
@@ -57,15 +72,28 @@ Nhiệm vụ: Chấm điểm bài kiểm tra của Kỹ sư Vận hành, Kế to
 
 {TAXONOMY_CONTEXT}
 
-Luật Chấm điểm (Red Flag & Skin-in-the-game):
-1. Chấm cực gắt khả năng tuân thủ SOP và Xử lý sự cố tại hiện trường (Delivery).
-2. Dò Bẫy Văn Mẫu: Nếu trả lời hô hào chung chung -> Trừ sạch điểm. Sinh viên lý thuyết.
-3. Kích hoạt Cảm biến Cờ Đỏ (Red Flags): Nghiêm cấm đùn đẩy trách nhiệm ("Do người khác", "báo cáo sếp và chờ"). Nếu có, cắm Cờ đỏ tức khắc.
+Luật Chấm điểm (Red Flag, Skin-in-the-game & CoT BARS):
+1. **Dò Bằng Chứng (Evidence-First):** Đối với mỗi trục năng lực, bạn BẮT BUỘC phải trích dẫn lại một câu nói của ứng viên làm bằng chứng.
+2. **Dán Nhãn Bằng Chứng:** Tự phân loại bằng chứng thành `theory` (lý thuyết/văn mẫu), `action` (hành động thực tế), `experience` (kể lại trải nghiệm), hoặc `none` (không có).
+3. **Chấm điểm theo BARS Rubric:**
+   - Điểm 1 (Kém): Thừa nhận không có kinh nghiệm hoặc trả lời sai trọng tâm.
+   - Điểm 2 (Lý thuyết): Bằng chứng được dán nhãn là `theory` (chỉ nói lý thuyết, thiếu bước hành động). ĐẶC BIỆT LƯU Ý: Nếu `evidence_type` của Delivery hoặc Crisis_Prevention là `theory`, điểm số tuyệt đối KHÔNG ĐƯỢC VƯỢT QUÁ 2.
+   - Điểm 3 (Khá): Bằng chứng dán nhãn `action` nhưng chung chung.
+   - Điểm 4 (Tốt): Bằng chứng dán nhãn `action` hoặc `experience` với chi tiết rõ ràng, bám sát hiện trường.
+   - Điểm 5 (Xuất sắc): Xử lý xuất sắc + có bằng chứng ngăn ngừa rủi ro tương lai.
+4. Cảm biến Cờ Đỏ (Red Flags): Lưu ý các dấu hiệu như đùn đẩy trách nhiệm hoặc vi phạm quy tắc an toàn cốt lõi. Ghi nhận khéo léo vào mảng `red_flags`.
 
 Trả về JSON:
 ```json
 {{
     "eval_mode": "REDFLAG",
+    "evidence_analysis": {{
+        "SOP": {{"evidence": "<trích dẫn>", "evidence_type": "<theory/action/experience/none>"}},
+        "Technical": {{"evidence": "<trích dẫn>", "evidence_type": "<theory/action/experience/none>"}},
+        "Leadership": {{"evidence": "<trích dẫn>", "evidence_type": "<theory/action/experience/none>"}},
+        "Delivery": {{"evidence": "<trích dẫn>", "evidence_type": "<theory/action/experience/none>"}},
+        "Crisis_Prevention": {{"evidence": "<trích dẫn>", "evidence_type": "<theory/action/experience/none>"}}
+    }},
     "radar_scores": {{
         "SOP": <1-5>,
         "Technical": <1-5>,
@@ -74,15 +102,22 @@ Trả về JSON:
         "Crisis_Prevention": <1-5>
     }},
     "fit_score_percentage": <0-100>,
-    "skin_in_the_game_index": "<High/Medium/Low>",
-    "red_flags": [
-        "<Cờ đỏ 1 nếu có, ví dụ: Đùn đẩy trách nhiệm>", 
-        "<Cờ đỏ 2>"
-    ],
-    "strengths": [
-        "<Điểm sáng thao tác nếu có>"
-    ],
-    "executive_summary": "<Lời phê sinh tử 2 câu cho Trưởng ca>"
+    "world_class_report": {{
+        "readiness_level": "<Ready Now / Ready with Support / Not Ready>",
+        "executive_summary": "<Chân dung tổng quan 3-4 câu về phong cách làm việc, tư duy và độ fit>",
+        "core_strengths": [
+            "<Điểm mạnh cốt lõi 1 (Bright Side)>",
+            "<Điểm mạnh cốt lõi 2>"
+        ],
+        "potential_derailers": [
+            "<Rủi ro chệch hướng 1 khi gặp áp lực (Dark Side)>",
+            "<Rủi ro chệch hướng 2>"
+        ],
+        "development_advice": [
+            "<Lời khuyên 1 cho Manager: Cần đào tạo/kèm cặp gì?>",
+            "<Lời khuyên 2>"
+        ]
+    }}
 }}
 ```
 """
@@ -99,7 +134,7 @@ def build_evaluator_prompt(role_data: dict, candidate_answers: dict) -> str:
         
     return f"""
     Thực hiện chấm điểm năng lực cho vị trí: {role} (Level: {level} - Khối: {group}).
-    Đây là bài trả lời 5 tình huống Thực chiến của ứng viên:
+    Đây là bài trả lời 7 câu hỏi đánh giá năng lực (từ cơ bản đến BEI) của ứng viên:
     
     {answers_text}
     
